@@ -25,15 +25,22 @@ module.exports.getDriverLisence = async (req, res) => {
 
 module.exports.getDriversList = async (req, res) => {
   try {
-    const { name = null || undefined } = req.body || {};
+    const { name = null || undefined, licence = null || undefined } =
+      req.body || {};
 
-    const whereCondition = name
-      ? {
-          DName: {
-            [Op.like]: `%${name}%`,
-          },
-        }
-      : {};
+    const whereCondition =
+      name || licence
+        ? {
+            [Op.or]: {
+              DName: {
+                [Op.like]: `%${name}%`,
+              },
+              Licence: {
+                [Op.like]: `%${licence}%`,
+              },
+            },
+          }
+        : {};
 
     const drivers = await DBMODELS.Driver.findAll({
       where: whereCondition,
@@ -62,4 +69,3 @@ module.exports.getDriversList = async (req, res) => {
       .json({ status: "500", message: "Internal server error" });
   }
 };
-
