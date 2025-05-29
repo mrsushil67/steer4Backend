@@ -1,4 +1,4 @@
-const DBMODELS = require("../models/init-models");
+const { DBMODELS } = require("../models/init-models");
 const { logg } = require("../utils/utils");
 
 module.exports.getDriverLisence = async (req, res) => {
