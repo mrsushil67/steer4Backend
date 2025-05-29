@@ -5,6 +5,6 @@ const  { authorizedUser } = require('../middlewares/authMiddleware') //middlewar
 const DriverController = require('../controllers/driver.controller');
 
 DriverRouter.get('/:Id', DriverController.getDriverLisence);
-DriverRouter.post('/filter', DriverController.getDriversList)
+DriverRouter.post('/filter', DriverController.getDriversList);
 
 module.exports = DriverRouter;
