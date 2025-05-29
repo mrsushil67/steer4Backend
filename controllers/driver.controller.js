@@ -25,18 +25,22 @@ module.exports.getDriverLisence = async (req, res) => {
 
 module.exports.getDriversList = async (req, res) => {
   try {
-    const { name } = req.body;
-    console.log("name", name);
+    const { name = null || undefined } = req.body || {};
+
+    const whereCondition = name
+      ? {
+          DName: {
+            [Op.like]: `%${name}%`,
+          },
+        }
+      : {};
 
     const drivers = await DBMODELS.Driver.findAll({
-      where: {
-        DName: {
-          [Op.like]: `%${name}%`,
-        },
-      },
-      attributes: ["DriverID","DName","Licence"],
+      where: whereCondition,
+      attributes: ["DriverID", "DName", "Licence"],
       limit: 20,
     });
+
     if (drivers.length === 0) {
       return res
         .status(404)
@@ -45,14 +49,12 @@ module.exports.getDriversList = async (req, res) => {
 
     const lengths = drivers.length;
 
-    return res
-      .status(200)
-      .json({
-        status: "200",
-        lengths,
-        drivers,
-        message: "Drivers fetched successfully",
-      });
+    return res.status(200).json({
+      status: "200",
+      lengths,
+      drivers,
+      message: "Drivers fetched successfully",
+    });
   } catch (error) {
     console.log(error);
     return res
