@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { DBMODELS } = require("../models/init-models");
 const { logg } = require("../utils/utils");
 
@@ -19,5 +20,43 @@ module.exports.getDriverLisence = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Internal Server Error", status: false });
+  }
+};
+
+module.exports.getDriversList = async (req, res) => {
+  try {
+    const { name } = req.query;
+    console.log("name", name);
+
+    const drivers = await DBMODELS.Driver.findAll({
+      where: {
+        DName: {
+          [Op.like]: `%${name}%`,
+        },
+      },
+      attributes: ["DriverID","DName","Licence"],
+      limit: 20,
+    });
+    if (drivers.length === 0) {
+      return res
+        .status(404)
+        .json({ status: "404", message: "Driver not found" });
+    }
+
+    const lengths = drivers.length;
+
+    return res
+      .status(200)
+      .json({
+        status: "200",
+        lengths,
+        drivers,
+        message: "Drivers fetched successfully",
+      });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: "500", message: "Internal server error" });
   }
 };

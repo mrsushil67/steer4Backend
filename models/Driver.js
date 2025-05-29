@@ -164,7 +164,7 @@ module.exports = function(sequelize, DataTypes) {
     sequelize,
     tableName: 'Driver',
     hasTrigger: true,
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",
