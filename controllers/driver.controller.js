@@ -25,7 +25,7 @@ module.exports.getDriverLisence = async (req, res) => {
 
 module.exports.getDriversList = async (req, res) => {
   try {
-    const { name } = req.query;
+    const { name } = req.body;
     console.log("name", name);
 
     const drivers = await DBMODELS.Driver.findAll({
@@ -60,3 +60,4 @@ module.exports.getDriversList = async (req, res) => {
       .json({ status: "500", message: "Internal server error" });
   }
 };
+
