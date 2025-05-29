@@ -4,6 +4,7 @@ module.exports = function(sequelize, DataTypes) {
     CityId: {
       autoIncrement: true,
       type: DataTypes.INTEGER,
+      primaryKey: true,
       allowNull: false
     },
     CityName: {

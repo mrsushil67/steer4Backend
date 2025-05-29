@@ -1,3 +1,4 @@
+const sequelize = require('../config/databaseConnection');
 var DataTypes = require("sequelize").DataTypes;
 var _Accident = require("./Accident");
 var _AccidentVehiceImages = require("./AccidentVehiceImages");
@@ -146,11 +147,11 @@ var _StdExpenses = require("./StdExpenses");
 var _StdForControl = require("./StdForControl");
 var _StdTat = require("./StdTat");
 var _SubDipo = require("./SubDipo");
-var _TABLE 124 = require("./TABLE 124");
-var _TABLE 138 = require("./TABLE 138");
-var _TABLE 146 = require("./TABLE 146");
-var _TABLE 148 = require("./TABLE 148");
-var _TABLE 186 = require("./TABLE 186");
+// var _TABLE 124 = require("./TABLE 124");
+// var _TABLE 138 = require("./TABLE 138");
+// var _TABLE 146 = require("./TABLE 146");
+// var _TABLE 148 = require("./TABLE 148");
+// var _TABLE 186 = require("./TABLE 186");
 var _TallyLedger = require("./TallyLedger");
 var _TatDummy = require("./TatDummy");
 var _Taxes = require("./Taxes");
@@ -360,11 +361,11 @@ function initModels(sequelize) {
   var StdForControl = _StdForControl(sequelize, DataTypes);
   var StdTat = _StdTat(sequelize, DataTypes);
   var SubDipo = _SubDipo(sequelize, DataTypes);
-  var TABLE 124 = _TABLE 124(sequelize, DataTypes);
-  var TABLE 138 = _TABLE 138(sequelize, DataTypes);
-  var TABLE 146 = _TABLE 146(sequelize, DataTypes);
-  var TABLE 148 = _TABLE 148(sequelize, DataTypes);
-  var TABLE 186 = _TABLE 186(sequelize, DataTypes);
+  // var TABLE 124 = _TABLE 124(sequelize, DataTypes);
+  // var TABLE 138 = _TABLE 138(sequelize, DataTypes);
+  // var TABLE 146 = _TABLE 146(sequelize, DataTypes);
+  // var TABLE 148 = _TABLE 148(sequelize, DataTypes);
+  // var TABLE 186 = _TABLE 186(sequelize, DataTypes);
   var TallyLedger = _TallyLedger(sequelize, DataTypes);
   var TatDummy = _TatDummy(sequelize, DataTypes);
   var Taxes = _Taxes(sequelize, DataTypes);
@@ -591,11 +592,11 @@ function initModels(sequelize) {
     StdForControl,
     StdTat,
     SubDipo,
-    TABLE 124,
-    TABLE 138,
-    TABLE 146,
-    TABLE 148,
-    TABLE 186,
+    // TABLE 124,
+    // TABLE 138,
+    // TABLE 146,
+    // TABLE 148,
+    // TABLE 186,
     TallyLedger,
     TatDummy,
     Taxes,
@@ -658,6 +659,9 @@ function initModels(sequelize) {
     text,
   };
 }
+
+const DBMODELS = initModels(sequelize)
 module.exports = initModels;
 module.exports.initModels = initModels;
 module.exports.default = initModels;
+module.exports = { DBMODELS };
