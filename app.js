@@ -6,6 +6,8 @@ var multer = require('multer');
 var forms = multer();
 const UserRouter = require("./routes/user.route");
 const DriverRouter = require("./routes/driver.route");
+const VehicleRouter = require("./routes/vehicle.route");
+const CustomerRouter = require("./routes/customer.route");
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
@@ -19,5 +21,7 @@ app.use(morgan('dev'));
 
 app.use("/api/v1/user",UserRouter);
 app.use("/api/v1/driver", DriverRouter);
+app.use("/api/v1/vehicle", VehicleRouter);
+app.use('/api/v1/customer', CustomerRouter);
 
 module.exports = app;
