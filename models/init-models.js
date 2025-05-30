@@ -429,20 +429,30 @@ function initModels(sequelize) {
 
   CustRateMap.belongsTo(CustomerMaster, { as: "Cust", foreignKey: "CustId"});
   CustomerMaster.hasMany(CustRateMap, { as: "CustRateMaps", foreignKey: "CustId"});
+
   CustRateMap.belongsTo(CustomerSeviceType, { as: "RouteType_CustomerSeviceType", foreignKey: "RouteType"});
   CustomerSeviceType.hasMany(CustRateMap, { as: "CustRateMaps", foreignKey: "RouteType"});
+
   Docket.belongsTo(DocketPackage, { as: "Package", foreignKey: "PackageId"});
   DocketPackage.hasMany(Docket, { as: "Dockets", foreignKey: "PackageId"});
+
   CustRateMap.belongsTo(RouteMaster, { as: "Route", foreignKey: "RouteId"});
   RouteMaster.hasMany(CustRateMap, { as: "CustRateMaps", foreignKey: "RouteId"});
+
   CustRouteMap.belongsTo(RouteMaster, { as: "Route", foreignKey: "RouteId"});
   RouteMaster.hasMany(CustRouteMap, { as: "CustRouteMaps", foreignKey: "RouteId"});
+
   Docket.belongsTo(TripCharges, { as: "TripCharge", foreignKey: "TripChargeId"});
   TripCharges.hasMany(Docket, { as: "Dockets", foreignKey: "TripChargeId"});
+
   CustRateMap.belongsTo(TripType, { as: "TripType_TripType", foreignKey: "TripType"});
   TripType.hasMany(CustRateMap, { as: "CustRateMaps", foreignKey: "TripType"});
+
   city.belongsTo(states, { as: "state", foreignKey: "stateId"});
   states.hasMany(city, { as: "cities", foreignKey: "stateId"});
+
+  RouteMaster.belongsTo(CustomerMaster, { as: "Cust", foreignKey: "CustId" });
+  CustomerMaster.hasMany(RouteMaster, { as: "RouteMasters", foreignKey: "CustId" });
 
   return {
     Accident,
