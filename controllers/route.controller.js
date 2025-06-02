@@ -10,8 +10,16 @@ module.exports.getRoutelist = async (req, res) => {
         .status(400)
         .json({ status: "400", message: "fill all fields" });
     }
+
     const routes = await DBMODELS.CustRateMap.findAll({
       where: { CustId, RouteType },
+      include: [
+        {
+          model: DBMODELS.TripType,
+          as: "trip_type",
+          required: true,
+        },
+      ],
     });
 
     if (routes.length === 0) {

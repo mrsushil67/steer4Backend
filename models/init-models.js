@@ -445,7 +445,7 @@ function initModels(sequelize) {
   Docket.belongsTo(TripCharges, { as: "TripCharge", foreignKey: "TripChargeId"});
   TripCharges.hasMany(Docket, { as: "Dockets", foreignKey: "TripChargeId"});
 
-  CustRateMap.belongsTo(TripType, { as: "TripType_TripType", foreignKey: "TripType"});
+  CustRateMap.belongsTo(TripType, { as: "trip_type", foreignKey: "TripType"});
   TripType.hasMany(CustRateMap, { as: "CustRateMaps", foreignKey: "TripType"});
 
   city.belongsTo(states, { as: "state", foreignKey: "stateId"});
