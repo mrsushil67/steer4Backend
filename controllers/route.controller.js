@@ -3,13 +3,13 @@ const { DBMODELS } = require("../models/init-models");
 
 module.exports.getRoutelist = async (req, res) => {
     try {
-        const { CustId, RouteCat }= req.body;
+        const { CustId, RouteType } = req.body;
 
-        if(!CustId || !RouteCat){
+        if(!CustId || !RouteType){
             return res.status(400).json({status: "400", message:"fill all fields"});
         }
-        const routes = await DBMODELS.RouteMaster.findAll({
-            where: {CustId, RouteCat},
+        const routes = await DBMODELS.CustRateMap.findAll({
+            where: {CustId, RouteType},
         });
 
         if (routes.length === 0) {
