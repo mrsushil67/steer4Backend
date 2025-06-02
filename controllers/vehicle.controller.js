@@ -38,7 +38,7 @@ module.exports.getVehicleList = async (req, res) => {
 
 module.exports.getVehicleSize = async (req, res) => {
   try {
-    const { size = null || undefined } = req.body || {};
+    const { size } = req.body || {};
 
     const whereCondition = size
       ? {
@@ -52,11 +52,17 @@ module.exports.getVehicleSize = async (req, res) => {
       where: whereCondition,
     });
 
+    if (vehicleSize.length === 0) {
+      return res
+        .status(404)
+        .json({ status: "404", message: "No record found" });
+    }
+
     return res
       .status(200)
       .json({ status: "200", message: "Record found", vehicleSize });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });
