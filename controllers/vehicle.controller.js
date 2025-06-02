@@ -31,3 +31,17 @@ module.exports.getVehicleList = async (req, res) => {
       .json({ status: "500", message: "Internal server error" });
   }
 };
+
+
+module.exports.getVehicleSize = async (req, res) => {
+  try {
+    
+    const vehicleSize = await DBMODELS.Vehiclesize.findAll({});
+    return res.status(200).json({status: "200",vehicleSize})
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: "500", message: "Internal server error" });
+  }
+}
