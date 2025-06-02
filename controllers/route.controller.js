@@ -18,6 +18,7 @@ module.exports.getRoutelist = async (req, res) => {
           model: DBMODELS.TripType,
           as: "trip_type",
           required: true,
+          attributes: ["Id", "TypeName"],
         },
       ],
     });
