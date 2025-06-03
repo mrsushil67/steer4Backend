@@ -3,7 +3,7 @@ const { DBMODELS } = require("../models/init-models");
 
 module.exports.getRoutelist = async (req, res) => {
   try {
-    const { CustId, RouteType } = req.body;
+    const { CustId, RouteType } = req.body || {};
 
     if (!CustId || !RouteType) {
       return res
