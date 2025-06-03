@@ -10,6 +10,7 @@ const VehicleRouter = require("./routes/vehicle.route");
 const CustomerRouter = require("./routes/customer.route");
 const RouteRouter = require("./routes/route.route");
 const TripSheetRouter = require("./routes/tripSheet.route");
+const TripRouter = require("./routes/tripPlan.route");
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
@@ -27,6 +28,6 @@ app.use("/api/v1/vehicle", VehicleRouter);
 app.use('/api/v1/customer', CustomerRouter);
 app.use('/api/v1/route', RouteRouter);
 app.use('/api/v1/tripsheet', TripSheetRouter);
-app.use('/api/v1/trip', TripSheetRouter);
+app.use('/api/v1/trip', TripRouter);
 
 module.exports = app;
