@@ -3,7 +3,7 @@ const { DBMODELS } = require("../models/init-models");
 module.exports.tripPlan = async (req, res) => {
   try {
 
-    const trip = await DBMODELS.TripPlanSchedule.get({});
+    const trip = await DBMODELS.TripPlanSchedule.findAll({});
     return res.status(200).json({status:"200", trip})
   } catch (error) {
     console.error("Error While creating tripSheet:", error);
