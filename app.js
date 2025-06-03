@@ -27,5 +27,6 @@ app.use("/api/v1/vehicle", VehicleRouter);
 app.use('/api/v1/customer', CustomerRouter);
 app.use('/api/v1/route', RouteRouter);
 app.use('/api/v1/tripsheet', TripSheetRouter);
+app.use('/api/v1/trip', TripSheetRouter);
 
 module.exports = app;
