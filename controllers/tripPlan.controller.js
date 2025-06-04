@@ -32,6 +32,7 @@ module.exports.tripPlan = async (req, res) => {
       DepartureTime,
       Remark,
       TripSheet,
+      StartKm,
     } = req.body;
 
     // Validate required fields
@@ -45,15 +46,14 @@ module.exports.tripPlan = async (req, res) => {
       !Driver1Id ||
       !VPlaceTime ||
       !DepartureTime ||
-      !TripSheet
+      !TripSheet||
+      !StartKm
     ) {
       return res.status(400).json({
         status: "400",
         message: "Missing required fields",
       });
     }
-
-    console.log(req.body);
 
     const dataModel = {
       CustType,
@@ -68,10 +68,9 @@ module.exports.tripPlan = async (req, res) => {
       DepartureTime,
       Remark,
       TripSheet,
+      StartKm,
       CreatedBy : userId
     };
-
-    console.log(dataModel)
 
     const data = await DBMODELS.TripPlanSchedule.create(dataModel);
 
@@ -79,8 +78,16 @@ module.exports.tripPlan = async (req, res) => {
       .status(201)
       .json({ status: "201", message: "Record saved successfully", data });
   } catch (error) {
+
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(409).json({
+        status: "409",
+        message: "Duplicate key error",
+      });
+    }
    
     console.error("Error While creating tripSheet:", error);
+
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });

@@ -3,6 +3,6 @@ const TripController = require("../controllers/tripPlan.controller");
 const { authorizedUser } = require("../middlewares/authMiddleware");
 
 TripRouter.get("/checkData", TripController.checkTripPlan);
-TripRouter.post("/", authorizedUser, TripController.tripPlan); // just check data
+TripRouter.post("/tripPlan", authorizedUser, TripController.tripPlan); // just check data
 
 module.exports = TripRouter;
