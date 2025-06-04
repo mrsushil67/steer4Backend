@@ -28,6 +28,7 @@ module.exports.getCustomerList = async (req, res) => {
 
     const customers = await DBMODELS.CustomerMaster.findAll({
       where: whereCondition,
+      attributes: ['CustId','CustomerName','CustCode','ServiceType','CustomerType',],
       limit: 20,
     });
 
