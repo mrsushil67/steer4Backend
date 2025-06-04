@@ -1,6 +1,7 @@
 const TripRouter = require('express').Router();
-const TripController = require('../controllers/tripPlan.controller')
+const TripController = require('../controllers/tripPlan.controller');
+const { authorizedUser } = require('../middlewares/authMiddleware');
 
-TripRouter.get('/', TripController.tripPlan); // just check data
+TripRouter.get('/', authorizedUser, TripController.tripPlan); // just check data
 
 module.exports = TripRouter;
