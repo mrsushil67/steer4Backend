@@ -6,22 +6,24 @@ module.exports.getCustomerList = async (req, res) => {
     const { name = null, ServiceType } = req.body || {};
 
     if (!ServiceType) {
-      return res.status(400).json({ status: "400", message: "ServiceType is required" });
+      return res
+        .status(400)
+        .json({ status: "400", message: "ServiceType is required" });
     }
 
     const whereCondition = name
       ? {
-        [Op.and]: [
-          {
-            CustomerName: {
-              [Op.like]: `%${name}%`,
+          [Op.and]: [
+            {
+              CustomerName: {
+                [Op.like]: `%${name}%`,
+              },
             },
-          },
-          {
-            ServiceType,
-          },
-        ],
-      }
+            {
+              ServiceType,
+            },
+          ],
+        }
       : { ServiceType };
 
     const customers = await DBMODELS.CustomerMaster.findAll({
@@ -30,7 +32,9 @@ module.exports.getCustomerList = async (req, res) => {
     });
 
     if (customers.length === 0) {
-      return res.status(404).json({ status: "404", message: "Record not found" });
+      return res
+        .status(404)
+        .json({ status: "404", message: "Record not found" });
     }
 
     return res
