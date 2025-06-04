@@ -32,7 +32,6 @@ module.exports.tripPlan = async (req, res) => {
       DepartureTime,
       Remark,
       TripSheet,
-      CreatedBy,
     } = req.body;
 
     // Validate required fields
@@ -46,8 +45,7 @@ module.exports.tripPlan = async (req, res) => {
       !Driver1Id ||
       !VPlaceTime ||
       !DepartureTime ||
-      !TripSheet ||
-      !CreatedBy
+      !TripSheet
     ) {
       return res.status(400).json({
         status: "400",
@@ -75,30 +73,13 @@ module.exports.tripPlan = async (req, res) => {
 
     console.log(dataModel)
 
-    // const data = await DBMODELS.TripPlanSchedule.create(dataModel);
+    const data = await DBMODELS.TripPlanSchedule.create(dataModel);
 
-    // return res
-    //   .status(201)
-    //   .json({ status: "201", message: "Record saved successfully", data });
+    return res
+      .status(201)
+      .json({ status: "201", message: "Record saved successfully", data });
   } catch (error) {
-    if (error.name === "SequelizeValidationError") {
-      console.error("Validation Error:", error);
-      return res.status(400).json({
-        status: "400",
-        message: "Validation error",
-        details: error.errors.map((err) => err.message),
-      });
-    }
-
-    if (error.name === "SequelizeUniqueConstraintError") {
-      console.error("Unique Constraint Error:", error);
-      return res.status(409).json({
-        status: "409",
-        message: "Duplicate entry error",
-        details: error.errors.map((err) => err.message),
-      });
-    }
-
+   
     console.error("Error While creating tripSheet:", error);
     return res
       .status(500)
