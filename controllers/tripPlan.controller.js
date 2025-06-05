@@ -4,8 +4,6 @@ module.exports.checkTripPlan = async (req, res) => {
   try {
     const { id } = req.query;
 
-    console.log(id);
-
     const trip = id
       ? await DBMODELS.TripPlanSchedule.findOne({ where: { Id: id } })
       : await DBMODELS.TripPlanSchedule.findAll({});
@@ -16,7 +14,7 @@ module.exports.checkTripPlan = async (req, res) => {
         .json({ status: "404", message: "No record found" });
     }
 
-    return res.status(200).json({ status: "200", trip });
+    return res.status(200).json({ status: "200",data, trip });
   } catch (error) {
     console.error("Error While fetching trip plan:", error);
     return res
@@ -210,6 +208,56 @@ module.exports.cancelTrip = async (req, res) => {
     });
   } catch (error) {
     console.error("Error While updating trip:", error);
+    return res
+      .status(500)
+      .json({ status: "500", message: "Internal server error" });
+  }
+};
+
+module.exports.proceedTrip = async (req, res) => {
+  try {
+    const { tripId } = req.query;
+
+    if (!tripId) {
+      return res.status(400).json({ status: "400", message: "Missing tripId" });
+    }
+
+    const [updatedRows] = await DBMODELS.TripPlanSchedule.update(
+      { is_final: 1 },
+      { where: { ID: tripId } }
+    );
+
+    if (updatedRows === 0) {
+      return res.status(404).json({
+        status: "404",
+        message: "No records updated, status might already be the same",
+      });
+    }
+
+    const tripScheduleData = await DBMODELS.TripPlanSchedule.findOne({
+      where: { ID: tripId },
+    });
+
+    if (!tripScheduleData) {
+      return res.status(404).json({
+        status: "404",
+        message: "Record not found after update",
+      });
+    }
+                     
+    const tripPlanData = await DBMODELS.TripPlan.create({
+      ...tripScheduleData.toJSON(),
+    });
+
+    return res.status(201).json({
+      status: "201",
+      message: `Trip proceeded`,
+      updatedTripPlanSchedule: tripScheduleData,
+      addedTripPlan: tripPlanData,
+    });
+
+  } catch (error) {
+    console.error("Error while proceeding trip:", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });
