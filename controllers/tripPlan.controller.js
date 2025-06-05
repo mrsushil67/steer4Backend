@@ -14,7 +14,7 @@ module.exports.checkTripPlan = async (req, res) => {
         .json({ status: "404", message: "No record found" });
     }
 
-    return res.status(200).json({ status: "200",data, trip });
+    return res.status(200).json({ status: "200",trip });
   } catch (error) {
     console.error("Error While fetching trip plan:", error);
     return res
