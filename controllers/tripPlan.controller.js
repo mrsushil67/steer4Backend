@@ -109,7 +109,7 @@ module.exports.updateTrip = async (req, res) => {
     const { tripId } = req.query;
     const updateFields = req.body;
 
-    if(!tripId){
+    if (!tripId) {
       return res.status(400).json({
         status: "400",
         message: "Missing tripId",
@@ -134,13 +134,11 @@ module.exports.updateTrip = async (req, res) => {
       });
     }
 
-    return res
-      .status(200)
-      .json({
-        status: "200",
-        message: "Record updated successfully",
-        updatedRows,
-      });
+    return res.status(200).json({
+      status: "200",
+      message: "Record updated successfully",
+      updatedRows,
+    });
   } catch (error) {
     console.error("Error While updating trip:", error);
     return res
@@ -168,12 +166,16 @@ module.exports.cancelTrip = async (req, res) => {
       where: { ID: tripId },
     });
 
-    console.log("status : ",status,typeof(status))
-    console.log("existingTripPlanSchedule.Status : ",existingTripPlanSchedule.Status);
-    console.log("existingTripPlan.Status : ",existingTripPlan.Status)
+    console.log("status : ", status, typeof status);
+    console.log(
+      "existingTripPlanSchedule.Status : ",
+      existingTripPlanSchedule.Status
+    );
+    console.log("existingTripPlan.Status : ", existingTripPlan.Status);
 
     if (
-      (existingTripPlanSchedule && existingTripPlanSchedule.Status === parseInt(status)) ||
+      (existingTripPlanSchedule &&
+        existingTripPlanSchedule.Status === parseInt(status)) ||
       (existingTripPlan && existingTripPlan.Status === parseInt(status))
     ) {
       return res.status(200).json({
@@ -182,10 +184,11 @@ module.exports.cancelTrip = async (req, res) => {
       });
     }
 
-    const [updatedTripPlanScheduleRows] = await DBMODELS.TripPlanSchedule.update(
-      { Status: status },
-      { where: { ID: tripId } }
-    );
+    const [updatedTripPlanScheduleRows] =
+      await DBMODELS.TripPlanSchedule.update(
+        { Status: status },
+        { where: { ID: tripId } }
+      );
 
     const [updatedTripPlanRows] = await DBMODELS.TripPlan.update(
       { Status: status },
