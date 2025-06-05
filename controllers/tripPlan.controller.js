@@ -147,7 +147,7 @@ module.exports.updateTrip = async (req, res) => {
 
 module.exports.cancelTrip = async (req, res) => {
   try {
-    const { tripId, status } = req.body || {};
+    const { tripId = null, status = null } = req.body || {};
 
     if (!tripId || !status) {
       return res
@@ -163,6 +163,10 @@ module.exports.cancelTrip = async (req, res) => {
     const existingTripPlan = await DBMODELS.TripPlan.findOne({
       where: { ID: tripId },
     });
+
+    if(!existingTripPlanSchedule || !existingTripPlan){
+      return res.status(404).json({ status: "404", message:"no renord found"})
+    }
 
     console.log("status : ", status, typeof status);
     console.log(
