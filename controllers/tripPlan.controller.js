@@ -47,13 +47,6 @@ module.exports.checkTripPlan = async (req, res) => {
                 "TripType",
                 "RouteString",
               ],
-              include: [
-                {
-                  model: DBMODELS.TripType,
-                  as: "trip_type",
-                  attributes: ["Id", "TypeName"],
-                },
-              ],
             },
           ],
           attributes: [
@@ -112,13 +105,6 @@ module.exports.checkTripPlan = async (req, res) => {
                 "TripType",
                 "RouteString",
               ],
-              include: [
-                {
-                  model: DBMODELS.TripType,
-                  as: "trip_type",
-                  attributes: ["Id", "TypeName"],
-                },
-              ],
             },
           ],
           attributes: [
@@ -136,7 +122,6 @@ module.exports.checkTripPlan = async (req, res) => {
             "Status",
           ],
           order: [["ID", "ASC"]],
-          group: ['ID'],
         });
 
     if (!trip || (Array.isArray(trip) && trip.length === 0)) {
