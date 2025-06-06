@@ -469,6 +469,20 @@ function initModels(sequelize) {
   CustRateMap.belongsTo(TripPlanSchedule, { as: "TripPlanSchedule", foreignKey: "RouteId" });
   TripPlanSchedule.hasOne(CustRateMap, { as: "CustRateMaps", foreignKey: "RouteId" });
 
+  RouteMaster.belongsTo(TripPlanSchedule, {as : "TripPlanSchedule" , foreignKey: "RouteId"});
+  TripPlanSchedule.hasOne(RouteMaster, {as: "route_master", foreignKey: "RouteId"});
+
+  TripPlanSchedule.belongsTo(TripType ,{as: 'tripType', foreignKey: "TripType"});
+  TripType.hasOne(TripPlanSchedule, {as: "TripPlanSchedule", foreignKey: "TripType"});
+
+  RouteMaster.belongsTo(city, {as: 'source_city',foreignKey: 'Source'});
+  city.hasMany(RouteMaster, {as: 'source_routes', foreignKey: 'Source' });
+
+  RouteMaster.belongsTo(city, {as: 'dest_city',foreignKey: 'Destination'});
+  city.hasMany(RouteMaster, {as: 'destination_routes', foreignKey: 'Destination' });
+
+
+
   return {
     Accident,
     AccidentVehiceImages,

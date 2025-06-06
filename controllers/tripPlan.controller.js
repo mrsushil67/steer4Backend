@@ -24,30 +24,28 @@ module.exports.checkTripPlan = async (req, res) => {
               as: "Driver",
               attributes: ["DriverID", "DName", "Licence"],
             },
-            // {
-            //   model: DBMODELS.CustRateMap,
-            //   as: "CustRateMaps",
-            //   on: {
-            //     RouteId: where(
-            //       col("TripPlanSchedule.RouteId"),
-            //       "=",
-            //       col("CustRateMaps.RouteId")
-            //     ),
-            //     CustId: where(
-            //       col("TripPlanSchedule.CustId"),
-            //       "=",
-            //       col("CustRateMaps.CustId")
-            //     ),
-            //   },
-            //   attributes: [
-            //     "ID",
-            //     "CustId",
-            //     "RouteId",
-            //     "RouteType",
-            //     "TripType",
-            //     "RouteString",
-            //   ],
-            // },
+            {
+              model: DBMODELS.RouteMaster,
+              as: "route_master",
+              attributes:['RouteId'],
+              include:[
+                {
+                  model: DBMODELS.city,
+                  as: "source_city",
+                  attributes: ['CityName','latitude','longitude']
+                },
+                {
+                   model: DBMODELS.city,
+                  as: "dest_city",
+                  attributes: ['CityName','latitude','longitude']
+                }
+              ]
+            },
+            {
+              model: DBMODELS.TripType,
+              as: 'tripType',
+              attributes: ['TypeName']
+            }
           ],
           attributes: [
             "ID",
@@ -82,30 +80,28 @@ module.exports.checkTripPlan = async (req, res) => {
               as: "Driver",
               attributes: ["DriverID", "DName", "Licence"],
             },
-            // {
-            //   model: DBMODELS.CustRateMap,
-            //   as: "CustRateMaps",
-            //   on: {
-            //     RouteId: where(
-            //       col("TripPlanSchedule.RouteId"),
-            //       "=",
-            //       col("CustRateMaps.RouteId")
-            //     ),
-            //     CustId: where(
-            //       col("TripPlanSchedule.CustId"),
-            //       "=",
-            //       col("CustRateMaps.CustId")
-            //     ),
-            //   },
-            //   attributes: [
-            //     "ID",
-            //     "CustId",
-            //     "RouteId",
-            //     "RouteType",
-            //     "TripType",
-            //     "RouteString",
-            //   ],
-            // },
+            {
+              model: DBMODELS.RouteMaster,
+              as: "route_master",
+              attributes:['RouteId'],
+              include:[
+                {
+                  model: DBMODELS.city,
+                  as: "source_city",
+                  attributes: ['CityName','latitude','longitude']
+                },
+                {
+                   model: DBMODELS.city,
+                  as: "dest_city",
+                  attributes: ['CityName','latitude','longitude']
+                }
+              ]
+            },
+            {
+              model: DBMODELS.TripType,
+              as: 'tripType',
+              attributes: ['TypeName']
+            }
           ],
           attributes: [
             "ID",
@@ -160,7 +156,6 @@ module.exports.tripPlan = async (req, res) => {
       StartKm,
     } = req.body;
 
-    console.log("Data : ",req.body)
     if (
       !CustType ||
       !CustId ||
@@ -196,6 +191,8 @@ module.exports.tripPlan = async (req, res) => {
       StartKm,
       CreatedBy: userId,
     };
+
+    console.log("Data : ",dataModel)
 
     const data = await DBMODELS.TripPlanSchedule.create(dataModel);
 
