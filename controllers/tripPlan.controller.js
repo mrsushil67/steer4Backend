@@ -160,7 +160,7 @@ module.exports.tripPlan = async (req, res) => {
       StartKm,
     } = req.body;
 
-    // Validate required fields
+    console.log("Data : ",req.body)
     if (
       !CustType ||
       !CustId ||
