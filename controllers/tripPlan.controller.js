@@ -5,48 +5,8 @@ module.exports.checkTripPlan = async (req, res) => {
   try {
     const { id } = req.query;
 
-    console.log(id)
-
-    const trips = id
-      ? [await DBMODELS.TripPlanSchedule.findOne({
-          where: { ID: id },
-          include: [
-            {
-              model: DBMODELS.CustomerMaster,
-              as: 'CustomerMasters',
-              attributes: ['CustId','CustomerName','CustCode','GSTNo']
-            },
-            {
-              model: DBMODELS.Vehicle,
-              as: 'Vehicle',
-              attributes: ['VehicleID','VNumer','FleetZize']
-            },
-            {
-              model: DBMODELS.Driver,
-              as: 'Driver',
-              attributes: ['DriverID','DName','Licence']
-            },
-            {
-              model: DBMODELS.CustRateMap,
-              as: 'CustRateMaps',
-              required: true,
-              on: {
-                RouteId: where(col('TripPlanSchedule.RouteId'), '=', col('CustRateMaps.RouteId')),
-                CustId: where(col('TripPlanSchedule.CustId'), '=', col('CustRateMaps.CustId'))
-              },
-              attributes:['ID','CustId','RouteId','RouteType','TripType','RouteString'],
-              include: [
-                {
-                  model: DBMODELS.TripType,
-                  as: "trip_type",
-                  required: true,
-                  attributes: ["Id", "TypeName"],
-                },
-              ],
-            }
-          ],
-          attributes: ['ID','CustType','CustId','RouteId','TripType','VehicleId','Driver1Id','VPlaceTime','DepartureTime','TripSheet','CreatedBy','Status']
-        })]
+    const trip = id
+      ? await DBMODELS.TripPlanSchedule.findOne({ where: { ID: id } })
       : await DBMODELS.TripPlanSchedule.findAll({
           include: [
             {
@@ -69,8 +29,16 @@ module.exports.checkTripPlan = async (req, res) => {
               as: 'CustRateMaps',
               required: true,
               on: {
-                RouteId: where(col('TripPlanSchedule.RouteId'), '=', col('CustRateMaps.RouteId')),
-                CustId: where(col('TripPlanSchedule.CustId'), '=', col('CustRateMaps.CustId'))
+                RouteId: where(
+                  col('TripPlanSchedule.RouteId'),
+                  '=',
+                  col('CustRateMaps.RouteId')
+                ),
+                CustId: where(
+                  col('TripPlanSchedule.CustId'),
+                  '=',
+                  col('CustRateMaps.CustId')
+                )
               },
               attributes:['ID','CustId','RouteId','RouteType','TripType','RouteString'],
               include: [
@@ -86,39 +54,18 @@ module.exports.checkTripPlan = async (req, res) => {
           attributes: ['ID','CustType','CustId','RouteId','TripType','VehicleId','Driver1Id','VPlaceTime','DepartureTime','TripSheet','CreatedBy','Status']
         });
 
-    const filteredTrips = trips
-      .filter(t => t) // remove nulls in case of `id` not found
-      .map(trip => {
-        const tripData = trip.toJSON(); // Ensure it's a plain object
-
-        return {
-          ...tripData,
-          CustomerName: tripData.CustomerMasters?.CustomerName,
-          CustCode: tripData.CustomerMasters?.CustCode,
-          GSTNo: tripData.CustomerMasters?.GSTNo,
-          VNumer: tripData.Vehicle?.VNumer,
-          FleetZize: tripData.Vehicle?.FleetZize,
-          DName: tripData.Driver?.DName,
-          Licence: tripData.Driver?.Licence,
-          RouteString: tripData.CustRateMaps?.RouteString,
-          TypeName: tripData.CustRateMaps?.trip_type?.TypeName,
-          CustomerMasters: undefined,
-          Vehicle: undefined,
-          Driver: undefined,
-          CustRateMaps: undefined
-        };
-      });
-
-    if (filteredTrips.length === 0) {
-      return res.status(404).json({ status: "404", message: "No record found" });
+    if (!trip || (Array.isArray(trip) && trip.length === 0)) {
+      return res
+        .status(404)
+        .json({ status: "404", message: "No record found" });
     }
 
-    const result = id ? filteredTrips[0] : filteredTrips;
-
-    return res.status(200).json({ status: "200", trip: result });
+    return res.status(200).json({ status: "200", trip });
   } catch (error) {
     console.error("Error While fetching trip plan:", error);
-    return res.status(500).json({ status: "500", message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ status: "500", message: "Internal server error" });
   }
 };
 
