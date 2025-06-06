@@ -1,124 +1,75 @@
-const { where, col } = require("sequelize");
+const { where, col, Op } = require("sequelize");
 const { DBMODELS } = require("../models/init-models");
 
 module.exports.checkTripPlan = async (req, res) => {
   try {
-    const { id } = req.query;
+    const { vehicleNo = null } = req.body || {};
 
-    const trip = id
-      ? await DBMODELS.TripPlanSchedule.findAll({
-          where: { ID: id },
+    const whereClause = {};
+
+    if (vehicleNo) {
+      whereClause["$Vehicle.VNumer$"] = {
+        [Op.like]: `%${vehicleNo}%`,
+      };
+    }
+
+    const trip = await DBMODELS.TripPlanSchedule.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: DBMODELS.CustomerMaster,
+          as: "CustomerMasters",
+          attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+        },
+        {
+          model: DBMODELS.Vehicle,
+          as: "Vehicle",
+          attributes: ["VehicleID", "VNumer", "FleetZize"],
+        },
+        {
+          model: DBMODELS.Driver,
+          as: "Driver",
+          attributes: ["DriverID", "DName", "Licence"],
+        },
+        {
+          model: DBMODELS.RouteMaster,
+          as: "route_master",
+          attributes: ["RouteId"],
           include: [
             {
-              model: DBMODELS.CustomerMaster,
-              as: "CustomerMasters",
-              attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+              model: DBMODELS.city,
+              as: "source_city",
+              attributes: ["CityName", "latitude", "longitude"],
             },
             {
-              model: DBMODELS.Vehicle,
-              as: "Vehicle",
-              attributes: ["VehicleID", "VNumer", "FleetZize"],
+              model: DBMODELS.city,
+              as: "dest_city",
+              attributes: ["CityName", "latitude", "longitude"],
             },
-            {
-              model: DBMODELS.Driver,
-              as: "Driver",
-              attributes: ["DriverID", "DName", "Licence"],
-            },
-            {
-              model: DBMODELS.RouteMaster,
-              as: "route_master",
-              attributes:['RouteId'],
-              include:[
-                {
-                  model: DBMODELS.city,
-                  as: "source_city",
-                  attributes: ['CityName','latitude','longitude']
-                },
-                {
-                   model: DBMODELS.city,
-                  as: "dest_city",
-                  attributes: ['CityName','latitude','longitude']
-                }
-              ]
-            },
-            {
-              model: DBMODELS.TripType,
-              as: 'tripType',
-              attributes: ['TypeName']
-            }
           ],
-          attributes: [
-            "ID",
-            "CustType",
-            "CustId",
-            "RouteId",
-            "TripType",
-            "VehicleId",
-            "Driver1Id",
-            "VPlaceTime",
-            "DepartureTime",
-            "TripSheet",
-            "CreatedBy",
-            "Status",
-          ],
-          order: [["ID", "ASC"]],
-        })
-      : await DBMODELS.TripPlanSchedule.findAll({
-          include: [
-            {
-              model: DBMODELS.CustomerMaster,
-              as: "CustomerMasters",
-              attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
-            },
-            {
-              model: DBMODELS.Vehicle,
-              as: "Vehicle",
-              attributes: ["VehicleID", "VNumer", "FleetZize"],
-            },
-            {
-              model: DBMODELS.Driver,
-              as: "Driver",
-              attributes: ["DriverID", "DName", "Licence"],
-            },
-            {
-              model: DBMODELS.RouteMaster,
-              as: "route_master",
-              attributes:['RouteId'],
-              include:[
-                {
-                  model: DBMODELS.city,
-                  as: "source_city",
-                  attributes: ['CityName','latitude','longitude']
-                },
-                {
-                   model: DBMODELS.city,
-                  as: "dest_city",
-                  attributes: ['CityName','latitude','longitude']
-                }
-              ]
-            },
-            {
-              model: DBMODELS.TripType,
-              as: 'tripType',
-              attributes: ['TypeName']
-            }
-          ],
-          attributes: [
-            "ID",
-            "CustType",
-            "CustId",
-            "RouteId",
-            "TripType",
-            "VehicleId",
-            "Driver1Id",
-            "VPlaceTime",
-            "DepartureTime",
-            "TripSheet",
-            "CreatedBy",
-            "Status",
-          ],
-          order: [["ID", "ASC"]],
-        });
+        },
+        {
+          model: DBMODELS.TripType,
+          as: "tripType",
+          attributes: ["TypeName"],
+        },
+      ],
+      attributes: [
+        "ID",
+        "CustType",
+        "CustId",
+        "RouteId",
+        "TripType",
+        "VehicleId",
+        "Driver1Id",
+        "VPlaceTime",
+        "DepartureTime",
+        "TripSheet",
+        "CreatedBy",
+        "Status",
+      ],
+      order: [["ID", "ASC"]],
+    });
 
     if (!trip || (Array.isArray(trip) && trip.length === 0)) {
       return res
@@ -192,7 +143,7 @@ module.exports.tripPlan = async (req, res) => {
       CreatedBy: userId,
     };
 
-    console.log("Data : ",dataModel)
+    console.log("Data : ", dataModel);
 
     const data = await DBMODELS.TripPlanSchedule.create(dataModel);
 
