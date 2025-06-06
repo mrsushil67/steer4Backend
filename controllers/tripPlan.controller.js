@@ -24,30 +24,30 @@ module.exports.checkTripPlan = async (req, res) => {
               as: "Driver",
               attributes: ["DriverID", "DName", "Licence"],
             },
-            {
-              model: DBMODELS.CustRateMap,
-              as: "CustRateMaps",
-              on: {
-                RouteId: where(
-                  col("TripPlanSchedule.RouteId"),
-                  "=",
-                  col("CustRateMaps.RouteId")
-                ),
-                CustId: where(
-                  col("TripPlanSchedule.CustId"),
-                  "=",
-                  col("CustRateMaps.CustId")
-                ),
-              },
-              attributes: [
-                "ID",
-                "CustId",
-                "RouteId",
-                "RouteType",
-                "TripType",
-                "RouteString",
-              ],
-            },
+            // {
+            //   model: DBMODELS.CustRateMap,
+            //   as: "CustRateMaps",
+            //   on: {
+            //     RouteId: where(
+            //       col("TripPlanSchedule.RouteId"),
+            //       "=",
+            //       col("CustRateMaps.RouteId")
+            //     ),
+            //     CustId: where(
+            //       col("TripPlanSchedule.CustId"),
+            //       "=",
+            //       col("CustRateMaps.CustId")
+            //     ),
+            //   },
+            //   attributes: [
+            //     "ID",
+            //     "CustId",
+            //     "RouteId",
+            //     "RouteType",
+            //     "TripType",
+            //     "RouteString",
+            //   ],
+            // },
           ],
           attributes: [
             "ID",
@@ -82,30 +82,30 @@ module.exports.checkTripPlan = async (req, res) => {
               as: "Driver",
               attributes: ["DriverID", "DName", "Licence"],
             },
-            {
-              model: DBMODELS.CustRateMap,
-              as: "CustRateMaps",
-              on: {
-                RouteId: where(
-                  col("TripPlanSchedule.RouteId"),
-                  "=",
-                  col("CustRateMaps.RouteId")
-                ),
-                CustId: where(
-                  col("TripPlanSchedule.CustId"),
-                  "=",
-                  col("CustRateMaps.CustId")
-                ),
-              },
-              attributes: [
-                "ID",
-                "CustId",
-                "RouteId",
-                "RouteType",
-                "TripType",
-                "RouteString",
-              ],
-            },
+            // {
+            //   model: DBMODELS.CustRateMap,
+            //   as: "CustRateMaps",
+            //   on: {
+            //     RouteId: where(
+            //       col("TripPlanSchedule.RouteId"),
+            //       "=",
+            //       col("CustRateMaps.RouteId")
+            //     ),
+            //     CustId: where(
+            //       col("TripPlanSchedule.CustId"),
+            //       "=",
+            //       col("CustRateMaps.CustId")
+            //     ),
+            //   },
+            //   attributes: [
+            //     "ID",
+            //     "CustId",
+            //     "RouteId",
+            //     "RouteType",
+            //     "TripType",
+            //     "RouteString",
+            //   ],
+            // },
           ],
           attributes: [
             "ID",
