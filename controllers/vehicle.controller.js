@@ -3,15 +3,26 @@ const { DBMODELS } = require("../models/init-models");
 
 module.exports.getVehicleList = async (req, res) => {
   try {
-    const { vehicleNo = null || undefined } = req.body || {};
+    const { vehicleNo = null, vehicleSize } = req.body || {};
+
+    if(!vehicleSize){
+      return res.status(400).json({status: "400", message: "Vehicle size is Not defined"})
+    }
 
     const whereCondition = vehicleNo
       ? {
-          VNumer: {
-            [Op.like]: `%${vehicleNo}%`,
+        [Op.and]: [
+          {
+            VNumer: {
+              [Op.like]: `%${vehicleNo}%`,
+            },
           },
-        }
-      : {};
+          {
+            FleetZize: vehicleSize,
+          },
+        ],
+      }
+      : { FleetZize: vehicleSize };
 
     const vehicles = await DBMODELS.Vehicle.findAll({
       where: whereCondition,
