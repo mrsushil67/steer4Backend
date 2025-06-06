@@ -136,6 +136,7 @@ module.exports.checkTripPlan = async (req, res) => {
             "Status",
           ],
           order: [["ID", "ASC"]],
+          group: ['ID'],
         });
 
     if (!trip || (Array.isArray(trip) && trip.length === 0)) {
