@@ -6,41 +6,48 @@ module.exports.checkTripPlan = async (req, res) => {
     const { id } = req.query;
 
     const trip = id
-      ? await DBMODELS.TripPlanSchedule.findOne({ where: { ID: id } })
-      : await DBMODELS.TripPlanSchedule.findAll({
+      ? await DBMODELS.TripPlanSchedule.findAll({
+          where: { ID: id },
           include: [
             {
               model: DBMODELS.CustomerMaster,
-              as: 'CustomerMasters',
-              attributes: ['CustId','CustomerName','CustCode','GSTNo']
+              as: "CustomerMasters",
+              attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
             },
             {
               model: DBMODELS.Vehicle,
-              as: 'Vehicle',
-              attributes: ['VehicleID','VNumer','FleetZize']
+              as: "Vehicle",
+              attributes: ["VehicleID", "VNumer", "FleetZize"],
             },
             {
               model: DBMODELS.Driver,
-              as: 'Driver',
-              attributes: ['DriverID','DName','Licence']
+              as: "Driver",
+              attributes: ["DriverID", "DName", "Licence"],
             },
             {
               model: DBMODELS.CustRateMap,
-              as: 'CustRateMaps',
+              as: "CustRateMaps",
               required: true,
               on: {
                 RouteId: where(
-                  col('TripPlanSchedule.RouteId'),
-                  '=',
-                  col('CustRateMaps.RouteId')
+                  col("TripPlanSchedule.RouteId"),
+                  "=",
+                  col("CustRateMaps.RouteId")
                 ),
                 CustId: where(
-                  col('TripPlanSchedule.CustId'),
-                  '=',
-                  col('CustRateMaps.CustId')
-                )
+                  col("TripPlanSchedule.CustId"),
+                  "=",
+                  col("CustRateMaps.CustId")
+                ),
               },
-              attributes:['ID','CustId','RouteId','RouteType','TripType','RouteString'],
+              attributes: [
+                "ID",
+                "CustId",
+                "RouteId",
+                "RouteType",
+                "TripType",
+                "RouteString",
+              ],
               include: [
                 {
                   model: DBMODELS.TripType,
@@ -49,9 +56,90 @@ module.exports.checkTripPlan = async (req, res) => {
                   attributes: ["Id", "TypeName"],
                 },
               ],
-            }
+            },
           ],
-          attributes: ['ID','CustType','CustId','RouteId','TripType','VehicleId','Driver1Id','VPlaceTime','DepartureTime','TripSheet','CreatedBy','Status']
+          attributes: [
+            "ID",
+            "CustType",
+            "CustId",
+            "RouteId",
+            "TripType",
+            "VehicleId",
+            "Driver1Id",
+            "VPlaceTime",
+            "DepartureTime",
+            "TripSheet",
+            "CreatedBy",
+            "Status",
+          ],
+          order: [["ID", "ASC"]],
+        })
+      : await DBMODELS.TripPlanSchedule.findAll({
+          include: [
+            {
+              model: DBMODELS.CustomerMaster,
+              as: "CustomerMasters",
+              attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+            },
+            {
+              model: DBMODELS.Vehicle,
+              as: "Vehicle",
+              attributes: ["VehicleID", "VNumer", "FleetZize"],
+            },
+            {
+              model: DBMODELS.Driver,
+              as: "Driver",
+              attributes: ["DriverID", "DName", "Licence"],
+            },
+            {
+              model: DBMODELS.CustRateMap,
+              as: "CustRateMaps",
+              required: true,
+              on: {
+                RouteId: where(
+                  col("TripPlanSchedule.RouteId"),
+                  "=",
+                  col("CustRateMaps.RouteId")
+                ),
+                CustId: where(
+                  col("TripPlanSchedule.CustId"),
+                  "=",
+                  col("CustRateMaps.CustId")
+                ),
+              },
+              attributes: [
+                "ID",
+                "CustId",
+                "RouteId",
+                "RouteType",
+                "TripType",
+                "RouteString",
+              ],
+              include: [
+                {
+                  model: DBMODELS.TripType,
+                  as: "trip_type",
+                  required: true,
+                  attributes: ["Id", "TypeName"],
+                },
+              ],
+            },
+          ],
+          attributes: [
+            "ID",
+            "CustType",
+            "CustId",
+            "RouteId",
+            "TripType",
+            "VehicleId",
+            "Driver1Id",
+            "VPlaceTime",
+            "DepartureTime",
+            "TripSheet",
+            "CreatedBy",
+            "Status",
+          ],
+          order: [["ID", "ASC"]],
         });
 
     if (!trip || (Array.isArray(trip) && trip.length === 0)) {
@@ -210,8 +298,10 @@ module.exports.cancelTrip = async (req, res) => {
       where: { ID: tripId },
     });
 
-    if(!existingTripPlanSchedule || !existingTripPlan){
-      return res.status(404).json({ status: "404", message:"no renord found"})
+    if (!existingTripPlanSchedule || !existingTripPlan) {
+      return res
+        .status(404)
+        .json({ status: "404", message: "no renord found" });
     }
 
     console.log("status : ", status, typeof status);
@@ -294,7 +384,7 @@ module.exports.proceedTrip = async (req, res) => {
         message: "Record not found after update",
       });
     }
-                     
+
     const tripPlanData = await DBMODELS.TripPlan.create({
       ...tripScheduleData.toJSON(),
     });
@@ -305,7 +395,6 @@ module.exports.proceedTrip = async (req, res) => {
       updatedTripPlanSchedule: tripScheduleData,
       addedTripPlan: tripPlanData,
     });
-
   } catch (error) {
     console.error("Error while proceeding trip:", error);
     return res
@@ -317,10 +406,8 @@ module.exports.proceedTrip = async (req, res) => {
 module.exports.tripOperations = async (req, res) => {
   try {
     const data = await DBMODELS.TripOperation.findAll({
-        include: [
-          { model: DBMODELS.TripPlan, as: 'TripPlan' }
-        ]
-      });
+      include: [{ model: DBMODELS.TripPlan, as: "TripPlan" }],
+    });
 
     return res.status(200).json({ message: "Record found", data });
   } catch (error) {
