@@ -27,7 +27,6 @@ module.exports.checkTripPlan = async (req, res) => {
             {
               model: DBMODELS.CustRateMap,
               as: "CustRateMaps",
-              required: true,
               on: {
                 RouteId: where(
                   col("TripPlanSchedule.RouteId"),
@@ -52,7 +51,6 @@ module.exports.checkTripPlan = async (req, res) => {
                 {
                   model: DBMODELS.TripType,
                   as: "trip_type",
-                  required: true,
                   attributes: ["Id", "TypeName"],
                 },
               ],
