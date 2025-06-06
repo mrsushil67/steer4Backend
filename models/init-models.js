@@ -426,6 +426,9 @@ function initModels(sequelize) {
   var states = _states(sequelize, DataTypes);
   var stationery = _stationery(sequelize, DataTypes);
   var text = _text(sequelize, DataTypes);
+  
+  TripOperation.belongsTo(TripPlan, { as: "TripPlan", foreignKey: "TripId" });
+  TripPlan.hasMany(TripOperation, { as: "TripOperations", foreignKey: "TripId" });
 
   CustRateMap.belongsTo(CustomerMaster, { as: "Cust", foreignKey: "CustId"});
   CustomerMaster.hasMany(CustRateMap, { as: "CustRateMaps", foreignKey: "CustId"});

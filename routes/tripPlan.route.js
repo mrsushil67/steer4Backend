@@ -7,5 +7,6 @@ TripRouter.post("/submit", authorizedUser, TripController.tripPlan); // just che
 TripRouter.put("/update", authorizedUser, TripController.updateTrip);
 TripRouter.post("/cancel", authorizedUser, TripController.cancelTrip);
 TripRouter.post("/proceed", TripController.proceedTrip);
+TripRouter.get("/getOperation", TripController.tripOperations);
 
 module.exports = TripRouter;
