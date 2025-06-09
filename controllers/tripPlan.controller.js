@@ -3,83 +3,105 @@ const { DBMODELS } = require("../models/init-models");
 
 module.exports.checkTripPlan = async (req, res) => {
   try {
+
     const { vehicleNo = null } = req.body || {};
 
     const whereClause = {};
 
     if (vehicleNo) {
-      whereClause["$Vehicle.VNumer$"] = {
-        [Op.like]: `%${vehicleNo}%`,
+      whereClause["$TripPlan.Vehicle.VNumer$"] = {
+      [Op.like]: `%${vehicleNo}%`,
       };
     }
 
-    const trip = await DBMODELS.TripPlanSchedule.findAll({
+    console.log("Where : ",whereClause)
+
+    const data = await DBMODELS.TripOperation.findAll({
       where: whereClause,
       include: [
         {
-          model: DBMODELS.CustomerMaster,
-          as: "CustomerMasters",
-          attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
-        },
-        {
-          model: DBMODELS.Vehicle,
-          as: "Vehicle",
-          attributes: ["VehicleID", "VNumer", "FleetZize"],
-        },
-        {
-          model: DBMODELS.Driver,
-          as: "Driver",
-          attributes: ["DriverID", "DName", "Licence"],
-        },
-        {
-          model: DBMODELS.RouteMaster,
-          as: "route_master",
-          attributes: ["RouteId"],
+          model: DBMODELS.TripPlan,
+          as: "TripPlan",
           include: [
             {
-              model: DBMODELS.city,
-              as: "source_city",
-              attributes: ["CityName", "latitude", "longitude"],
+              model: DBMODELS.CustomerMaster,
+              as: "CustomerMasters",
+              attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
             },
             {
-              model: DBMODELS.city,
-              as: "dest_city",
-              attributes: ["CityName", "latitude", "longitude"],
+              model: DBMODELS.Vehicle,
+              as: "Vehicle",
+              attributes: ["VehicleID", "VNumer", "FleetZize"],
+            },
+            {
+              model: DBMODELS.Driver,
+              as: "Driver",
+              attributes: ["DriverID", "DName", "Licence"],
+            },
+            {
+              model: DBMODELS.RouteMaster,
+              as: "route_master",
+              attributes: ["RouteId"],
+              include: [
+                {
+                  model: DBMODELS.city,
+                  as: "source_city",
+                  attributes: ["CityName", "latitude", "longitude"],
+                },
+                {
+                  model: DBMODELS.city,
+                  as: "dest_city",
+                  attributes: ["CityName", "latitude", "longitude"],
+                },
+              ],
+            },
+            {
+              model: DBMODELS.TripType,
+              as: "tripType",
+              attributes: ["TypeName"],
             },
           ],
         },
-        {
-          model: DBMODELS.TripType,
-          as: "tripType",
-          attributes: ["TypeName"],
-        },
       ],
-      attributes: [
-        "ID",
-        "CustType",
-        "CustId",
-        "RouteId",
-        "TripType",
-        "VehicleId",
-        "Driver1Id",
-        "VPlaceTime",
-        "DepartureTime",
-        "TripSheet",
-        "CreatedBy",
-        "Status",
-      ],
-      order: [["ID", "ASC"]],
     });
 
-    if (!trip || (Array.isArray(trip) && trip.length === 0)) {
+    const filteredTrips = data.filter((trip) => {
+      const tripNo = trip?.TripNo;
+      const lastLetter = tripNo.slice(-1);
+
+      if (trip?.TripPlan?.TripType == 2) {
+        if (lastLetter === "A" && trip.Stat !== 7) {
+          return true;
+        } else if (lastLetter === "B") {
+          const correspondingATrip = data.find(
+            (t) =>
+              t?.TripNo === tripNo.slice(0, -1) + "A" &&
+              t?.Stat === 7
+          );
+          if (correspondingATrip) {
+            return true;
+          }
+        }
+      } else {
+        if (trip?.Stat !== 7) {
+          return true;
+        }
+      }
+
+      return false;
+    });
+
+    if (!data || (Array.isArray(data) && data.length === 0)) {
       return res
         .status(404)
         .json({ status: "404", message: "No record found" });
     }
 
-    return res.status(200).json({ status: "200", trip });
+    return res
+      .status(200)
+      .json({ message: "Record found", data: filteredTrips });
   } catch (error) {
-    console.error("Error While fetching trip plan:", error);
+    console.error("Error while fetching trip operations:", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });

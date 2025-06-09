@@ -457,23 +457,23 @@ function initModels(sequelize) {
   RouteMaster.belongsTo(CustomerMaster, { as: "Cust", foreignKey: "CustId" });
   CustomerMaster.hasMany(RouteMaster, { as: "RouteMasters", foreignKey: "CustId" });
 
-  CustomerMaster.belongsTo(TripPlanSchedule, { as: "TripPlanSchedule", foreignKey: "CustId" });
-  TripPlanSchedule.hasOne(CustomerMaster, { as: "CustomerMasters", foreignKey: "CustId" });
+  CustomerMaster.belongsTo(TripPlan, { as: "TripPlan", foreignKey: "CustId" });
+  TripPlan.hasOne(CustomerMaster, { as: "CustomerMasters", foreignKey: "CustId" });
 
-  Vehicle.belongsTo( TripPlanSchedule , {as: "TripPlanSchedule", foreignKey: "VehicleId"});
-  TripPlanSchedule.hasOne(Vehicle , {as: "Vehicle", foreignKey: "VehicleId"});
+  Vehicle.belongsTo( TripPlan , {as: "TripPlan", foreignKey: "VehicleId"});
+  TripPlan.hasOne(Vehicle , {as: "Vehicle", foreignKey: "VehicleId"});
 
-  Driver.belongsTo(TripPlanSchedule, {as: "TripPlanSchedule", foreignKey: "DriverID"});
-  TripPlanSchedule.hasOne(Driver , {as: "Driver", foreignKey: "DriverID"});
+  Driver.belongsTo(TripPlan, {as: "TripPlan", foreignKey: "DriverID"});
+  TripPlan.hasOne(Driver , {as: "Driver", foreignKey: "DriverID"});
 
-  CustRateMap.belongsTo(TripPlanSchedule, { as: "TripPlanSchedule", foreignKey: "RouteId" });
-  TripPlanSchedule.hasOne(CustRateMap, { as: "CustRateMaps", foreignKey: "RouteId" });
+  CustRateMap.belongsTo(TripPlan, { as: "TripPlan", foreignKey: "RouteId" });
+  TripPlan.hasOne(CustRateMap, { as: "CustRateMaps", foreignKey: "RouteId" });
 
-  RouteMaster.belongsTo(TripPlanSchedule, {as : "TripPlanSchedule" , foreignKey: "RouteId"});
-  TripPlanSchedule.hasOne(RouteMaster, {as: "route_master", foreignKey: "RouteId"});
+  RouteMaster.belongsTo(TripPlan, {as : "TripPlan" , foreignKey: "RouteId"});
+  TripPlan.hasOne(RouteMaster, {as: "route_master", foreignKey: "RouteId"});
 
-  TripPlanSchedule.belongsTo(TripType ,{as: 'tripType', foreignKey: "TripType"});
-  TripType.hasOne(TripPlanSchedule, {as: "TripPlanSchedule", foreignKey: "TripType"});
+  TripPlan.belongsTo(TripType ,{as: 'tripType', foreignKey: "TripType"});
+  TripType.hasOne(TripPlan, {as: "TripPlan", foreignKey: "TripType"});
 
   RouteMaster.belongsTo(city, {as: 'source_city',foreignKey: 'Source'});
   city.hasMany(RouteMaster, {as: 'source_routes', foreignKey: 'Source' });
