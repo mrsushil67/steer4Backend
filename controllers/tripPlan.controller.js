@@ -3,8 +3,7 @@ const { DBMODELS } = require("../models/init-models");
 
 module.exports.checkTripPlan = async (req, res) => {
   try {
-
-    const { vehicleNo = null } = req.body || {};
+    const { vehicleNo = null, status = null, fromDate = null, toDate = null } = req.body || {};
 
     const whereClause = {};
 
@@ -14,7 +13,25 @@ module.exports.checkTripPlan = async (req, res) => {
       };
     }
 
-    console.log("Where : ",whereClause)
+    if (status !== null) {
+      whereClause["$TripPlan.Status$"] = status;
+    }
+
+    if (fromDate && toDate) {
+      whereClause["$TripPlan.DepartureTime$"] = {
+      [Op.between]: [new Date(fromDate), new Date(toDate)],
+      };
+    } else if (fromDate) {
+      whereClause["$TripPlan.DepartureTime$"] = {
+      [Op.gte]: new Date(fromDate),
+      };
+    } else if (toDate) {
+      whereClause["$TripPlan.DepartureTime$"] = {
+      [Op.lte]: new Date(toDate),
+      };
+    }
+
+    console.log("Where : ", whereClause);
 
     const data = await DBMODELS.TripOperation.findAll({
       where: whereClause,
@@ -99,7 +116,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: "Record found", data: filteredTrips });
+      .json({status: "200", message: "Record found", data: filteredTrips });
   } catch (error) {
     console.error("Error while fetching trip operations:", error);
     return res
