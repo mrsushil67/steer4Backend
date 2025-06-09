@@ -9,25 +9,25 @@ module.exports.checkTripPlan = async (req, res) => {
 
     if (vehicleNo) {
       whereClause["$TripPlan.Vehicle.VNumer$"] = {
-      [Op.like]: `%${vehicleNo}%`,
+        [Op.like]: `%${vehicleNo}%`,
       };
     }
 
     if (status !== null) {
-      whereClause["$TripPlan.Status$"] = status;
+      whereClause["Stat"] = status;
     }
 
     if (fromDate && toDate) {
       whereClause["$TripPlan.DepartureTime$"] = {
-      [Op.between]: [new Date(fromDate), new Date(toDate)],
+        [Op.between]: [new Date(fromDate), new Date(toDate)],
       };
     } else if (fromDate) {
       whereClause["$TripPlan.DepartureTime$"] = {
-      [Op.gte]: new Date(fromDate),
+        [Op.gte]: new Date(fromDate),
       };
     } else if (toDate) {
       whereClause["$TripPlan.DepartureTime$"] = {
-      [Op.lte]: new Date(toDate),
+        [Op.lte]: new Date(toDate),
       };
     }
 
@@ -116,7 +116,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
     return res
       .status(200)
-      .json({status: "200", message: "Record found", data: filteredTrips });
+      .json({ status: "200", message: "Record found", data: filteredTrips });
   } catch (error) {
     console.error("Error while fetching trip operations:", error);
     return res
