@@ -422,7 +422,10 @@ module.exports.cancelTrip = async (req, res) => {
   try {
     const { tripId = null } = req.body || {};
 
-    if (!tripId) {
+    const TripId = parseInt(tripId);
+    console.log("TripId : ",TripId, typeof(TripId))
+
+    if (!TripId) {
       return res
         .status(400)
         .json({ status: "400", message: "tripId or status missing" });
@@ -430,7 +433,7 @@ module.exports.cancelTrip = async (req, res) => {
 
     // Check if the status is already the same
     const existingTripPlanSchedule = await DBMODELS.TripPlanSchedule.findOne({
-      where: { ID: tripId },
+      where: { ID: TripId },
     });
 
     if (!existingTripPlanSchedule) {
@@ -442,7 +445,7 @@ module.exports.cancelTrip = async (req, res) => {
     const [updatedTripPlanScheduleRows] =
       await DBMODELS.TripPlanSchedule.update(
         { Status: 6 },
-        { where: { ID: tripId } }
+        { where: { ID: TripId } }
       );
 
     if (updatedTripPlanScheduleRows === 0) {
