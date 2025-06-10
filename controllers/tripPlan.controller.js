@@ -38,6 +38,9 @@ module.exports.checkTripPlan = async (req, res) => {
 
     console.log("Where : ", whereClause);
     const ScheduleData = await DBMODELS.TripPlanSchedule.findAll({
+      where: {
+        is_final: 0
+      },
       include: [
         {
           model: DBMODELS.CustomerMaster,
@@ -178,6 +181,7 @@ module.exports.checkTripPlan = async (req, res) => {
       return false;
     });
 
+    console.log(ScheduleData)
     const mergedArray = ScheduleData.concat(filteredTrips);
 
     const tripDetailsArray = mergedArray.map((item) => {
@@ -271,8 +275,6 @@ module.exports.checkTripPlan = async (req, res) => {
         };
       }
     });
-
-    console.log(tripDetailsArray);
 
     if (
       !tripDetailsArray ||
