@@ -457,7 +457,6 @@ module.exports.cancelTrip = async (req, res) => {
       status: "201",
       message: "trip cancled successfully",
       updatedTripPlanScheduleRows,
-      updatedTripPlanRows,
     });
   } catch (error) {
     console.error("Error While updating trip:", error);
