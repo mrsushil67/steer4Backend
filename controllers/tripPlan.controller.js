@@ -39,7 +39,7 @@ module.exports.checkTripPlan = async (req, res) => {
     console.log("Where : ", whereClause);
     const ScheduleData = await DBMODELS.TripPlanSchedule.findAll({
       where: {
-        is_final: 0
+        [Op.and]: [{ is_final: 0 }, { Status: { [Op.ne]: 6 } }],
       },
       include: [
         {
@@ -432,7 +432,6 @@ module.exports.cancelTrip = async (req, res) => {
     const existingTripPlanSchedule = await DBMODELS.TripPlanSchedule.findOne({
       where: { ID: tripId },
     });
-
 
     if (!existingTripPlanSchedule) {
       return res
