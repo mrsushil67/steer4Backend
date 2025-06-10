@@ -105,8 +105,6 @@ module.exports.checkTripPlan = async (req, res) => {
       order: [["ID", "ASC"]],
     });
 
-    console.log("TripPlanSchedule Data: ", ScheduleData);
-
     const data = await DBMODELS.TripOperation.findAll({
       where: whereClause,
       include: [
@@ -182,9 +180,105 @@ module.exports.checkTripPlan = async (req, res) => {
 
     const mergedArray = ScheduleData.concat(filteredTrips);
 
+    const tripDetailsArray = mergedArray.map((item) => {
+      if (item.TripPlan) {
+        return {
+          Id: item.TripId,
+          TripNo: item.TripNo,
+          InvoiceCopy: item.InvoiceCopy,
+          LRCopy: item.LRCopy,
+          DAV: item.DAV,
+          GatePass: item.GatePass,
+          POD: item.POD,
+          EwayBilNo: item.EwayBilNo,
+          ATD: item.ATD,
+          CreatedBy: item.CreatedBy,
+          CreatedTime: item.CreatedTime,
+          ATA: item.ATA,
+          AmendReason: item.AmendReason,
+          Stat: item.Stat,
+          StartBy: item.StartBy,
+          OnRouteBy: item.OnRouteBy,
+          CloseBy: item.CloseBy,
+          Is_Invoice: item.Is_Invoice,
+          Remark: item.Remark,
+          OpeningKm: item.OpeningKm,
+          ClosingKm: item.ClosingKm,
+          ActualKm: item.ActulaKm,
+          CVerify: item.CVerify,
+          TripSheetNo: item.TripSheetNo,
+    
+          // TripPlan: {
+            TripSheet: item.TripPlan.TripSheet,
+            VPlaceTime: item.TripPlan.VPlaceTime,
+            DepartureTime: item.TripPlan.DepartureTime,
+            RouteId: item.TripPlan.RouteId,
+            VehicleId: item.TripPlan.VehicleId,
+            Driver1Id: item.TripPlan.Driver1Id,
+            Status: item.TripPlan.Status,
+            CreatedBy: item.TripPlan.CreatedBy,
+            TripTypeName: item.TripPlan.tripType?.TypeName || null,
+
+
+          CustomerName: item.TripPlan.CustomerMasters?.CustomerName || null,
+          CustCode: item.TripPlan.CustomerMasters?.CustCode || null,
+          GSTNo: item.TripPlan.CustomerMasters?.GSTNo || null,
+
+            VehicleNumber: item.TripPlan.Vehicle?.VNumer || null,
+            FleetSize: item.TripPlan.Vehicle?.FleetZize || null,
+      
+            DriverName: item.TripPlan.Driver?.DName || null,
+            DriverLicence: item.TripPlan.Driver?.Licence || null,
+            RateMapCustId: item.TripPlan.CustomerMasters?.CustId || null,
+            RateMapRouteId: item.TripPlan.CustomerMasters?.RouteId || null,
+            RateMapRouteType: item.TripPlan.CustomerMasters?.RouteType || null,
+            RateMapTripType: item.TripPlan.CustomerMasters?.TripType || null,
+            RouteString: item.TripPlan.CustomerMasters?.RouteString || null,
+            TripTypeName: item.TripPlan.trip_type?.TypeName || null,
+          // },
+        };
+      } else {
+        return {
+          Id: item.ID,
+          CustType: item.CustType,
+          CustId: item.CustId,
+          RouteId: item.RouteId,
+          TripType: item.TripType,
+          VehicleId: item.VehicleId,
+          Driver1Id: item.Driver1Id,
+          VPlaceTime: item.VPlaceTime,
+          DepartureTime: item.DepartureTime,
+          TripSheet: item.TripSheet,
+          CreatedBy: item.CreatedBy,
+          Status: item.Status,
+    
+          CustomerName: item.CustomerMasters?.CustomerName || null,
+          CustCode: item.CustomerMasters?.CustCode || null,
+          GSTNo: item.CustomerMasters?.GSTNo || null,
+    
+          VehicleNumber: item.Vehicle?.VNumer || null,
+          FleetSize: item.Vehicle?.FleetZize || null,
+    
+          DriverName: item.Driver?.DName || null,
+          DriverLicence: item.Driver?.Licence || null,
+    
+          RateMapID: item.CustRateMaps?.ID || null,
+          RateMapCustId: item.CustRateMaps?.CustId || null,
+          RateMapRouteId: item.CustRateMaps?.RouteId || null,
+          RateMapRouteType: item.CustRateMaps?.RouteType || null,
+          RateMapTripType: item.CustRateMaps?.TripType || null,
+          RouteString: item.CustRateMaps?.RouteString || null,
+          TripTypeName: item.CustRateMaps?.trip_type?.TypeName || null,
+        };
+      }
+    });
+    
+
+    console.log(tripDetailsArray);
+
     if (
-      !mergedArray ||
-      (Array.isArray(mergedArray) && mergedArray.length === 0)
+      !tripDetailsArray ||
+      (Array.isArray(tripDetailsArray) && tripDetailsArray.length === 0)
     ) {
       return res
         .status(404)
@@ -193,7 +287,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: "200", message: "Record found", data: mergedArray });
+      .json({ status: "200", message: "Record found", data: tripDetailsArray });
   } catch (error) {
     console.error("Error while fetching trip operations:", error);
     return res
