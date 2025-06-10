@@ -449,7 +449,7 @@ module.exports.cancelTrip = async (req, res) => {
     if (updatedTripPlanScheduleRows === 0) {
       return res.status(404).json({
         status: "404",
-        message: "Record not found",
+        message: "Already Cancled",
       });
     }
 
