@@ -2,6 +2,7 @@ const { where, col, Op } = require("sequelize");
 const { DBMODELS } = require("../models/init-models");
 
 module.exports.checkTripPlan = async (req, res) => {
+ 
   try {
     const { vehicleNo = null, status = null, fromDate = null, toDate = null } = req.body || {};
 
@@ -32,7 +33,57 @@ module.exports.checkTripPlan = async (req, res) => {
     }
 
     console.log("Where : ", whereClause);
+    const ScheduleData = await DBMODELS.TripOperation.findAll({
+      where: whereClause,
+      include: [
+      {
+        model: DBMODELS.TripPlanSchedule,
+        as: "TripPlanSchedule",
+        include: [
+        {
+          model: DBMODELS.CustomerMaster,
+          as: "CustomerMasters",
+          attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+        },
+        {
+          model: DBMODELS.Vehicle,
+          as: "Vehicle",
+          attributes: ["VehicleID", "VNumer", "FleetZize"],
+        },
+        {
+          model: DBMODELS.Driver,
+          as: "Driver",
+          attributes: ["DriverID", "DName", "Licence"],
+        },
+        {
+          model: DBMODELS.RouteMaster,
+          as: "route_master",
+          attributes: ["RouteId"],
+          include: [
+          {
+            model: DBMODELS.city,
+            as: "source_city",
+            attributes: ["CityName", "latitude", "longitude"],
+          },
+          {
+            model: DBMODELS.city,
+            as: "dest_city",
+            attributes: ["CityName", "latitude", "longitude"],
+          },
+          ],
+        },
+        {
+          model: DBMODELS.TripType,
+          as: "tripType",
+          attributes: ["TypeName"],
+        },
+        ],
+      },
+      ],
+    });
 
+    console.log("TripPlanSchedule Data: ", ScheduleData);
+    
     const data = await DBMODELS.TripOperation.findAll({
       where: whereClause,
       include: [
@@ -82,7 +133,9 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
-    const filteredTrips = data.filter((trip) => {
+    const mergedArray = ScheduleData.concat(data); 
+
+    const filteredTrips = mergedArray.filter((trip) => {
       const tripNo = trip?.TripNo;
       const lastLetter = tripNo.slice(-1);
 
@@ -108,7 +161,7 @@ module.exports.checkTripPlan = async (req, res) => {
       return false;
     });
 
-    if (!data || (Array.isArray(data) && data.length === 0)) {
+    if (!mergedArray || (Array.isArray(mergedArray) && mergedArray.length === 0)) {
       return res
         .status(404)
         .json({ status: "404", message: "No record found" });

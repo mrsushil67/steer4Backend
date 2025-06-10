@@ -481,6 +481,33 @@ function initModels(sequelize) {
   RouteMaster.belongsTo(city, {as: 'dest_city',foreignKey: 'Destination'});
   city.hasMany(RouteMaster, {as: 'destination_routes', foreignKey: 'Destination' });
 
+  TripOperation.belongsTo(TripPlanSchedule, { as: "TripPlanSchedule", foreignKey: "TripId" });
+  TripPlanSchedule.hasMany(TripOperation, { as: "TripOperations", foreignKey: "TripId" });
+
+  CustomerMaster.belongsTo(TripPlanSchedule, { as: "TripPlanSchedule", foreignKey: "CustId" });
+  TripPlanSchedule.hasOne(CustomerMaster, { as: "CustomerMasters", foreignKey: "CustId" });
+
+  Vehicle.belongsTo( TripPlanSchedule , {as: "TripPlanSchedule", foreignKey: "VehicleId"});
+  TripPlanSchedule.hasOne(Vehicle , {as: "Vehicle", foreignKey: "VehicleId"});
+
+  Driver.belongsTo(TripPlanSchedule, {as: "TripPlanSchedule", foreignKey: "DriverID"});
+  TripPlanSchedule.hasOne(Driver , {as: "Driver", foreignKey: "DriverID"});
+
+  CustRateMap.belongsTo(TripPlanSchedule, { as: "TripPlanSchedule", foreignKey: "RouteId" });
+  TripPlanSchedule.hasOne(CustRateMap, { as: "CustRateMaps", foreignKey: "RouteId" });
+
+  RouteMaster.belongsTo(TripPlanSchedule, {as : "TripPlanSchedule" , foreignKey: "RouteId"});
+  TripPlanSchedule.hasOne(RouteMaster, {as: "route_master", foreignKey: "RouteId"});
+
+  TripPlanSchedule.belongsTo(TripType ,{as: 'tripType', foreignKey: "TripType"});
+  TripType.hasOne(TripPlanSchedule, {as: "TripPlanSchedule", foreignKey: "TripType"});
+
+  // RouteMaster.belongsTo(city, {as: 'source_city',foreignKey: 'Source'});
+  // city.hasMany(RouteMaster, {as: 'source_routes', foreignKey: 'Source' });
+
+  // RouteMaster.belongsTo(city, {as: 'dest_city',foreignKey: 'Destination'});
+  // city.hasMany(RouteMaster, {as: 'destination_routes', foreignKey: 'Destination' });
+
 
 
   return {
