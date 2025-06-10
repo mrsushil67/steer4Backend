@@ -440,7 +440,7 @@ module.exports.cancelTrip = async (req, res) => {
     if (!existingTripPlanSchedule || !existingTripPlan) {
       return res
         .status(404)
-        .json({ status: "404", message: "no renord found" });
+        .json({ status: "404", message: "no record found" });
     }
 
     console.log("status : ", status, typeof status);
@@ -481,7 +481,7 @@ module.exports.cancelTrip = async (req, res) => {
 
     return res.status(201).json({
       status: "201",
-      message: "Records updated successfully",
+      message: "Records Cancled successfully",
       updatedTripPlanScheduleRows,
       updatedTripPlanRows,
     });
