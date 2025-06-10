@@ -420,9 +420,9 @@ module.exports.updateTrip = async (req, res) => {
 
 module.exports.cancelTrip = async (req, res) => {
   try {
-    const { tripId = null, status = null } = req.body || {};
+    const { tripId = null } = req.body || {};
 
-    if (!tripId || !status) {
+    if (!tripId) {
       return res
         .status(400)
         .json({ status: "400", message: "tripId or status missing" });
@@ -433,55 +433,29 @@ module.exports.cancelTrip = async (req, res) => {
       where: { ID: tripId },
     });
 
-    const existingTripPlan = await DBMODELS.TripPlan.findOne({
-      where: { ID: tripId },
-    });
 
-    if (!existingTripPlanSchedule || !existingTripPlan) {
+    if (!existingTripPlanSchedule) {
       return res
         .status(404)
         .json({ status: "404", message: "no record found" });
     }
 
-    console.log("status : ", status, typeof status);
-    console.log(
-      "existingTripPlanSchedule.Status : ",
-      existingTripPlanSchedule.Status
-    );
-    console.log("existingTripPlan.Status : ", existingTripPlan.Status);
-
-    if (
-      (existingTripPlanSchedule &&
-        existingTripPlanSchedule.Status === parseInt(status)) ||
-      (existingTripPlan && existingTripPlan.Status === parseInt(status))
-    ) {
-      return res.status(200).json({
-        status: "200",
-        message: `Status is already ${status}`,
-      });
-    }
-
     const [updatedTripPlanScheduleRows] =
       await DBMODELS.TripPlanSchedule.update(
-        { Status: status },
+        { Status: 6 },
         { where: { ID: tripId } }
       );
 
-    const [updatedTripPlanRows] = await DBMODELS.TripPlan.update(
-      { Status: status },
-      { where: { ID: tripId } }
-    );
-
-    if (updatedTripPlanScheduleRows === 0 && updatedTripPlanRows === 0) {
+    if (updatedTripPlanScheduleRows === 0) {
       return res.status(404).json({
         status: "404",
-        message: "Record not found in both tables",
+        message: "Record not found",
       });
     }
 
     return res.status(201).json({
       status: "201",
-      message: "Records Cancled successfully",
+      message: "trip cancled successfully",
       updatedTripPlanScheduleRows,
       updatedTripPlanRows,
     });
