@@ -196,7 +196,7 @@ module.exports.checkTripPlan = async (req, res) => {
           CreatedTime: item.CreatedTime,
           ATA: item.ATA,
           AmendReason: item.AmendReason,
-          Stat: item.Stat,
+          Status: item.Stat,
           StartBy: item.StartBy,
           OnRouteBy: item.OnRouteBy,
           CloseBy: item.CloseBy,
@@ -207,34 +207,33 @@ module.exports.checkTripPlan = async (req, res) => {
           ActualKm: item.ActulaKm,
           CVerify: item.CVerify,
           TripSheetNo: item.TripSheetNo,
-    
-          // TripPlan: {
-            TripSheet: item.TripPlan.TripSheet,
-            VPlaceTime: item.TripPlan.VPlaceTime,
-            DepartureTime: item.TripPlan.DepartureTime,
-            RouteId: item.TripPlan.RouteId,
-            VehicleId: item.TripPlan.VehicleId,
-            Driver1Id: item.TripPlan.Driver1Id,
-            Status: item.TripPlan.Status,
-            CreatedBy: item.TripPlan.CreatedBy,
-            TripTypeName: item.TripPlan.tripType?.TypeName || null,
 
+          // TripPlan: {
+          TripSheet: item.TripPlan.TripSheet,
+          VPlaceTime: item.TripPlan.VPlaceTime,
+          DepartureTime: item.TripPlan.DepartureTime,
+          RouteId: item.TripPlan.RouteId,
+          VehicleId: item.TripPlan.VehicleId,
+          Driver1Id: item.TripPlan.Driver1Id,
+          // Status: item.TripPlan.Status,
+          CreatedBy: item.TripPlan.CreatedBy,
+          TripTypeName: item.TripPlan.tripType?.TypeName || null,
 
           CustomerName: item.TripPlan.CustomerMasters?.CustomerName || null,
           CustCode: item.TripPlan.CustomerMasters?.CustCode || null,
           GSTNo: item.TripPlan.CustomerMasters?.GSTNo || null,
 
-            VehicleNumber: item.TripPlan.Vehicle?.VNumer || null,
-            FleetSize: item.TripPlan.Vehicle?.FleetZize || null,
-      
-            DriverName: item.TripPlan.Driver?.DName || null,
-            DriverLicence: item.TripPlan.Driver?.Licence || null,
-            RateMapCustId: item.TripPlan.CustomerMasters?.CustId || null,
-            RateMapRouteId: item.TripPlan.CustomerMasters?.RouteId || null,
-            RateMapRouteType: item.TripPlan.CustomerMasters?.RouteType || null,
-            RateMapTripType: item.TripPlan.CustomerMasters?.TripType || null,
-            RouteString: item.TripPlan.CustomerMasters?.RouteString || null,
-            TripTypeName: item.TripPlan.trip_type?.TypeName || null,
+          VehicleNumber: item.TripPlan.Vehicle?.VNumer || null,
+          FleetSize: item.TripPlan.Vehicle?.FleetZize || null,
+
+          DriverName: item.TripPlan.Driver?.DName || null,
+          DriverLicence: item.TripPlan.Driver?.Licence || null,
+          RateMapCustId: item.TripPlan.CustomerMasters?.CustId || null,
+          RateMapRouteId: item.TripPlan.CustomerMasters?.RouteId || null,
+          RateMapRouteType: item.TripPlan.CustomerMasters?.RouteType || null,
+          RateMapTripType: item.TripPlan.CustomerMasters?.TripType || null,
+          RouteString: item.TripPlan.CustomerMasters?.RouteString || null,
+          TripTypeName: item.TripPlan.trip_type?.TypeName || null,
           // },
         };
       } else {
@@ -251,17 +250,17 @@ module.exports.checkTripPlan = async (req, res) => {
           TripSheet: item.TripSheet,
           CreatedBy: item.CreatedBy,
           Status: item.Status,
-    
+
           CustomerName: item.CustomerMasters?.CustomerName || null,
           CustCode: item.CustomerMasters?.CustCode || null,
           GSTNo: item.CustomerMasters?.GSTNo || null,
-    
+
           VehicleNumber: item.Vehicle?.VNumer || null,
           FleetSize: item.Vehicle?.FleetZize || null,
-    
+
           DriverName: item.Driver?.DName || null,
           DriverLicence: item.Driver?.Licence || null,
-    
+
           RateMapID: item.CustRateMaps?.ID || null,
           RateMapCustId: item.CustRateMaps?.CustId || null,
           RateMapRouteId: item.CustRateMaps?.RouteId || null,
@@ -272,7 +271,6 @@ module.exports.checkTripPlan = async (req, res) => {
         };
       }
     });
-    
 
     console.log(tripDetailsArray);
 
