@@ -61,6 +61,10 @@ module.exports.checkTripPlan = async (req, res) => {
           model: DBMODELS.CustRateMap,
           as: "CustRateMaps",
           required: true,
+          where: where( // for show only RT trip if trip type is 2 remove OW trip
+            col("CustRateMaps.TripType"),
+            col("TripPlanSchedule.TripType")
+          ),
           on: {
             RouteId: where(
               col("TripPlanSchedule.RouteId"),
@@ -625,7 +629,7 @@ module.exports.closeTripDetails = async (req, res) => {
       Act_Arr = null,
       OpeningKm = null,
       ClosingKm = null,
-      ActualKm,
+      ActualKm = null 
     } = req.body || {};
 
     if (!tripId) {
