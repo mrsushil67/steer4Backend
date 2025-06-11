@@ -8,7 +8,7 @@ TripRouter.put("/update", authorizedUser, TripController.updateTrip);
 TripRouter.post("/cancel", authorizedUser, TripController.cancelTrip);
 TripRouter.post("/proceed",authorizedUser, TripController.proceedTrip);
 TripRouter.get("/getOperation", TripController.tripOperations);
-TripRouter.post("/onRouteUpdate", TripController.onRouteTripUpdate);
-TripRouter.post("/closeTripUpdate", TripController.closeTripUpdate);
+TripRouter.post("/onRouteUpdate", authorizedUser, TripController.onRouteTripDetails);
+TripRouter.post("/closeTripUpdate", authorizedUser, TripController.closeTripDetails);
 
 module.exports = TripRouter;

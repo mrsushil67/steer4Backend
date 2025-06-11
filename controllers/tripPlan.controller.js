@@ -349,7 +349,7 @@ module.exports.tripPlan = async (req, res) => {
       Remark,
       TripSheet,
       StartKm,
-      Status: 1,  // default
+      Status: 1, // default
       CreatedBy: userId,
     };
 
@@ -424,7 +424,7 @@ module.exports.cancelTrip = async (req, res) => {
     const { tripId = null } = req.body || {};
 
     const TripId = parseInt(tripId);
-    console.log("TripId : ",TripId, typeof(TripId))
+    console.log("TripId : ", TripId, typeof TripId);
 
     if (!TripId) {
       return res
@@ -533,24 +533,156 @@ module.exports.tripOperations = async (req, res) => {
   }
 };
 
-module.exports.onRouteTripUpdate = async (req, res) => {
+module.exports.onRouteTripDetails = async (req, res) => {
   try {
-    console.log("onRouteTripUpdate");
+    const { tripId } = req.query;
+    const {
+      TAT = null,
+      TENT_KMs = null,
+      Act_Dept = null,
+      OpeningKm = null,
+      CustId = null,
+    } = req.body || {};
+
+    if (!tripId) {
+      return res.status(400).json({
+        status: "400",
+        message: "Missing tripId",
+      });
+    }
+
+    if (!Act_Dept || !OpeningKm || !CustId) {
+      return res
+        .status(400)
+        .json({
+          status: "400",
+          message: "Missing Act_Dept or OpeningKm CustId",
+        });
+    }
+
+    const existTrip = await DBMODELS.TripOperation.findOne({
+      where: {
+        TripId: tripId,
+      },
+      include: [
+        {
+          model: DBMODELS.TripPlan,
+          as: "TripPlan",
+          where: {
+            CustId: CustId,
+          },
+        },
+      ],
+    });
+
+    if (!existTrip) {
+      return res
+        .status(404)
+        .json({
+          status: "404",
+          message: "Record not found with this customer",
+        });
+    }
+
+    const [updatedRows] = await DBMODELS.TripOperation.update(
+      {
+        ATD: Act_Dept,
+        OpeningKm: OpeningKm,
+        // TAT: TAT,
+        // TENT_KMs: TENT_KMs
+      },
+      {
+        where: {
+          TripId: tripId,
+        },
+      }
+    );
+
+    if (updatedRows === 0) {
+      return res
+        .status(404)
+        .json({ status: "404", message: "No records updated" });
+    }
+
+    return res.status(200).json({
+      status: "200",
+      message: "Trip details updated successfully",
+      updatedRows: updatedRows,
+    });
   } catch (error) {
     console.error("Error while onRoute trip update:", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });
   }
-}
+};
 
-module.exports.closeTripUpdate = async(req, res) => {
+module.exports.closeTripDetails = async (req, res) => {
   try {
-    console.log("closeTripUpdate");
+    const { tripId } = req.query;
+    const {
+      Act_Dept = null,
+      Act_Arr = null,
+      OpeningKm = null,
+      ClosingKm = null,
+      ActualKm,
+    } = req.body || {};
+
+    if (!tripId) {
+      return res.status(400).json({
+        status: "400",
+        message: "Missing tripId",
+      });
+    }
+
+    if (!Act_Dept || !Act_Arr || !OpeningKm || !ClosingKm || !ActualKm) {
+      return res
+        .status(400)
+        .json({ status: "400", message: "required fields are missing" });
+    }
+
+    const existTrip = await DBMODELS.TripOperation.findOne({
+      where: {
+        TripId: tripId,
+      },
+    });
+
+    if (!existTrip) {
+      return res
+        .status(404)
+        .json({ status: "404", message: "Record not found" });
+    }
+
+    const [updatedRows] = await DBMODELS.TripOperation.update(
+      {
+        ATD: Act_Dept,
+        ATA: Act_Arr,
+        OpeningKm: OpeningKm,
+        ClosingKm: ClosingKm,
+        ActulaKm: ActualKm,
+      },
+      {
+        where: {
+          TripId: tripId,
+        },
+      }
+    );
+
+    if (updatedRows === 0) {
+      return res
+        .status(404)
+        .json({ status: "404", message: "Already updated" });
+    }
+
+    return res.status(200).json({
+      status: "200",
+      message: "Trip details updated successfully",
+      updatedRows: updatedRows,
+    });
   } catch (error) {
     console.error("Error while close trip:", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });
   }
-}
+};
