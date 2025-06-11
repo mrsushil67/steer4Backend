@@ -61,10 +61,10 @@ module.exports.checkTripPlan = async (req, res) => {
           model: DBMODELS.CustRateMap,
           as: "CustRateMaps",
           required: true,
-          where: where( // for show only RT trip if trip type is 2 remove OW trip
-            col("CustRateMaps.TripType"),
-            col("TripPlanSchedule.TripType")
-          ),
+          // where: where( // for show only RT trip if trip type is 2 remove OW trip
+          //   col("CustRateMaps.TripType"),
+          //   col("TripPlanSchedule.TripType")
+          // ),
           on: {
             RouteId: where(
               col("TripPlanSchedule.RouteId"),
@@ -539,7 +539,7 @@ module.exports.tripOperations = async (req, res) => {
 
 module.exports.onRouteTripDetails = async (req, res) => {
   try {
-    const { tripId } = req.query;
+    const { tripId, tripNo } = req.query;
     const {
       TAT = null,
       TENT_KMs = null,
@@ -548,10 +548,10 @@ module.exports.onRouteTripDetails = async (req, res) => {
       CustId = null,
     } = req.body || {};
 
-    if (!tripId) {
+    if (!tripId ||! tripNo) {
       return res.status(400).json({
         status: "400",
-        message: "Missing tripId",
+        message: "Missing tripId or tripNo",
       });
     }
 
@@ -598,6 +598,7 @@ module.exports.onRouteTripDetails = async (req, res) => {
       {
         where: {
           TripId: tripId,
+          TripNo : tripNo,
         },
       }
     );
@@ -623,7 +624,7 @@ module.exports.onRouteTripDetails = async (req, res) => {
 
 module.exports.closeTripDetails = async (req, res) => {
   try {
-    const { tripId } = req.query;
+    const { tripId, tripNo } = req.query;
     const {
       Act_Dept = null,
       Act_Arr = null,
@@ -632,10 +633,10 @@ module.exports.closeTripDetails = async (req, res) => {
       ActualKm = null 
     } = req.body || {};
 
-    if (!tripId) {
+    if (!tripId ||!tripNo) {
       return res.status(400).json({
         status: "400",
-        message: "Missing tripId",
+        message: "Missing tripId or tripNo",
       });
     }
 
@@ -668,6 +669,7 @@ module.exports.closeTripDetails = async (req, res) => {
       {
         where: {
           TripId: tripId,
+          TripNo: tripNo,
         },
       }
     );
