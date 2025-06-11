@@ -112,54 +112,54 @@ module.exports.checkTripPlan = async (req, res) => {
       order: [["ID", "ASC"]],
     });
 
-    const data = await DBMODELS.TripOperation.findAll({
-      where: whereClause,
-      include: [
-        {
-          model: DBMODELS.TripPlan,
-          as: "TripPlan",
-          include: [
-            {
-              model: DBMODELS.CustomerMaster,
-              as: "CustomerMasters",
-              attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
-            },
-            {
-              model: DBMODELS.Vehicle,
-              as: "Vehicle",
-              attributes: ["VehicleID", "VNumer", "FleetZize"],
-            },
-            {
-              model: DBMODELS.Driver,
-              as: "Driver",
-              attributes: ["DriverID", "DName", "Licence"],
-            },
-            {
-              model: DBMODELS.RouteMaster,
-              as: "route_master",
-              attributes: ["RouteId"],
-              include: [
-                {
-                  model: DBMODELS.city,
-                  as: "source_city",
-                  attributes: ["CityName", "latitude", "longitude"],
-                },
-                {
-                  model: DBMODELS.city,
-                  as: "dest_city",
-                  attributes: ["CityName", "latitude", "longitude"],
-                },
-              ],
-            },
-            {
-              model: DBMODELS.TripType,
-              as: "tripType",
-              attributes: ["TypeName"],
-            },
-          ],
-        },
-      ],
-    });
+    // const data = await DBMODELS.TripOperation.findAll({
+    //   where: whereClause,
+    //   include: [
+    //     {
+    //       model: DBMODELS.TripPlan,
+    //       as: "TripPlan",
+    //       include: [
+    //         {
+    //           model: DBMODELS.CustomerMaster,
+    //           as: "CustomerMasters",
+    //           attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+    //         },
+    //         {
+    //           model: DBMODELS.Vehicle,
+    //           as: "Vehicle",
+    //           attributes: ["VehicleID", "VNumer", "FleetZize"],
+    //         },
+    //         {
+    //           model: DBMODELS.Driver,
+    //           as: "Driver",
+    //           attributes: ["DriverID", "DName", "Licence"],
+    //         },
+    //         {
+    //           model: DBMODELS.RouteMaster,
+    //           as: "route_master",
+    //           attributes: ["RouteId"],
+    //           include: [
+    //             {
+    //               model: DBMODELS.city,
+    //               as: "source_city",
+    //               attributes: ["CityName", "latitude", "longitude"],
+    //             },
+    //             {
+    //               model: DBMODELS.city,
+    //               as: "dest_city",
+    //               attributes: ["CityName", "latitude", "longitude"],
+    //             },
+    //           ],
+    //         },
+    //         {
+    //           model: DBMODELS.TripType,
+    //           as: "tripType",
+    //           attributes: ["TypeName"],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // });
 
     const filteredTrips = data.filter((trip) => {
       const tripNo = trip?.TripNo;
@@ -184,8 +184,8 @@ module.exports.checkTripPlan = async (req, res) => {
 
       return false;
     });
-
-    const mergedArray = ScheduleData.concat(filteredTrips);
+     var filteredTrips1=[];
+    const mergedArray = ScheduleData.concat(filteredTrips1);
 
     const tripDetailsArray = mergedArray.map((item) => {
       if (item.TripPlan) {
