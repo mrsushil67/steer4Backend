@@ -6,7 +6,9 @@ TripRouter.get("/tripList", authorizedUser, TripController.checkTripPlan);
 TripRouter.post("/submit", authorizedUser, TripController.tripPlan); // just check data
 TripRouter.put("/update", authorizedUser, TripController.updateTrip);
 TripRouter.post("/cancel", authorizedUser, TripController.cancelTrip);
-TripRouter.post("/proceed", TripController.proceedTrip);
+TripRouter.post("/proceed",authorizedUser, TripController.proceedTrip);
 TripRouter.get("/getOperation", TripController.tripOperations);
+TripRouter.post("/onRouteUpdate", TripController.onRouteTripUpdate);
+TripRouter.post("/closeTripUpdate", TripController.closeTripUpdate);
 
 module.exports = TripRouter;

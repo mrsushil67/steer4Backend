@@ -471,7 +471,7 @@ module.exports.cancelTrip = async (req, res) => {
 
 module.exports.proceedTrip = async (req, res) => {
   try {
-    const { tripId } = req.query;
+    const { tripId = null } = req.body || {};
 
     if (!tripId) {
       return res.status(400).json({ status: "400", message: "Missing tripId" });
@@ -507,8 +507,8 @@ module.exports.proceedTrip = async (req, res) => {
     return res.status(201).json({
       status: "201",
       message: `Trip proceeded`,
-      updatedTripPlanSchedule: tripScheduleData,
-      addedTripPlan: tripPlanData,
+      // updatedTripPlanSchedule: tripScheduleData,
+      // addedTripPlan: tripPlanData,
     });
   } catch (error) {
     console.error("Error while proceeding trip:", error);
@@ -532,3 +532,25 @@ module.exports.tripOperations = async (req, res) => {
       .json({ status: "500", message: "Internal server error" });
   }
 };
+
+module.exports.onRouteTripUpdate = async (req, res) => {
+  try {
+    console.log("onRouteTripUpdate");
+  } catch (error) {
+    console.error("Error while onRoute trip update:", error);
+    return res
+      .status(500)
+      .json({ status: "500", message: "Internal server error" });
+  }
+}
+
+module.exports.closeTripUpdate = async(req, res) => {
+  try {
+    console.log("closeTripUpdate");
+  } catch (error) {
+    console.error("Error while close trip:", error);
+    return res
+      .status(500)
+      .json({ status: "500", message: "Internal server error" });
+  }
+}
