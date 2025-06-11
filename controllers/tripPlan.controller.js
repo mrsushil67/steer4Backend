@@ -109,7 +109,7 @@ module.exports.checkTripPlan = async (req, res) => {
         "CreatedBy",
         "Status",
       ],
-      order: [["ID", "ASC"]],
+      order: [["ID", "DESC"]],
     });
 
     const data = await DBMODELS.TripOperation.findAll({
