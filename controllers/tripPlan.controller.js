@@ -349,6 +349,7 @@ module.exports.tripPlan = async (req, res) => {
       Remark,
       TripSheet,
       StartKm,
+      Status: 1,  // default
       CreatedBy: userId,
     };
 
