@@ -617,6 +617,11 @@ module.exports.onRouteTripDetails = async (req, res) => {
       });
     }
 
+    const formattedActualTime = moment(
+      Act_Dept,
+      "DD-MM-YYYY HH:mm"
+    ).format("YYYY-MM-DD HH:mm:ss");
+
     const existTrip = await DBMODELS.TripOperation.findOne({
       where: {
         TripId: tripId,
@@ -632,7 +637,7 @@ module.exports.onRouteTripDetails = async (req, res) => {
 
     const [updatedRows] = await DBMODELS.TripOperation.update(
       {
-        ATD: Act_Dept,
+        ATD: formattedActualTime,
         OpeningKm: OpeningKm,
         // TAT: TAT,
         // TENT_KMs: TENT_KMs,
@@ -701,10 +706,19 @@ module.exports.closeTripDetails = async (req, res) => {
         .json({ status: "404", message: "Record not found" });
     }
 
+    const formattedActualArr = moment(
+      Act_Arr,
+      "DD-MM-YYYY HH:mm"
+    ).format("YYYY-MM-DD HH:mm:ss");
+    const formattedActualDEPT = moment(
+      Act_Dept,
+      "DD-MM-YYYY HH:mm"
+    ).format("YYYY-MM-DD HH:mm:ss");
+
     const [updatedRows] = await DBMODELS.TripOperation.update(
       {
-        ATD: Act_Dept,
-        ATA: Act_Arr,
+        ATD: formattedActualDEPT,
+        ATA: formattedActualArr,
         OpeningKm: OpeningKm,
         ClosingKm: ClosingKm,
         ActulaKm: ActualKm,
