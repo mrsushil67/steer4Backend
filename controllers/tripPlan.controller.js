@@ -200,6 +200,9 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
+    console.log(ScheduleData.length)
+    console.log(data.length)
+
     const filteredTrips = data.filter((trip) => {
       const tripNo = trip?.TripNo;
       const lastLetter = tripNo.slice(-1);

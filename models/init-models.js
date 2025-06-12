@@ -469,9 +469,6 @@ function initModels(sequelize) {
   TripPlan.belongsTo(CustRateMap, { as: "CustRateMaps", foreignKey: "CustId" });
   CustRateMap.hasOne(TripPlan, { as: "TripPlan", foreignKey: "CustId" });
 
-  TripPlanSchedule.belongsTo(CustRateMap, { as: "CustRateMaps", foreignKey: "CustId" });
-  CustRateMap.hasOne(TripPlanSchedule, { as: "TripPlanSchedule", foreignKey: "CustId" });
-
   TripPlan.belongsTo(RouteMaster, {as : "route_master" , foreignKey: "RouteId"});
   RouteMaster.hasOne(TripPlan, {as: "TripPlan", foreignKey: "RouteId"});
 
@@ -496,6 +493,8 @@ function initModels(sequelize) {
   TripPlanSchedule.belongsTo(Driver, {as: "Driver", foreignKey: "Driver1Id"});
   Driver.hasOne(TripPlanSchedule , {as: "TripPlanSchedule", foreignKey: "Driver1Id"});
 
+  TripPlanSchedule.belongsTo(CustRateMap, { as: "CustRateMaps", foreignKey: "CustId" });
+  CustRateMap.hasOne(TripPlanSchedule, { as: "TripPlanSchedule", foreignKey: "CustId" });
 
   TripPlanSchedule.belongsTo(RouteMaster, {as : "route_master" , foreignKey: "RouteId"});
   RouteMaster.hasOne(TripPlanSchedule, {as: "TripPlanSchedule", foreignKey: "RouteId"});
