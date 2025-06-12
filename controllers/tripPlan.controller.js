@@ -115,7 +115,7 @@ module.exports.checkTripPlan = async (req, res) => {
     if (status !== null && status !== undefined) {
       tripOperationWhere.Stat = status;
     }
-    
+
     let tripPlanWhere = {};
     if (fromDate && toDate) {
       tripPlanWhere.DepartureTime = {
@@ -130,13 +130,13 @@ module.exports.checkTripPlan = async (req, res) => {
         [Op.lte]: new Date(toDate),
       };
     }
-    
+
     // Vehicle filter is on nested Vehicle model
     let vehicleWhere = {};
     if (vehicleNo) {
       vehicleWhere.VNumer = vehicleNo;
     }
-    
+
     const data = await DBMODELS.TripOperation.findAll({
       where: tripOperationWhere,
       include: [
