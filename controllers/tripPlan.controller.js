@@ -191,14 +191,14 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
-    console.log(ScheduleData.length)
-    console.log(data.length)
+    console.log(ScheduleData.length);
+    console.log(data.length);
 
     const filteredTrips = data.filter((trip) => {
       const tripNo = trip?.TripNo;
 
-      if (!tripNo || typeof tripNo !== 'string') {
-        console.warn('Skipping trip due to invalid TripNo:', trip);
+      if (!tripNo || typeof tripNo !== "string") {
+        console.warn("Skipping trip due to invalid TripNo:", trip);
         return false;
       }
 
@@ -228,7 +228,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
     const tripDetailsArray = mergedArray.map((item) => {
       let tripDirection = "Forward"; // default
-    
+
       // Determine direction for trips with TripPlan
       if (item.TripPlan) {
         if (item.TripPlan.TripType === 2) {
@@ -239,9 +239,13 @@ module.exports.checkTripPlan = async (req, res) => {
           }
         }
       }
-    
+
       // TripOperation entries
-      if (item.TripNo && item?.TripPlan?.TripType === 2 && item.TripNo.endsWith("B")) {
+      if (
+        item.TripNo &&
+        item?.TripPlan?.TripType === 2 &&
+        item.TripNo.endsWith("B")
+      ) {
         tripDirection = "Reverse";
       }
 
@@ -304,7 +308,7 @@ module.exports.checkTripPlan = async (req, res) => {
       } else {
         return {
           Id: item.ID,
-          TripNo:  null,
+          TripNo: null,
           CustType: item.CustType,
           CustId: item.CustId,
           RouteId: item.RouteId,
@@ -400,10 +404,9 @@ module.exports.tripPlan = async (req, res) => {
     }
 
     // Convert to MySQL-compatible format
-    const formattedVPlaceTime = moment(
-      VPlaceTime,
-      "DD-MM-YYYY HH:mm"
-    ).format("YYYY-MM-DD HH:mm:ss");
+    const formattedVPlaceTime = moment(VPlaceTime, "DD-MM-YYYY HH:mm").format(
+      "YYYY-MM-DD HH:mm:ss"
+    );
     const formattedDepartureTime = moment(
       DepartureTime,
       "DD-MM-YYYY HH:mm"
@@ -493,8 +496,13 @@ module.exports.updateTrip = async (req, res) => {
     }
 
     // Format date/time fields
-    const formattedVPlaceTime = moment(VPlaceTime, "DD-MM-YYYY HH:mm").format("YYYY-MM-DD HH:mm:ss");
-    const formattedDepartureTime = moment(DepartureTime, "DD-MM-YYYY HH:mm").format("YYYY-MM-DD HH:mm:ss");
+    const formattedVPlaceTime = moment(VPlaceTime, "DD-MM-YYYY HH:mm").format(
+      "YYYY-MM-DD HH:mm:ss"
+    );
+    const formattedDepartureTime = moment(
+      DepartureTime,
+      "DD-MM-YYYY HH:mm"
+    ).format("YYYY-MM-DD HH:mm:ss");
 
     // Build update object
     const updateFields = {
@@ -679,15 +687,14 @@ module.exports.onRouteTripDetails = async (req, res) => {
       });
     }
 
-    const formattedActualTime = moment(
-      Act_Dept,
-      "DD-MM-YYYY HH:mm"
-    ).format("YYYY-MM-DD HH:mm:ss");
+    const formattedActualTime = moment(Act_Dept, "DD-MM-YYYY HH:mm").format(
+      "YYYY-MM-DD HH:mm:ss"
+    );
 
     const existTrip = await DBMODELS.TripOperation.findOne({
       where: {
         TripId: tripId,
-      }
+      },
     });
 
     if (!existTrip) {
@@ -768,14 +775,12 @@ module.exports.closeTripDetails = async (req, res) => {
         .json({ status: "404", message: "Record not found" });
     }
 
-    const formattedActualArr = moment(
-      Act_Arr,
-      "DD-MM-YYYY HH:mm"
-    ).format("YYYY-MM-DD HH:mm:ss");
-    const formattedActualDEPT = moment(
-      Act_Dept,
-      "DD-MM-YYYY HH:mm"
-    ).format("YYYY-MM-DD HH:mm:ss");
+    const formattedActualArr = moment(Act_Arr, "DD-MM-YYYY HH:mm").format(
+      "YYYY-MM-DD HH:mm:ss"
+    );
+    const formattedActualDEPT = moment(Act_Dept, "DD-MM-YYYY HH:mm").format(
+      "YYYY-MM-DD HH:mm:ss"
+    );
 
     const [updatedRows] = await DBMODELS.TripOperation.update(
       {
