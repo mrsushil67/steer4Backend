@@ -66,18 +66,18 @@ module.exports.checkTripPlan = async (req, res) => {
           //   col("CustRateMaps.TripType"),
           //   col("TripPlanSchedule.TripType")
           // ),
-          on: {
-            RouteId: where(
-              col("TripPlanSchedule.RouteId"),
-              "=",
-              col("CustRateMaps.RouteId")
-            ),
-            CustId: where(
-              col("TripPlanSchedule.CustId"),
-              "=",
-              col("CustRateMaps.CustId")
-            ),
-          },
+          // on: {
+          //   RouteId: where(
+          //     col("TripPlanSchedule.RouteId"),
+          //     "=",
+          //     col("CustRateMaps.RouteId")
+          //   ),
+          //   CustId: where(
+          //     col("TripPlanSchedule.CustId"),
+          //     "=",
+          //     col("CustRateMaps.CustId")
+          //   ),
+          // },
           attributes: [
             "ID",
             "CustId",
@@ -223,6 +223,8 @@ module.exports.checkTripPlan = async (req, res) => {
 
       return false;
     });
+
+    console.log(ScheduleData[0].toJSON());
 
     const mergedArray = ScheduleData.concat(filteredTrips);
 
@@ -639,7 +641,8 @@ module.exports.onRouteTripDetails = async (req, res) => {
         ATD: Act_Dept,
         OpeningKm: OpeningKm,
         // TAT: TAT,
-        // TENT_KMs: TENT_KMs
+        // TENT_KMs: TENT_KMs,
+        Stat: 4,
       },
       {
         where: {
@@ -711,6 +714,7 @@ module.exports.closeTripDetails = async (req, res) => {
         OpeningKm: OpeningKm,
         ClosingKm: ClosingKm,
         ActulaKm: ActualKm,
+        Stat: 7,
       },
       {
         where: {
