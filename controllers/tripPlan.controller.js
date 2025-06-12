@@ -617,16 +617,7 @@ module.exports.onRouteTripDetails = async (req, res) => {
     const existTrip = await DBMODELS.TripOperation.findOne({
       where: {
         TripId: tripId,
-      },
-      include: [
-        {
-          model: DBMODELS.TripPlan,
-          as: "TripPlan",
-          where: {
-            CustId: CustId,
-          },
-        },
-      ],
+      }
     });
 
     if (!existTrip) {
