@@ -199,9 +199,6 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
-    console.log("yyyyy ========",data[0].TripPlan.TripType);
-
-
     const filteredTrips = data.filter((trip) => {
       const tripNo = trip?.TripNo;
       const lastLetter = tripNo.slice(-1);
@@ -226,8 +223,7 @@ module.exports.checkTripPlan = async (req, res) => {
       return false;
     });
 
-    // console.log(data[0].TripPlan.CustRateMaps);
-    const mergedArray = ScheduleData.concat(data);
+    const mergedArray = ScheduleData.concat(filteredTrips);
 
     const tripDetailsArray = mergedArray.map((item) => {
       if (item.TripPlan) {
