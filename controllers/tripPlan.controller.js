@@ -60,7 +60,7 @@ module.exports.checkTripPlan = async (req, res) => {
         {
           model: DBMODELS.CustRateMap,
           as: "CustRateMaps",
-          required: true,
+          // required: true,
           // where: where( // for show only RT trip if trip type is 2 remove OW trip
           //   col("CustRateMaps.TripType"),
           //   col("TripPlanSchedule.TripType")
@@ -152,14 +152,55 @@ module.exports.checkTripPlan = async (req, res) => {
               ],
             },
             {
-              model: DBMODELS.TripType,
-              as: "tripType",
-              attributes: ["TypeName"],
+              model: DBMODELS.CustRateMap,
+              as: "CustRateMaps",
+              // required: true,
+              // where: where( // for show only RT trip if trip type is 2 remove OW trip
+              //   col("CustRateMaps.TripType"),
+              //   col("TripPlanSchedule.TripType")
+              // ),
+              // on: {
+              //   RouteId: where(
+              //     col("TripPlanSchedule.RouteId"),
+              //     "=",
+              //     col("CustRateMaps.RouteId")
+              //   ),
+              //   CustId: where(
+              //     col("TripPlanSchedule.CustId"),
+              //     "=",
+              //     col("CustRateMaps.CustId")
+              //   ),
+              // },
+              include: [
+                {
+                  model: DBMODELS.TripType,
+                  as: "trip_type",
+                  required: true,
+                  attributes: ["Id", "TypeName"],
+                },
+              ],
+              attributes: [
+                "ID",
+                "CustId",
+                "RouteId",
+                "RouteType",
+                "TripType",
+                "RouteString",
+              ],
             },
+
+            // {
+            //   model: DBMODELS.TripType,
+            //   as: "tripType",
+            //   // attributes: ["Id", "TypeName"],
+            // },
           ],
         },
       ],
     });
+
+    console.log("yyyyy ========",data[0].TripPlan.TripType);
+
 
     const filteredTrips = data.filter((trip) => {
       const tripNo = trip?.TripNo;
@@ -184,8 +225,9 @@ module.exports.checkTripPlan = async (req, res) => {
 
       return false;
     });
-     var filteredTrips1=[];
-    const mergedArray = ScheduleData.concat(filteredTrips1);
+
+    // console.log(data[0].TripPlan.CustRateMaps);
+    const mergedArray = ScheduleData.concat(data);
 
     const tripDetailsArray = mergedArray.map((item) => {
       if (item.TripPlan) {
@@ -235,12 +277,12 @@ module.exports.checkTripPlan = async (req, res) => {
 
           DriverName: item.TripPlan.Driver?.DName || null,
           DriverLicence: item.TripPlan.Driver?.Licence || null,
-          RateMapCustId: item.TripPlan.CustomerMasters?.CustId || null,
-          RateMapRouteId: item.TripPlan.CustomerMasters?.RouteId || null,
-          RateMapRouteType: item.TripPlan.CustomerMasters?.RouteType || null,
-          RateMapTripType: item.TripPlan.CustomerMasters?.TripType || null,
-          RouteString: item.TripPlan.CustomerMasters?.RouteString || null,
-          TripTypeName: item.TripPlan.trip_type?.TypeName || null,
+          RateMapCustId: item.TripPlan.CustRateMaps?.CustId || null,
+          RateMapRouteId: item.TripPlan.CustRateMaps?.RouteId || null,
+          RateMapRouteType: item.TripPlan.CustRateMaps?.RouteType || null,
+          RateMapTripType: item.TripPlan.CustRateMaps?.TripType || null,
+          RouteString: item.TripPlan.CustRateMaps?.RouteString || null,
+          TripTypeName: item.TripPlan.CustRateMaps?.trip_type?.TypeName || null,
           // },
         };
       } else {
