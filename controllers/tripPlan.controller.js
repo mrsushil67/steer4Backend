@@ -658,7 +658,7 @@ module.exports.onRouteTripDetails = async (req, res) => {
       updatedRows: updatedRows,
     });
   } catch (error) {
-    console.error("Error while onRoute trip update:", error);
+    console.log("Error while onRoute trip update:", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });
@@ -730,7 +730,7 @@ module.exports.closeTripDetails = async (req, res) => {
       updatedRows: updatedRows,
     });
   } catch (error) {
-    console.error("Error while close trip:", error);
+    console.log("Error while close trip:", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });
