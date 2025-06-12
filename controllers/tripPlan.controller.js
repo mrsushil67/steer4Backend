@@ -380,11 +380,11 @@ module.exports.tripPlan = async (req, res) => {
 
     // Convert to MySQL-compatible format
     const formattedVPlaceTime = moment(
-      data.VPlaceTime,
+      VPlaceTime,
       "DD-MM-YYYY HH:mm"
     ).format("YYYY-MM-DD HH:mm:ss");
     const formattedDepartureTime = moment(
-      data.DepartureTime,
+      DepartureTime,
       "DD-MM-YYYY HH:mm"
     ).format("YYYY-MM-DD HH:mm:ss");
 
