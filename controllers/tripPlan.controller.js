@@ -207,7 +207,7 @@ module.exports.checkTripPlan = async (req, res) => {
       if (trip?.TripPlan?.TripType == 2) {
         if (lastLetter === "A" && trip.Stat !== 7) {
           return true;
-        } else if (lastLetter === "B") {
+        } else if (lastLetter === "B" && trip.Stat !== 7) {
           const correspondingATrip = data.find(
             (t) => t?.TripNo === tripNo.slice(0, -1) + "A" && t?.Stat === 7
           );
