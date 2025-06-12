@@ -210,7 +210,7 @@ module.exports.checkTripPlan = async (req, res) => {
         console.warn('Skipping trip due to invalid TripNo:', trip);
         return false;
       }
-      
+
       const lastLetter = tripNo.slice(-1);
 
       if (trip?.TripPlan?.TripType == 2) {
@@ -461,22 +461,68 @@ module.exports.tripPlan = async (req, res) => {
 
 module.exports.updateTrip = async (req, res) => {
   try {
-    const { tripId } = req.query;
-    const updateFields = req.body;
+    const userId = req.user.userId;
 
-    if (!tripId) {
-      return res.status(400).json({
-        status: "400",
-        message: "Missing tripId",
-      });
-    }
+    const {
+      tripId, // Make sure tripId is sent in the request body
+      CustType,
+      CustId,
+      RouteId,
+      TripType,
+      VehicleSize,
+      VehicleId,
+      Driver1Id,
+      Driver2Id,
+      VPlaceTime,
+      DepartureTime,
+      Remark,
+      TripSheet,
+      StartKm,
+    } = req.body;
 
-    if (Object.keys(updateFields).length === 0) {
+    // Validate required fields
+    if (
+      !tripId ||
+      !CustType ||
+      !CustId ||
+      !RouteId ||
+      !TripType ||
+      !VehicleSize ||
+      !VehicleId ||
+      !Driver1Id ||
+      !VPlaceTime ||
+      !DepartureTime ||
+      !TripSheet ||
+      !StartKm
+    ) {
       return res.status(400).json({
         status: "400",
         message: "Missing required fields",
       });
     }
+
+    // Format date/time fields
+    const formattedVPlaceTime = moment(VPlaceTime, "DD-MM-YYYY HH:mm").format("YYYY-MM-DD HH:mm:ss");
+    const formattedDepartureTime = moment(DepartureTime, "DD-MM-YYYY HH:mm").format("YYYY-MM-DD HH:mm:ss");
+
+    // Build update object
+    const updateFields = {
+      CustType,
+      CustId,
+      RouteId,
+      TripType,
+      VehicleSize,
+      VehicleId,
+      Driver1Id,
+      Driver2Id: Driver2Id || null,
+      VPlaceTime: formattedVPlaceTime,
+      DepartureTime: formattedDepartureTime,
+      Remark: Remark || null,
+      TripSheet,
+      StartKm,
+      UpdatedBy: userId,
+      UpdatedAt: new Date(), // Optional: if you want to keep a timestamp
+    };
 
     const [updatedRows] = await DBMODELS.TripPlanSchedule.update(updateFields, {
       where: { ID: tripId },
@@ -485,7 +531,7 @@ module.exports.updateTrip = async (req, res) => {
     if (updatedRows === 0) {
       return res.status(404).json({
         status: "404",
-        message: "Record not found",
+        message: "Record not found or nothing to update",
       });
     }
 
@@ -495,10 +541,11 @@ module.exports.updateTrip = async (req, res) => {
       updatedRows,
     });
   } catch (error) {
-    console.error("Error While updating trip:", error);
-    return res
-      .status(500)
-      .json({ status: "500", message: "Internal server error" });
+    console.log("Error while updating trip:", error);
+    return res.status(500).json({
+      status: "500",
+      message: "Internal server error",
+    });
   }
 };
 
