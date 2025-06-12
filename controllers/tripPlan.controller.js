@@ -205,6 +205,12 @@ module.exports.checkTripPlan = async (req, res) => {
 
     const filteredTrips = data.filter((trip) => {
       const tripNo = trip?.TripNo;
+
+      if (!tripNo || typeof tripNo !== 'string') {
+        console.warn('Skipping trip due to invalid TripNo:', trip);
+        return false;
+      }
+      
       const lastLetter = tripNo.slice(-1);
 
       if (trip?.TripPlan?.TripType == 2) {
