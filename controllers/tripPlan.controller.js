@@ -1,4 +1,4 @@
-const { where, col, Op } = require("sequelize");
+const { where, col, Op, literal } = require("sequelize");
 const { DBMODELS } = require("../models/init-models");
 const moment = require("moment");
 
@@ -160,18 +160,9 @@ module.exports.checkTripPlan = async (req, res) => {
               //   col("CustRateMaps.TripType"),
               //   col("TripPlanSchedule.TripType")
               // ),
-              // on: {
-              //   RouteId: where(
-              //     col("TripPlanSchedule.RouteId"),
-              //     "=",
-              //     col("CustRateMaps.RouteId")
-              //   ),
-              //   CustId: where(
-              //     col("TripPlanSchedule.CustId"),
-              //     "=",
-              //     col("CustRateMaps.CustId")
-              //   ),
-              // },
+              on: literal(
+                "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId`"
+              ),
               include: [
                 {
                   model: DBMODELS.TripType,
