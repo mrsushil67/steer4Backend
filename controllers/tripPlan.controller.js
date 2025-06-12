@@ -285,6 +285,7 @@ module.exports.checkTripPlan = async (req, res) => {
       } else {
         return {
           Id: item.ID,
+          TripNo: item.TripNo || null,
           CustType: item.CustType,
           CustId: item.CustId,
           RouteId: item.RouteId,
