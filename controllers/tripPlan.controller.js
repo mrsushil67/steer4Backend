@@ -11,37 +11,35 @@ module.exports.checkTripPlan = async (req, res) => {
       toDate = null,
     } = req.body || {};
 
-    const whereClause = {};
-
-    if (vehicleNo) {
-      whereClause["$TripPlan.Vehicle.VNumer$"] = {
-        [Op.like]: `%${vehicleNo}%`,
-      };
-    }
+    let scheduleWhere = {
+      [Op.and]: [{ is_final: 0 }, { Status: { [Op.ne]: 6 } }],
+    };
 
     if (status !== null) {
-      whereClause["Stat"] = status;
+      scheduleWhere.Status = status;
+    }
+
+    let vehicleWhereSchedule = {};
+    if (vehicleNo) {
+      vehicleWhereSchedule.VNumer = vehicleNo;
     }
 
     if (fromDate && toDate) {
-      whereClause["$TripPlan.DepartureTime$"] = {
+      scheduleWhere.DepartureTime = {
         [Op.between]: [new Date(fromDate), new Date(toDate)],
       };
     } else if (fromDate) {
-      whereClause["$TripPlan.DepartureTime$"] = {
+      scheduleWhere.DepartureTime = {
         [Op.gte]: new Date(fromDate),
       };
     } else if (toDate) {
-      whereClause["$TripPlan.DepartureTime$"] = {
+      scheduleWhere.DepartureTime = {
         [Op.lte]: new Date(toDate),
       };
     }
 
-    console.log("Where : ", whereClause);
     const ScheduleData = await DBMODELS.TripPlanSchedule.findAll({
-      where: {
-        [Op.and]: [{ is_final: 0 }, { Status: { [Op.ne]: 6 } }],
-      },
+      where: scheduleWhere,
       include: [
         {
           model: DBMODELS.CustomerMaster,
@@ -113,12 +111,39 @@ module.exports.checkTripPlan = async (req, res) => {
       order: [["ID", "DESC"]],
     });
 
+    let tripOperationWhere = {};
+    if (status !== null && status !== undefined) {
+      tripOperationWhere.Stat = status;
+    }
+    
+    let tripPlanWhere = {};
+    if (fromDate && toDate) {
+      tripPlanWhere.DepartureTime = {
+        [Op.between]: [new Date(fromDate), new Date(toDate)],
+      };
+    } else if (fromDate) {
+      tripPlanWhere.DepartureTime = {
+        [Op.gte]: new Date(fromDate),
+      };
+    } else if (toDate) {
+      tripPlanWhere.DepartureTime = {
+        [Op.lte]: new Date(toDate),
+      };
+    }
+    
+    // Vehicle filter is on nested Vehicle model
+    let vehicleWhere = {};
+    if (vehicleNo) {
+      vehicleWhere.VNumer = vehicleNo;
+    }
+    
     const data = await DBMODELS.TripOperation.findAll({
-      where: whereClause,
+      where: tripOperationWhere,
       include: [
         {
           model: DBMODELS.TripPlan,
           as: "TripPlan",
+          where: tripPlanWhere,
           include: [
             {
               model: DBMODELS.CustomerMaster,
@@ -155,11 +180,6 @@ module.exports.checkTripPlan = async (req, res) => {
             {
               model: DBMODELS.CustRateMap,
               as: "CustRateMaps",
-              // required: true,
-              // where: where( // for show only RT trip if trip type is 2 remove OW trip
-              //   col("CustRateMaps.TripType"),
-              //   col("TripPlanSchedule.TripType")
-              // ),
               on: literal(
                 "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId`"
               ),
@@ -180,12 +200,6 @@ module.exports.checkTripPlan = async (req, res) => {
                 "RouteString",
               ],
             },
-
-            // {
-            //   model: DBMODELS.TripType,
-            //   as: "tripType",
-            //   // attributes: ["Id", "TypeName"],
-            // },
           ],
         },
       ],
