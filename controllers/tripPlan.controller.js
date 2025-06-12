@@ -1,5 +1,6 @@
 const { where, col, Op } = require("sequelize");
 const { DBMODELS } = require("../models/init-models");
+const moment = require("moment");
 
 module.exports.checkTripPlan = async (req, res) => {
   try {
@@ -377,6 +378,16 @@ module.exports.tripPlan = async (req, res) => {
       });
     }
 
+    // Convert to MySQL-compatible format
+    const formattedVPlaceTime = moment(
+      data.VPlaceTime,
+      "DD-MM-YYYY HH:mm"
+    ).format("YYYY-MM-DD HH:mm:ss");
+    const formattedDepartureTime = moment(
+      data.DepartureTime,
+      "DD-MM-YYYY HH:mm"
+    ).format("YYYY-MM-DD HH:mm:ss");
+
     const dataModel = {
       CustType,
       CustId,
@@ -386,8 +397,8 @@ module.exports.tripPlan = async (req, res) => {
       VehicleId,
       Driver1Id,
       Driver2Id,
-      VPlaceTime,
-      DepartureTime,
+      VPlaceTime: formattedVPlaceTime,
+      DepartureTime: formattedDepartureTime,
       Remark,
       TripSheet,
       StartKm,
@@ -586,7 +597,7 @@ module.exports.onRouteTripDetails = async (req, res) => {
       CustId = null,
     } = req.body || {};
 
-    if (!tripId ||! tripNo) {
+    if (!tripId || !tripNo) {
       return res.status(400).json({
         status: "400",
         message: "Missing tripId or tripNo",
@@ -594,12 +605,10 @@ module.exports.onRouteTripDetails = async (req, res) => {
     }
 
     if (!Act_Dept || !OpeningKm || !CustId) {
-      return res
-        .status(400)
-        .json({
-          status: "400",
-          message: "Missing Act_Dept or OpeningKm CustId",
-        });
+      return res.status(400).json({
+        status: "400",
+        message: "Missing Act_Dept or OpeningKm CustId",
+      });
     }
 
     const existTrip = await DBMODELS.TripOperation.findOne({
@@ -618,12 +627,10 @@ module.exports.onRouteTripDetails = async (req, res) => {
     });
 
     if (!existTrip) {
-      return res
-        .status(404)
-        .json({
-          status: "404",
-          message: "Record not found with this customer",
-        });
+      return res.status(404).json({
+        status: "404",
+        message: "Record not found with this customer",
+      });
     }
 
     const [updatedRows] = await DBMODELS.TripOperation.update(
@@ -636,7 +643,7 @@ module.exports.onRouteTripDetails = async (req, res) => {
       {
         where: {
           TripId: tripId,
-          TripNo : tripNo,
+          TripNo: tripNo,
         },
       }
     );
@@ -668,10 +675,10 @@ module.exports.closeTripDetails = async (req, res) => {
       Act_Arr = null,
       OpeningKm = null,
       ClosingKm = null,
-      ActualKm = null 
+      ActualKm = null,
     } = req.body || {};
 
-    if (!tripId ||!tripNo) {
+    if (!tripId || !tripNo) {
       return res.status(400).json({
         status: "400",
         message: "Missing tripId or tripNo",
