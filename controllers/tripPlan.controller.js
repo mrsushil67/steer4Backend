@@ -160,18 +160,18 @@ module.exports.checkTripPlan = async (req, res) => {
               //   col("CustRateMaps.TripType"),
               //   col("TripPlanSchedule.TripType")
               // ),
-              on: {
-                RouteId: where(
-                  col("TripPlanSchedule.RouteId"),
-                  "=",
-                  col("CustRateMaps.RouteId")
-                ),
-                CustId: where(
-                  col("TripPlanSchedule.CustId"),
-                  "=",
-                  col("CustRateMaps.CustId")
-                ),
-              },
+              // on: {
+              //   RouteId: where(
+              //     col("TripPlanSchedule.RouteId"),
+              //     "=",
+              //     col("CustRateMaps.RouteId")
+              //   ),
+              //   CustId: where(
+              //     col("TripPlanSchedule.CustId"),
+              //     "=",
+              //     col("CustRateMaps.CustId")
+              //   ),
+              // },
               include: [
                 {
                   model: DBMODELS.TripType,
