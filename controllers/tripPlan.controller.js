@@ -203,29 +203,29 @@ module.exports.checkTripPlan = async (req, res) => {
     console.log(ScheduleData.length)
     console.log(data.length)
 
-    const filteredTrips = data.filter((trip) => {
-      const tripNo = trip?.TripNo;
-      const lastLetter = tripNo.slice(-1);
+    // const filteredTrips = data.filter((trip) => {
+    //   const tripNo = trip?.TripNo;
+    //   const lastLetter = tripNo.slice(-1);
 
-      if (trip?.TripPlan?.TripType == 2) {
-        if (lastLetter === "A" && trip.Stat !== 7) {
-          return true;
-        } else if (lastLetter === "B") {
-          const correspondingATrip = data.find(
-            (t) => t?.TripNo === tripNo.slice(0, -1) + "A" && t?.Stat === 7
-          );
-          if (correspondingATrip) {
-            return true;
-          }
-        }
-      } else {
-        if (trip?.Stat !== 7) {
-          return true;
-        }
-      }
+    //   if (trip?.TripPlan?.TripType == 2) {
+    //     if (lastLetter === "A" && trip.Stat !== 7) {
+    //       return true;
+    //     } else if (lastLetter === "B") {
+    //       const correspondingATrip = data.find(
+    //         (t) => t?.TripNo === tripNo.slice(0, -1) + "A" && t?.Stat === 7
+    //       );
+    //       if (correspondingATrip) {
+    //         return true;
+    //       }
+    //     }
+    //   } else {
+    //     if (trip?.Stat !== 7) {
+    //       return true;
+    //     }
+    //   }
 
-      return false;
-    });
+    //   return false;
+    // });
 
     console.log(ScheduleData[0].toJSON());
 
