@@ -229,7 +229,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
     console.log(ScheduleData[0].toJSON());
 
-    const mergedArray = ScheduleData.concat(filteredTrips);
+    const mergedArray = ScheduleData.concat(data);
 
     const tripDetailsArray = mergedArray.map((item) => {
       if (item.TripPlan) {
