@@ -488,6 +488,8 @@ module.exports.updateTrip = async (req, res) => {
       StartKm,
     } = req.body;
 
+    console.log("Body : ",req.body)
+
     // Validate required fields
     if (
       !tripId ||
@@ -535,6 +537,8 @@ module.exports.updateTrip = async (req, res) => {
       UpdatedBy: userId,
       UpdatedAt: new Date(), // Optional: if you want to keep a timestamp
     };
+
+    console.log("updateFields : ",updateFields)
 
     const [updatedRows] = await DBMODELS.TripPlanSchedule.update(updateFields, {
       where: { ID: tripId },
