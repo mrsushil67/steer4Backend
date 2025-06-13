@@ -187,7 +187,7 @@ module.exports.checkTripPlan = async (req, res) => {
               model: DBMODELS.CustRateMap,
               as: "CustRateMaps",
               on: literal(
-                "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TipPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
+                "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
               ),
               include: [
                 {
