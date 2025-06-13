@@ -11,8 +11,6 @@ module.exports.checkTripPlan = async (req, res) => {
       toDate = null,
     } = req.body || {};
 
-    console.log(req.body);
-
     let scheduleWhere = {
       [Op.and]: [{ is_final: 0 }, { Status: { [Op.ne]: 6 } }],
     };
@@ -116,7 +114,7 @@ module.exports.checkTripPlan = async (req, res) => {
     });
 
     ScheduleData.forEach(trip => {
-      console.log("Trip : ",trip)
+      console.log("Trip : ",trip.ID, trip.TripSheet)
     });
 
 
