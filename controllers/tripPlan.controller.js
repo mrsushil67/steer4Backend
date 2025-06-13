@@ -137,7 +137,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
     const data = await DBMODELS.TripOperation.findAll({
       where: tripOperationWhere,
-      // group: ['Id'],
+      group: ['Id'],
       include: [
         {
           model: DBMODELS.TripPlan,
@@ -187,13 +187,13 @@ module.exports.checkTripPlan = async (req, res) => {
               model: DBMODELS.CustRateMap,
               as: "CustRateMaps",
               on: literal(
-                "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId`"
+                "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TipPlan`.`TripType` = `TripPlan->CustRateMaps`.TripType`"
               ),
               include: [
                 {
                   model: DBMODELS.TripType,
                   as: "trip_type",
-                  required: true,
+                  // required: true,
                   attributes: ["Id", "TypeName"],
                 },
               ],
