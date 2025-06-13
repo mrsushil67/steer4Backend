@@ -115,6 +115,13 @@ module.exports.checkTripPlan = async (req, res) => {
       order: [["ID", "DESC"]],
     });
 
+    ScheduleData.forEach(trip => {
+      console.log("Trip : ",trip)
+    });
+
+
+
+
     let tripOperationWhere = {};
     if (status !== null && status !== undefined) {
       tripOperationWhere.Stat = status;
