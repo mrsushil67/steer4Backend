@@ -111,7 +111,7 @@ module.exports.checkTripPlan = async (req, res) => {
       order: [["ID", "DESC"]],
     });
 
-    ScheduleData.forEach(schedule => {
+    ScheduleData.forEach((schedule) => {
       console.log(`Trip ID: ${schedule.ID}, TripType: ${schedule.TripType}`);
     });
 
@@ -215,31 +215,47 @@ module.exports.checkTripPlan = async (req, res) => {
     const filteredTrips = data.filter((trip) => {
       const tripNo = trip?.TripNo;
 
+      // Check for valid TripNo
       if (!tripNo || typeof tripNo !== "string") {
         console.log("Skipping trip due to invalid TripNo:", trip);
         return false;
       }
 
       const lastLetter = tripNo.slice(-1);
+      console.log("tripNo : ", trip?.TripPlan?.TripType, lastLetter);
 
-      if (trip?.TripPlan?.TripType == 2) {
+      // Check if TripPlan and TripType exist
+      if (!trip?.TripPlan || typeof trip?.TripPlan?.TripType !== "number") {
+        console.log("Skipping trip due to missing or invalid TripPlan:", trip);
+        return false;
+      }
+
+      const tripType = trip?.TripPlan?.TripType;
+
+      if (tripType === 2) {
+        // Handle trips with type 2
         if (lastLetter === "A" && trip.Stat !== 7) {
-          return true;
+          return true; // Trip "A" with Stat !== 7
         } else if (lastLetter === "B") {
+          // Find corresponding "A" trip with Stat === 7
           const correspondingATrip = data.find(
             (t) => t?.TripNo === tripNo.slice(0, -1) + "A" && t?.Stat === 7
           );
           if (correspondingATrip) {
-            return true;
+            console.log("Found corresponding A trip: ", correspondingATrip);
+            return true; // Return trip "B" if corresponding "A" exists with Stat === 7
+          } else {
+            console.log("No corresponding A trip found for trip B:", trip);
           }
         }
       } else {
+        // Handle other trip types
         if (trip?.Stat !== 7) {
-          return true;
+          return true; // Return trip if Stat !== 7
         }
       }
 
-      return false;
+      return false; // Exclude trip if none of the conditions match
     });
 
     const mergedArray = ScheduleData.concat(filteredTrips);
@@ -473,10 +489,9 @@ module.exports.tripPlan = async (req, res) => {
 module.exports.updateTrip = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const {tripId} = req.query;
+    const { tripId } = req.query;
 
     const {
-     
       CustType,
       CustId,
       RouteId,
@@ -492,10 +507,10 @@ module.exports.updateTrip = async (req, res) => {
       StartKm,
     } = req.body;
 
-    console.log("Body : ",req.body)
+    console.log("Body : ", req.body);
 
     // Validate required fields
-    if (!tripId){
+    if (!tripId) {
       return res.status(400).json({
         status: "400",
         message: "TripId is missing",
@@ -512,7 +527,7 @@ module.exports.updateTrip = async (req, res) => {
       !Driver1Id ||
       !VPlaceTime ||
       !DepartureTime ||
-      !TripSheet 
+      !TripSheet
     ) {
       return res.status(400).json({
         status: "400",
@@ -548,7 +563,7 @@ module.exports.updateTrip = async (req, res) => {
       UpdatedAt: new Date(), // Optional: if you want to keep a timestamp
     };
 
-    console.log("updateFields : ",updateFields)
+    console.log("updateFields : ", updateFields);
 
     const [updatedRows] = await DBMODELS.TripPlanSchedule.update(updateFields, {
       where: { ID: tripId },
