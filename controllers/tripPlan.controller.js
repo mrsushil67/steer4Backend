@@ -470,9 +470,10 @@ module.exports.tripPlan = async (req, res) => {
 module.exports.updateTrip = async (req, res) => {
   try {
     const userId = req.user.userId;
+    const {tripId} = req.query;
 
     const {
-      tripId, // Make sure tripId is sent in the request body
+     
       CustType,
       CustId,
       RouteId,
@@ -491,8 +492,14 @@ module.exports.updateTrip = async (req, res) => {
     console.log("Body : ",req.body)
 
     // Validate required fields
+    if (!tripId){
+      return res.status(400).json({
+        status: "400",
+        message: "TripId is missing",
+      });
+    }
+
     if (
-      !tripId ||
       !CustType ||
       !CustId ||
       !RouteId ||
