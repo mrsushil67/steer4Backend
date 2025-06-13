@@ -137,7 +137,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
     const data = await DBMODELS.TripOperation.findAll({
       where: tripOperationWhere,
-      // group: TripOperation.Id,
+      // group: ['Id'],
       include: [
         {
           model: DBMODELS.TripPlan,
@@ -274,7 +274,8 @@ module.exports.checkTripPlan = async (req, res) => {
 
       if (item.TripPlan) {
         return {
-          Id: item.TripId,
+          Id: item.Id,
+          TripId: item.TripId,
           TripNo: item.TripNo,
           InvoiceCopy: item.InvoiceCopy,
           LRCopy: item.LRCopy,
@@ -331,6 +332,7 @@ module.exports.checkTripPlan = async (req, res) => {
       } else {
         return {
           Id: item.ID,
+          TripId: item.TripId || null,
           TripNo: null,
           CustType: item.CustType,
           CustId: item.CustId,
