@@ -233,31 +233,34 @@ module.exports.checkTripPlan = async (req, res) => {
       const tripType = trip?.TripPlan?.TripType;
 
       if (tripType === 2) {
-        // Handle trips with type 2
         if (lastLetter === "A" && trip.Stat !== 7) {
-          return true; // Trip "A" with Stat !== 7
+          return true;
         } else if (lastLetter === "B") {
-          // Find corresponding "A" trip with Stat === 7
           const correspondingATrip = data.find(
             (t) => t?.TripNo === tripNo.slice(0, -1) + "A" && t?.Stat === 7
           );
           if (correspondingATrip) {
             console.log("Found corresponding A trip: ", correspondingATrip);
-            return true; // Return trip "B" if corresponding "A" exists with Stat === 7
+            return true;
           } else {
             console.log("No corresponding A trip found for trip B:", trip);
           }
         }
       } else {
-        // Handle other trip types
         if (trip?.Stat !== 7) {
-          return true; // Return trip if Stat !== 7
+          return true;
         }
       }
 
-      return false; // Exclude trip if none of the conditions match
+      return false;
     });
 
+
+    filteredTrips.forEach((schedule) => {
+      console.log(`Trip ID: ${schedule.Id}, TripType: ${schedule.TripNo}, or: ${schedule.TripPlan.TripType} status: ${schedule.Stat}`);
+    });
+
+    // console.log(">>>>>>>  : ",filteredTrips)
     const mergedArray = ScheduleData.concat(filteredTrips);
 
     const tripDetailsArray = mergedArray.map((item) => {
