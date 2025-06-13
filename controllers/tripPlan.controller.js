@@ -77,6 +77,11 @@ module.exports.checkTripPlan = async (req, res) => {
               "=",
               col("CustRateMaps.CustId")
             ),
+            TripType: where(
+              col("TripPlanSchedule.TripType"),
+              "=",
+              col("CustRateMaps.TripType")
+            )
           },
           attributes: [
             "ID",
@@ -113,11 +118,17 @@ module.exports.checkTripPlan = async (req, res) => {
       order: [["ID", "DESC"]],
     });
 
-    ScheduleData.forEach(trip => {
-      console.log("Trip : ",trip.ID, trip.TripSheet, trip.TripType)
-    });
 
-
+    // const filteredTrips = ScheduleData.filter((trip) => {
+    //   if (trip.TripType === 2) return true;
+    
+    //   const hasMatchingRT = ScheduleData.some(
+    //     (t) => t.TripType === 2 && t.TripId === trip.TripId
+    //   );
+    
+    //   return !hasMatchingRT;
+    // });
+    
 
 
     let tripOperationWhere = {};
