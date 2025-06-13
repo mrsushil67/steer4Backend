@@ -142,7 +142,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
     const data = await DBMODELS.TripOperation.findAll({
       where: tripOperationWhere,
-      group: TripOperation.Id,
+      // group: TripOperation.Id,
       include: [
         {
           model: DBMODELS.TripPlan,
