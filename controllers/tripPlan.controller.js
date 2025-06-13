@@ -186,6 +186,7 @@ module.exports.checkTripPlan = async (req, res) => {
             {
               model: DBMODELS.CustRateMap,
               as: "CustRateMaps",
+              distinct: true,
               on: literal(
                 "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
               ),
