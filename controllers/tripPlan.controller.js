@@ -11,7 +11,7 @@ module.exports.checkTripPlan = async (req, res) => {
       toDate = null,
     } = req.body || {};
 
-    console.log(req.body)
+    console.log(req.body);
 
     let scheduleWhere = {
       [Op.and]: [{ is_final: 0 }, { Status: { [Op.ne]: 6 } }],
@@ -19,11 +19,6 @@ module.exports.checkTripPlan = async (req, res) => {
 
     if (status !== null) {
       scheduleWhere.Status = status;
-    }
-
-    let vehicleWhereSchedule = {};
-    if (vehicleNo) {
-      vehicleWhereSchedule.VNumer = vehicleNo;
     }
 
     if (fromDate && toDate) {
@@ -51,6 +46,13 @@ module.exports.checkTripPlan = async (req, res) => {
         {
           model: DBMODELS.Vehicle,
           as: "Vehicle",
+          where: vehicleNo
+            ? {
+                VNumer: {
+                  [Op.like]: `%${vehicleNo}%`,
+                },
+              }
+            : {},
           attributes: ["VehicleID", "VNumer", "FleetZize"],
         },
         {
@@ -113,7 +115,6 @@ module.exports.checkTripPlan = async (req, res) => {
       order: [["ID", "DESC"]],
     });
 
-
     let tripOperationWhere = {};
     if (status !== null && status !== undefined) {
       tripOperationWhere.Stat = status;
@@ -134,12 +135,6 @@ module.exports.checkTripPlan = async (req, res) => {
       };
     }
 
-    // Vehicle filter is on nested Vehicle model
-    let vehicleWhere = {};
-    if (vehicleNo) {
-      vehicleWhere.VNumer = vehicleNo;
-    }
-
     const data = await DBMODELS.TripOperation.findAll({
       where: tripOperationWhere,
       // group: TripOperation.Id,
@@ -157,6 +152,13 @@ module.exports.checkTripPlan = async (req, res) => {
             {
               model: DBMODELS.Vehicle,
               as: "Vehicle",
+              where: vehicleNo
+                ? {
+                    VNumer: {
+                      [Op.like]: `%${vehicleNo}%`,
+                    },
+                  }
+                : {},
               attributes: ["VehicleID", "VNumer", "FleetZize"],
             },
             {
@@ -216,7 +218,7 @@ module.exports.checkTripPlan = async (req, res) => {
       if (trip.TripPlan.TripType === 2) {
         const tripA = data.find((t) => t?.TripNo === tripNo.slice(0, -1) + "A");
         const tripB = trip;
-        
+
         if (lastLetter === "A" && trip.Stat !== 7) {
           return true;
         } else if (lastLetter === "B") {
@@ -230,8 +232,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
           if (correspondingATrip && correspondingATripB) {
             return true;
-          }
-          else{
+          } else {
             return false;
           }
         } else if (tripA && tripB && tripA.Stat + tripB.Stat === 14) {
@@ -243,14 +244,14 @@ module.exports.checkTripPlan = async (req, res) => {
     });
 
     filteredTrips.forEach((trip) => {
-      console.log(">>> : ",trip.Id, trip.TripNo, trip.Stat);
+      console.log(">>> : ", trip.Id, trip.TripNo, trip.Stat);
     });
 
     const mergedArray = ScheduleData.concat(filteredTrips);
 
     const tripDetailsArray = mergedArray.map((item) => {
       let tripDirection = "";
-    
+
       if (item.TripPlan) {
         if (item.TripPlan.TripType === 2) {
           if (item.TripNo?.endsWith("B")) {
@@ -258,12 +259,16 @@ module.exports.checkTripPlan = async (req, res) => {
           } else {
             tripDirection = "Forward";
           }
-        }else{
+        } else {
           tripDirection = "Forward";
         }
       }
-    
-      if (item.TripNo && item?.TripPlan?.TripType === 2 && item.TripNo.endsWith("B")) {
+
+      if (
+        item.TripNo &&
+        item?.TripPlan?.TripType === 2 &&
+        item.TripNo.endsWith("B")
+      ) {
         tripDirection = "Reverse";
       }
 
