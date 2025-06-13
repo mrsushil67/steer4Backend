@@ -500,8 +500,7 @@ module.exports.updateTrip = async (req, res) => {
       !Driver1Id ||
       !VPlaceTime ||
       !DepartureTime ||
-      !TripSheet ||
-      !StartKm
+      !TripSheet 
     ) {
       return res.status(400).json({
         status: "400",
