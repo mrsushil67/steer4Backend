@@ -111,6 +111,10 @@ module.exports.checkTripPlan = async (req, res) => {
       order: [["ID", "DESC"]],
     });
 
+    ScheduleData.forEach(schedule => {
+      console.log(`Trip ID: ${schedule.ID}, TripType: ${schedule.TripType}`);
+    });
+
     let tripOperationWhere = {};
     if (status !== null && status !== undefined) {
       tripOperationWhere.Stat = status;
@@ -217,8 +221,6 @@ module.exports.checkTripPlan = async (req, res) => {
       }
 
       const lastLetter = tripNo.slice(-1);
-console.log("uuuu  :",trip?.TripPlan?.TripType)
-
 
       if (trip?.TripPlan?.TripType == 2) {
         if (lastLetter === "A" && trip.Stat !== 7) {
@@ -245,7 +247,6 @@ console.log("uuuu  :",trip?.TripPlan?.TripType)
     const tripDetailsArray = mergedArray.map((item) => {
       let tripDirection = ""; // default
 
-      // Determine direction for trips with TripPlan
       if (item.TripPlan) {
         if (item.TripPlan.TripType === 2) {
           if (item.TripNo?.endsWith("B")) {
