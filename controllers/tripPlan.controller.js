@@ -539,7 +539,7 @@ module.exports.updateTrip = async (req, res) => {
       VPlaceTime: formattedVPlaceTime,
       DepartureTime: formattedDepartureTime,
       Remark: Remark || null,
-      TripSheet,
+      // TripSheet,
       StartKm,
       UpdatedBy: userId,
       UpdatedAt: new Date(), // Optional: if you want to keep a timestamp
