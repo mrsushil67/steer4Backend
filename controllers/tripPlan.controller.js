@@ -208,54 +208,48 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
-    console.log(ScheduleData.length);
-    console.log(data.length);
-
     const filteredTrips = data.filter((trip) => {
-      const tripNo = trip?.TripNo;
-
-      // Check for valid TripNo
-      if (!tripNo || typeof tripNo !== "string") {
-        return false;
-      }
-
+      const tripNo = trip.TripNo;
       const lastLetter = tripNo.slice(-1);
 
-      // Check if TripPlan and TripType exist
-      if (!trip?.TripPlan || typeof trip?.TripPlan?.TripType !== "number") {
-        return false;
-      }
-
-      const tripType = trip?.TripPlan?.TripType;
-
-      if (tripType === 2) {
+      if (trip.TripPlan.TripType === 2) {
+        const tripA = data.find((t) => t?.TripNo === tripNo.slice(0, -1) + "A");
+        const tripB = trip;
+        
         if (lastLetter === "A" && trip.Stat !== 7) {
           return true;
         } else if (lastLetter === "B") {
           const correspondingATrip = data.find(
             (t) => t?.TripNo === tripNo.slice(0, -1) + "A" && t?.Stat === 7
           );
-          if (correspondingATrip) {
+
+          const correspondingATripB = data.find(
+            (t) => t?.TripNo === tripNo.slice(0, -1) + "B" && t?.Stat !== 7
+          );
+
+          if (correspondingATrip && correspondingATripB) {
             return true;
-          } else {
           }
+          else{
+            return false;
+          }
+        } else if (tripA && tripB && tripA.Stat + tripB.Stat === 14) {
+          return false;
         }
       } else {
-        if (trip?.Stat !== 7) {
-          return true;
-        }
+        return true;
       }
-
-      return false;
     });
 
+    filteredTrips.forEach((trip) => {
+      console.log(">>> : ",trip.Id, trip.TripNo, trip.Stat);
+    });
 
-    // console.log(">>>>>>>  : ",filteredTrips)
     const mergedArray = ScheduleData.concat(filteredTrips);
 
     const tripDetailsArray = mergedArray.map((item) => {
-      let tripDirection = ""; // default
-
+      let tripDirection = "";
+    
       if (item.TripPlan) {
         if (item.TripPlan.TripType === 2) {
           if (item.TripNo?.endsWith("B")) {
@@ -263,15 +257,12 @@ module.exports.checkTripPlan = async (req, res) => {
           } else {
             tripDirection = "Forward";
           }
+        }else{
+          tripDirection = "Forward";
         }
       }
-
-      // TripOperation entries
-      if (
-        item.TripNo &&
-        item?.TripPlan?.TripType === 2 &&
-        item.TripNo.endsWith("B")
-      ) {
+    
+      if (item.TripNo && item?.TripPlan?.TripType === 2 && item.TripNo.endsWith("B")) {
         tripDirection = "Reverse";
       }
 
@@ -364,7 +355,7 @@ module.exports.checkTripPlan = async (req, res) => {
           RateMapTripType: item.CustRateMaps?.TripType || null,
           RouteString: item.CustRateMaps?.RouteString || null,
           TripTypeName: item.CustRateMaps?.trip_type?.TypeName || null,
-          TripDirection: "Forward",
+          TripDirection: "",
         };
       }
     });
