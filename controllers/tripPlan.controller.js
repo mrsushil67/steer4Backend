@@ -113,9 +113,6 @@ module.exports.checkTripPlan = async (req, res) => {
       order: [["ID", "DESC"]],
     });
 
-    ScheduleData.forEach((schedule) => {
-      console.log(`Trip ID: ${schedule.ID}, TripType: ${schedule.TripType}`);
-    });
 
     let tripOperationWhere = {};
     if (status !== null && status !== undefined) {
@@ -219,16 +216,13 @@ module.exports.checkTripPlan = async (req, res) => {
 
       // Check for valid TripNo
       if (!tripNo || typeof tripNo !== "string") {
-        console.log("Skipping trip due to invalid TripNo:", trip);
         return false;
       }
 
       const lastLetter = tripNo.slice(-1);
-      console.log("tripNo : ", trip?.TripPlan?.TripType, lastLetter);
 
       // Check if TripPlan and TripType exist
       if (!trip?.TripPlan || typeof trip?.TripPlan?.TripType !== "number") {
-        console.log("Skipping trip due to missing or invalid TripPlan:", trip);
         return false;
       }
 
@@ -242,10 +236,8 @@ module.exports.checkTripPlan = async (req, res) => {
             (t) => t?.TripNo === tripNo.slice(0, -1) + "A" && t?.Stat === 7
           );
           if (correspondingATrip) {
-            console.log("Found corresponding A trip: ", correspondingATrip);
             return true;
           } else {
-            console.log("No corresponding A trip found for trip B:", trip);
           }
         }
       } else {
@@ -257,10 +249,6 @@ module.exports.checkTripPlan = async (req, res) => {
       return false;
     });
 
-
-    filteredTrips.forEach((schedule) => {
-      console.log(`Trip ID: ${schedule.Id}, TripType: ${schedule.TripNo}, or: ${schedule.TripPlan.TripType} status: ${schedule.Stat}`);
-    });
 
     // console.log(">>>>>>>  : ",filteredTrips)
     const mergedArray = ScheduleData.concat(filteredTrips);
