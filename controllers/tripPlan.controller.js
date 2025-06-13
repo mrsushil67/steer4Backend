@@ -114,7 +114,7 @@ module.exports.checkTripPlan = async (req, res) => {
     });
 
     ScheduleData.forEach(trip => {
-      console.log("Trip : ",trip.ID, trip.TripSheet)
+      console.log("Trip : ",trip.ID, trip.TripSheet, trip.TripType)
     });
 
 
