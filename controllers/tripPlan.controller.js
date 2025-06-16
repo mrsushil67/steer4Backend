@@ -238,9 +238,14 @@ module.exports.checkTripPlan = async (req, res) => {
         } else if (tripA && tripB && tripA.Stat + tripB.Stat === 14) {
           return false;
         }
-      } else {
-        console.log("yee: ",trip.TripNo, trip.Stat)
-        return true;
+      } else{
+        if (lastLetter === 'A' && trip.Stat === 7 ){
+          console.log("yee: ",trip.TripNo, trip.Stat)
+          return false;
+        }
+        else{
+          return true;
+        }
       }
     });
 
