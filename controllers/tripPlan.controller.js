@@ -243,9 +243,9 @@ module.exports.checkTripPlan = async (req, res) => {
       }
     });
 
-    // filteredTrips.forEach((trip) => {
-    //   console.log(">>> : ", trip.Id, trip.TripNo, trip.Stat);
-    // });
+    filteredTrips.forEach((trip) => {
+      console.log(">>> : ", trip.Id, trip.TripNo, trip.Stat);
+    });
 
     const mergedArray = ScheduleData.concat(filteredTrips);
 
