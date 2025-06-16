@@ -724,14 +724,15 @@ module.exports.onRouteTripDetails = async (req, res) => {
     const formattedActualTime = moment(Act_Dept, "DD-MM-YYYY HH:mm").format(
       "YYYY-MM-DD HH:mm:ss"
     );
-
+   console.log(tripId);
+   console.log(tripNo);
     const existTrip = await DBMODELS.TripOperation.findOne({
       where: {
         TripId: tripId,
         TripNo: tripNo,
       },
     });
-
+  console.log(existTrip);
     if (!existTrip) {
       return res.status(404).json({
         status: "404",
