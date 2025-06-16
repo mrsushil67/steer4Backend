@@ -301,7 +301,8 @@ module.exports.checkTripPlan = async (req, res) => {
           OnRouteBy: item.OnRouteBy,
           CloseBy: item.CloseBy,
           Is_Invoice: item.Is_Invoice,
-          Remark: item.Remark,
+          StartKm: item.StartKm || null,
+          Remark: item.Remark || null,
           OpeningKm: item.OpeningKm,
           ClosingKm: item.ClosingKm,
           ActualKm: item.ActulaKm,
@@ -353,6 +354,8 @@ module.exports.checkTripPlan = async (req, res) => {
           TripSheet: item.TripSheet,
           CreatedBy: item.CreatedBy,
           Status: item.Status,
+          StartKm: item.StartKm,
+          Remark: item.Remark,
 
           CustomerName: item.CustomerMasters?.CustomerName || null,
           CustCode: item.CustomerMasters?.CustCode || null,
