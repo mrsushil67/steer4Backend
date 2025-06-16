@@ -728,6 +728,7 @@ module.exports.onRouteTripDetails = async (req, res) => {
     const existTrip = await DBMODELS.TripOperation.findOne({
       where: {
         TripId: tripId,
+        TripNo: tripNo,
       },
     });
 
