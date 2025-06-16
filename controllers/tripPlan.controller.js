@@ -110,6 +110,8 @@ module.exports.checkTripPlan = async (req, res) => {
         "TripSheet",
         "CreatedBy",
         "Status",
+        "StartKm",
+        "Remark",
       ],
       order: [["ID", "DESC"]],
     });
