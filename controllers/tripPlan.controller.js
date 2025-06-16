@@ -241,10 +241,10 @@ module.exports.checkTripPlan = async (req, res) => {
       } else{
         if (lastLetter === 'A' && trip.Stat === 7 ){
           console.log("yee: ",trip.TripNo, trip.Stat)
-          return false;
+          return true;
         }
         else{
-          return true;
+          return false;
         }
       }
     });
