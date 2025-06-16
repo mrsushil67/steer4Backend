@@ -239,6 +239,7 @@ module.exports.checkTripPlan = async (req, res) => {
           return false;
         }
       } else {
+        console.log("yee: ",trip.TripNo, trip.Stat)
         return true;
       }
     });
