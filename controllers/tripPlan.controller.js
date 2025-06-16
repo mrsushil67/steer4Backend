@@ -242,7 +242,7 @@ module.exports.checkTripPlan = async (req, res) => {
         }
       } else{
         if (lastLetter === 'A' && trip.Stat !== 7 ){
-          console.log("yee: ",trip.TripNo, trip.Stat)
+          // console.log("yee: ",trip.TripNo, trip.Stat)
           return true;
         }
         else{
@@ -251,9 +251,9 @@ module.exports.checkTripPlan = async (req, res) => {
       }
     });
 
-    filteredTrips.forEach((trip) => {
-      console.log(">>> : ", trip.Id, trip.TripNo, trip.Stat);
-    });
+    // filteredTrips.forEach((trip) => {
+    //   console.log(">>> : ", trip.Id, trip.TripNo, trip.Stat);
+    // });
 
     const mergedArray = ScheduleData.concat(filteredTrips);
 
