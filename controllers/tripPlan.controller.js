@@ -1013,7 +1013,13 @@ module.exports.marketTripPlan = async (req, res) => {
       .status(201)
       .json({ status: "201", message: "Record saved successfully" });
   } catch (err) {
-    console.error(err);
+    if (err.name === "SequelizeUniqueConstraintError") {
+      return res.status(409).json({
+        status: "409",
+        message: "tripsheet already exit",
+      });
+    }
+    console.log(err);
     return res.status(500).json({ error: "Server Error" });
   }
 };
