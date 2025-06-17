@@ -865,6 +865,7 @@ module.exports.closeTripDetails = async (req, res) => {
 };
 
 module.exports.marketTripPlan = async (req, res) => {
+  const userId = req.user.userId;
   const {
     CustType,
     CustId,
@@ -920,12 +921,17 @@ module.exports.marketTripPlan = async (req, res) => {
     },
   });
 
-  const SourceName = checkSource.CityName;
   const checkDest = await DBMODELS.city.findOne({
     where: {
       CityId: destination,
     },
   });
+
+  if (!checkSource || !checkDest) {
+    return res.status(400).json({ message: "Invalid source or destination city ID" });
+  }
+
+  const SourceName = checkSource.CityName;
   const DestName = checkDest.CityName;
 
   let RouteID;
@@ -948,9 +954,9 @@ module.exports.marketTripPlan = async (req, res) => {
     });
 
     if (routes.length > 0) {
-      console.log("routes : ", routes);
-      RouteID = routes.RouteId;
-    } else {
+      // console.log("routes : ", routes);
+      RouteID = routes[0].RouteId;
+    }else {
       const newRoute = await DBMODELS.RouteMaster.create({
         CustId: CustId,
         RouteCode: `${SourceName.slice(0, 2)}-${DestName.slice(0, 2)}`,
@@ -976,7 +982,7 @@ module.exports.marketTripPlan = async (req, res) => {
         ],
       });
 
-      console.log("createdRoute : ", createdRoute);
+      // console.log("createdRoute : ", createdRoute);
       RouteID = createdRoute.RouteId;
     }
 
@@ -984,7 +990,7 @@ module.exports.marketTripPlan = async (req, res) => {
       CustType,
       CustId,
       RouteId: RouteID,
-      TripType,
+      TripType: 1,
       VehicleSize,
       VehicleId,
       Driver1Id,
