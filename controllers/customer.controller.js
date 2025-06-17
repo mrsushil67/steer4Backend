@@ -59,12 +59,12 @@ module.exports.findCustomer = async (req, res) => {
 
     const whereCondition = custName
       ? {
-          CustomerName: {
+          Name: {
             [Op.like]: `%${custName}%`,
           },
         }
       : {};
-    const customers = await DBMODELS.CustomerMaster.findAll({
+    const customers = await DBMODELS.MarketCust.findAll({
       where: whereCondition,
       // attributes: ['CustId','CustomerName','CustCode','ServiceType','CustomerType',],
       limit: 20,
