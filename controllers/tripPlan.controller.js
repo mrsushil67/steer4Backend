@@ -883,6 +883,7 @@ module.exports.marketTripPlan = async (req, res) => {
     StartKm,
   } = req.body;
 
+  console.log(req.body)
   if (!CustId) {
     return res.status(400).json({ message: "customerId is required" });
   }
