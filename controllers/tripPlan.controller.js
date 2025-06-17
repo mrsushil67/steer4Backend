@@ -374,7 +374,7 @@ module.exports.checkTripPlan = async (req, res) => {
           RateMapTripType: item.CustRateMaps?.TripType || null,
           RouteString: item.CustRateMaps?.RouteString || null,
           TripTypeName: item.CustRateMaps?.trip_type?.TypeName || null,
-          TripDirection: "",
+          TripDirection: "Forward",
         };
       }
     });
