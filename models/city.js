@@ -78,7 +78,7 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     sequelize,
     tableName: 'city',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "CityId_UNIQUE",
