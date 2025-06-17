@@ -10,5 +10,6 @@ TripRouter.post("/proceed",authorizedUser, TripController.proceedTrip);
 TripRouter.get("/getOperation", TripController.tripOperations);
 TripRouter.post("/onRouteUpdate", authorizedUser, TripController.onRouteTripDetails);
 TripRouter.post("/closeTripUpdate", authorizedUser, TripController.closeTripDetails);
+TripRouter.post("/submitMarketTrip", authorizedUser, TripController.marketTripPlan);
 
 module.exports = TripRouter;

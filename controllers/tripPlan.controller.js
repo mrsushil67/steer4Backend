@@ -402,7 +402,6 @@ module.exports.checkTripPlan = async (req, res) => {
 module.exports.tripPlan = async (req, res) => {
   try {
     const userId = req.user.userId;
-    console.log(userId);
 
     const {
       CustType,
@@ -864,3 +863,151 @@ module.exports.closeTripDetails = async (req, res) => {
       .json({ status: "500", message: "Internal server error" });
   }
 };
+
+module.exports.marketTripPlan = async (req, res) => {
+  const {
+    CustType,
+    CustId,
+    source,
+    destination,
+    // TripType,
+    VehicleSize,
+    VehicleId,
+    Driver1Id,
+    Driver2Id,
+    VPlaceTime,
+    DepartureTime,
+    Remark,
+    TripSheet,
+    StartKm,
+  } = req.body;
+
+  if (!CustId) {
+    return res.status(400).json({ message: "customerId is required" });
+  }
+
+  if (
+    !CustType ||
+    !CustId ||
+    !source ||
+    !destination ||
+    // !TripType ||
+    !VehicleSize ||
+    !VehicleId ||
+    !Driver1Id ||
+    !VPlaceTime ||
+    !DepartureTime ||
+    !TripSheet ||
+    !StartKm
+  ) {
+    return res.status(400).json({
+      status: "400",
+      message: "Missing required fields",
+    });
+  }
+
+  const formattedVPlaceTime = moment(VPlaceTime, "DD-MM-YYYY HH:mm").format(
+    "YYYY-MM-DD HH:mm:ss"
+  );
+  const formattedDepartureTime = moment(
+    DepartureTime,
+    "DD-MM-YYYY HH:mm"
+  ).format("YYYY-MM-DD HH:mm:ss");
+
+  const checkSource = await DBMODELS.city.findOne({
+    where: {
+      CityId: source,
+    },
+  });
+
+  const SourceName = checkSource.CityName;
+  const checkDest = await DBMODELS.city.findOne({
+    where: {
+      CityId: destination,
+    },
+  });
+  const DestName = checkDest.CityName;
+
+  let RouteID;
+  try {
+    const routes = await DBMODELS.RouteMaster.findAll({
+      where: {
+        Source: source,
+        Destination: destination,
+      },
+      include: [
+        {
+          model: DBMODELS.city,
+          as: "source_city",
+        },
+        {
+          model: DBMODELS.city,
+          as: "dest_city",
+        },
+      ],
+    });
+
+    if (routes.length > 0) {
+      console.log("routes : ", routes);
+      RouteID = routes.RouteId;
+    } else {
+      const newRoute = await DBMODELS.RouteMaster.create({
+        CustId: CustId,
+        RouteCode: `${SourceName.slice(0, 2)}-${DestName.slice(0, 2)}`,
+        Source: source,
+        Destination: destination,
+        Distance: 0,
+        CreatedBy: req.user?.userId,
+        RouteCat: 1,
+        is_active: 1,
+      });
+
+      const createdRoute = await DBMODELS.RouteMaster.findOne({
+        where: { RouteId: newRoute.RouteId },
+        include: [
+          {
+            model: DBMODELS.city,
+            as: "source_city",
+          },
+          {
+            model: DBMODELS.city,
+            as: "dest_city",
+          },
+        ],
+      });
+
+      console.log("createdRoute : ", createdRoute);
+      RouteID = createdRoute.RouteId;
+    }
+
+    const dataModel = {
+      CustType,
+      CustId,
+      RouteId: RouteID,
+      TripType,
+      VehicleSize,
+      VehicleId,
+      Driver1Id,
+      Driver2Id,
+      VPlaceTime: formattedVPlaceTime,
+      DepartureTime: formattedDepartureTime,
+      Remark,
+      TripSheet,
+      StartKm,
+      Status: 1, // default
+      CreatedBy: userId,
+    };
+
+    console.log("Data : ", dataModel);
+
+    const data = await DBMODELS.TripPlanSchedule.create(dataModel);
+
+    return res
+      .status(201)
+      .json({ status: "201", message: "Record saved successfully" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server Error" });
+  }
+};
+
