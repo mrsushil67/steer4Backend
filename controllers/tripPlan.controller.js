@@ -33,8 +33,79 @@ module.exports.checkTripPlan = async (req, res) => {
       };
     }
 
-    const ScheduleData = await DBMODELS.TripPlanSchedule.findAll({
-      where: scheduleWhere,
+    const ScheduleDatafromRouteMaster = await DBMODELS.TripPlanSchedule.findAll({
+      where: {
+        ...scheduleWhere,
+        CustType: "2",
+      },
+      include: [
+        {
+          model: DBMODELS.CustomerMaster,
+          as: "CustomerMasters",
+          attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+        },
+        {
+          model: DBMODELS.Vehicle,
+          as: "Vehicle",
+          where: vehicleNo
+            ? {
+                VNumer: {
+                  [Op.like]: `%${vehicleNo}%`,
+                },
+              }
+            : {},
+          attributes: ["VehicleID", "VNumer", "FleetZize"],
+        },
+        {
+          model: DBMODELS.Driver,
+          as: "Driver",
+          attributes: ["DriverID", "DName", "Licence"],
+        },
+        {
+          model: DBMODELS.RouteMaster,
+          as: "Route_Master",
+          // required: true,
+          on: {
+            RouteId: where(
+              col("TripPlanSchedule.RouteId"),
+              "=",
+              col("Route_Master.RouteId")
+            ),
+            CustId: where(
+              col("TripPlanSchedule.CustId"),
+              "=",
+              col("Route_Master.CustId")
+            ),
+          },
+          // attributes: ["RouteId", "RouteName", "RouteType", "RouteString"],
+        },
+      ],
+      attributes: [
+        "ID",
+        "CustType",
+        "CustId",
+        "RouteId",
+        "TripType",
+        "VehicleId",
+        "Driver1Id",
+        "VPlaceTime",
+        "DepartureTime",
+        "TripSheet",
+        "CreatedBy",
+        "Status",
+        "StartKm",
+        "Remark",
+      ],
+      order: [["ID", "DESC"]],
+    });
+
+    const ScheduleDatafromCustRateMAps = await DBMODELS.TripPlanSchedule.findAll({
+      where: {
+        ...scheduleWhere,
+        CustType: {
+          [Op.ne]: "2",
+        },
+      },
       include: [
         {
           model: DBMODELS.CustomerMaster,
@@ -254,6 +325,10 @@ module.exports.checkTripPlan = async (req, res) => {
     // filteredTrips.forEach((trip) => {
     //   console.log(">>> : ", trip.Id, trip.TripNo, trip.Stat);
     // });
+    const ScheduleData = [
+      ...ScheduleDatafromRouteMaster,
+      ...ScheduleDatafromCustRateMAps
+    ]
 
     const mergedArray = ScheduleData.concat(filteredTrips);
 

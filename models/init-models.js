@@ -496,7 +496,7 @@ function initModels(sequelize) {
   TripPlanSchedule.belongsTo(CustRateMap, { as: "CustRateMaps", foreignKey: "CustId" });
   CustRateMap.hasOne(TripPlanSchedule, { as: "TripPlanSchedule", foreignKey: "CustId" });
 
-  TripPlanSchedule.belongsTo(RouteMaster, {as : "route_master" , foreignKey: "RouteId"});
+  TripPlanSchedule.belongsTo(RouteMaster, {as : "Route_Master" , foreignKey: "RouteId"});
   RouteMaster.hasOne(TripPlanSchedule, {as: "TripPlanSchedule", foreignKey: "RouteId"});
 
   TripPlanSchedule.belongsTo(TripType ,{as: 'tripType', foreignKey: "TripType"});
