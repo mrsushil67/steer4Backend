@@ -335,8 +335,6 @@ module.exports.checkTripPlan = async (req, res) => {
       ...ScheduleDatafromCustRateMAps
     ]
     
-    console.log(">>>>>>>>>>>>>>>>>>> : ",ScheduleDatafromRouteMaster[0])
-
     const mergedArray = ScheduleData.concat(filteredTrips);
 
     const tripDetailsArray = mergedArray.map((item) => {
