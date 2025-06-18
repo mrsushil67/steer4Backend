@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const morgan = require("morgan");
 var multer = require('multer');
 var forms = multer();
+const cors = require('cors')
 const UserRouter = require("./routes/user.route");
 const DriverRouter = require("./routes/driver.route");
 const VehicleRouter = require("./routes/vehicle.route");
@@ -17,6 +18,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 app.use(express.json());
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

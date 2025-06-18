@@ -1024,3 +1024,139 @@ module.exports.marketTripPlan = async (req, res) => {
   }
 };
 
+module.exports.closedTrips = async (req, res) => {
+  try {
+    const {
+      vehicleNo = null,
+      fromDate = null,
+      toDate = null,
+    } = req.body || {};
+
+    let tripPlanWhere = {};
+    if (fromDate && toDate) {
+      tripPlanWhere.DepartureTime = {
+        [Op.between]: [new Date(fromDate), new Date(toDate)],
+      };
+    } else if (fromDate) {
+      tripPlanWhere.DepartureTime = {
+        [Op.gte]: new Date(fromDate),
+      };
+    } else if (toDate) {
+      tripPlanWhere.DepartureTime = {
+        [Op.lte]: new Date(toDate),
+      };
+    }
+
+    const data = await DBMODELS.TripOperation.findAll({
+      // where: tripOperationWhere,
+      // attributes:['Id','TripNo','TripId','Stat'],
+      include: [
+        {
+          model: DBMODELS.TripPlan,
+          as: "TripPlan",
+          where: tripPlanWhere,
+          include: [
+            {
+              model: DBMODELS.CustomerMaster,
+              as: "CustomerMasters",
+              attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+            },
+            {
+              model: DBMODELS.Vehicle,
+              as: "Vehicle",
+              where: vehicleNo
+                ? {
+                    VNumer: {
+                      [Op.like]: `%${vehicleNo}%`,
+                    },
+                  }
+                : {},
+              attributes: ["VehicleID", "VNumer", "FleetZize"],
+            },
+            {
+              model: DBMODELS.Driver,
+              as: "Driver",
+              attributes: ["DriverID", "DName", "Licence"],
+            },
+            {
+              model: DBMODELS.RouteMaster,
+              as: "route_master",
+              attributes: ["RouteId"],
+              include: [
+                {
+                  model: DBMODELS.city,
+                  as: "source_city",
+                  attributes: ["CityName", "latitude", "longitude"],
+                },
+                {
+                  model: DBMODELS.city,
+                  as: "dest_city",
+                  attributes: ["CityName", "latitude", "longitude"],
+                },
+              ],
+            },
+            {
+              model: DBMODELS.CustRateMap,
+              as: "CustRateMaps",
+              on: literal(
+                "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
+              ),
+              include: [
+                {
+                  model: DBMODELS.TripType,
+                  as: "trip_type",
+                  required: true,
+                  attributes: ["Id", "TypeName"],
+                },
+              ],
+              attributes: [
+                "ID",
+                "CustId",
+                "RouteId",
+                "RouteType",
+                "TripType",
+                "RouteString",
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const filteredClosed = data.filter((trip) => {
+      const tripNo = trip.TripNo;
+      const lastLetter = tripNo.slice(-1);
+      const isClosed = trip.Stat === 7;
+    
+      if (trip.TripPlan.TripType === 2) {
+        if (lastLetter === "A" && isClosed) {
+          const baseTripNo = tripNo.slice(0, -1);
+    
+          const tripA = data.find(
+            (t) => t?.TripNo === baseTripNo + "A" && t?.Stat === 7
+          );
+          const tripB = data.find(
+            (t) => t?.TripNo === baseTripNo + "B" && t?.Stat === 7
+          );
+    
+          return tripA && tripB;
+        }
+        return false;
+      }
+    
+      if (trip.TripPlan.TripType === 1) {
+        return lastLetter === "A" && isClosed;
+      }
+    
+      return false;
+    });
+ 
+    return res.status(200).json({ message: "Record found", data:filteredClosed });
+  } catch (error) {
+    console.error("Error while fetching trip operations:", error);
+    return res
+      .status(500)
+      .json({ status: "500", message: "Internal server error" });
+  }
+}
+
