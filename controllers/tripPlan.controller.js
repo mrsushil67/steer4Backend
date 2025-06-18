@@ -40,9 +40,9 @@ module.exports.checkTripPlan = async (req, res) => {
       },
       include: [
         {
-          model: DBMODELS.CustomerMaster,
-          as: "CustomerMasters",
-          attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+          model: DBMODELS.MarketCust,
+          as: "MarketCust",
+          // attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
         },
         {
           model: DBMODELS.Vehicle,
@@ -329,6 +329,8 @@ module.exports.checkTripPlan = async (req, res) => {
       ...ScheduleDatafromRouteMaster,
       ...ScheduleDatafromCustRateMAps
     ]
+    
+    console.log(">>>>>>>>>>>>>>>>>>> : ",ScheduleDatafromCustRateMAps[0])
 
     const mergedArray = ScheduleData.concat(filteredTrips);
 
@@ -414,43 +416,83 @@ module.exports.checkTripPlan = async (req, res) => {
           // },
         };
       } else {
-        return {
-          Id: item.ID,
-          TripId: item.TripId || null,
-          TripNo: null,
-          CustType: item.CustType,
-          CustId: item.CustId,
-          RouteId: item.RouteId,
-          TripType: item.TripType,
-          VehicleId: item.VehicleId,
-          Driver1Id: item.Driver1Id,
-          VPlaceTime: item.VPlaceTime,
-          DepartureTime: item.DepartureTime,
-          TripSheet: item.TripSheet,
-          CreatedBy: item.CreatedBy,
-          Status: item.Status,
-          StartKm: item.StartKm,
-          Remark: item.Remark,
-
-          CustomerName: item.CustomerMasters?.CustomerName || null,
-          CustCode: item.CustomerMasters?.CustCode || null,
-          GSTNo: item.CustomerMasters?.GSTNo || null,
-
-          VehicleNumber: item.Vehicle?.VNumer || null,
-          FleetSize: item.Vehicle?.FleetZize || null,
-
-          DriverName: item.Driver?.DName || null,
-          DriverLicence: item.Driver?.Licence || null,
-
-          RateMapID: item.CustRateMaps?.ID || null,
-          RateMapCustId: item.CustRateMaps?.CustId || null,
-          RateMapRouteId: item.CustRateMaps?.RouteId || null,
-          RateMapRouteType: item.CustRateMaps?.RouteType || null,
-          RateMapTripType: item.CustRateMaps?.TripType || null,
-          RouteString: item.CustRateMaps?.RouteString || null,
-          TripTypeName: item.CustRateMaps?.trip_type?.TypeName || null,
-          TripDirection: "Forward",
-        };
+        if(item.CustType === '2'){
+          return {
+            Id: item.ID,
+            TripId: item.TripId || null,
+            TripNo: null,
+            CustType: item.CustType,
+            CustId: item.CustId,
+            RouteId: item.RouteId,
+            TripType: item.TripType,
+            VehicleId: item.VehicleId,
+            Driver1Id: item.Driver1Id,
+            VPlaceTime: item.VPlaceTime,
+            DepartureTime: item.DepartureTime,
+            TripSheet: item.TripSheet,
+            CreatedBy: item.CreatedBy,
+            Status: item.Status,
+            StartKm: item.StartKm,
+            Remark: item.Remark,
+  
+            CustomerName: item.MarketCust?.Name || null,
+            CustCode: item.MarketCust?.CustCode || null,
+            GSTNo: item.MarketCust?.GSTNo || null,
+  
+            VehicleNumber: item.Vehicle?.VNumer || null,
+            FleetSize: item.Vehicle?.FleetZize || null,
+  
+            DriverName: item.Driver?.DName || null,
+            DriverLicence: item.Driver?.Licence || null,
+  
+            RateMapID: item.Route_Master?.RouteId || null,
+            RateMapCustId: item.Route_Master?.CustId || null,
+            RateMapRouteId: item.Route_Master?.RouteId || null,
+            RateMapRouteType: item.Route_Master?.RouteType || null,
+            RateMapTripType: item.CustRateMaps?.TripType || null,
+            RouteString: item.CustRateMaps?.RouteString || null,
+            TripTypeName: item.CustRateMaps?.trip_type?.TypeName || null,
+            TripDirection: item.TripType === 2 ? "Reverse": "Forward",
+          };
+        }else{
+          return {
+            Id: item.ID,
+            TripId: item.TripId || null,
+            TripNo: null,
+            CustType: item.CustType,
+            CustId: item.CustId,
+            RouteId: item.RouteId,
+            TripType: item.TripType,
+            VehicleId: item.VehicleId,
+            Driver1Id: item.Driver1Id,
+            VPlaceTime: item.VPlaceTime,
+            DepartureTime: item.DepartureTime,
+            TripSheet: item.TripSheet,
+            CreatedBy: item.CreatedBy,
+            Status: item.Status,
+            StartKm: item.StartKm,
+            Remark: item.Remark,
+  
+            CustomerName: item.CustomerMasters?.CustomerName || null,
+            CustCode: item.CustomerMasters?.CustCode || null,
+            GSTNo: item.CustomerMasters?.GSTNo || null,
+  
+            VehicleNumber: item.Vehicle?.VNumer || null,
+            FleetSize: item.Vehicle?.FleetZize || null,
+  
+            DriverName: item.Driver?.DName || null,
+            DriverLicence: item.Driver?.Licence || null,
+  
+            RateMapID: item.CustRateMaps?.ID || null,
+            RateMapCustId: item.CustRateMaps?.CustId || null,
+            RateMapRouteId: item.CustRateMaps?.RouteId || null,
+            RateMapRouteType: item.CustRateMaps?.RouteType || null,
+            RateMapTripType: item.CustRateMaps?.TripType || null,
+            RouteString: item.CustRateMaps?.RouteString || null,
+            TripTypeName: item.CustRateMaps?.trip_type?.TypeName || null,
+            TripDirection: item.TripType === 2 ? "Reverse": "Forward",
+          };
+        }
       }
     });
 
