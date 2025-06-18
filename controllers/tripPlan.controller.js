@@ -79,6 +79,11 @@ module.exports.checkTripPlan = async (req, res) => {
           },
           // attributes: ["RouteId", "RouteName", "RouteType", "RouteString"],
         },
+        {
+          model: DBMODELS.TripType,
+          as:'tripType',
+          attributes: ["Id", "TypeName"],
+        }
       ],
       attributes: [
         "ID",
@@ -330,7 +335,7 @@ module.exports.checkTripPlan = async (req, res) => {
       ...ScheduleDatafromCustRateMAps
     ]
     
-    console.log(">>>>>>>>>>>>>>>>>>> : ",ScheduleDatafromCustRateMAps[0])
+    console.log(">>>>>>>>>>>>>>>>>>> : ",ScheduleDatafromRouteMaster[0])
 
     const mergedArray = ScheduleData.concat(filteredTrips);
 
@@ -451,7 +456,7 @@ module.exports.checkTripPlan = async (req, res) => {
             RateMapRouteType: item.Route_Master?.RouteType || null,
             RateMapTripType: item.CustRateMaps?.TripType || null,
             RouteString: item.CustRateMaps?.RouteString || null,
-            TripTypeName: item.CustRateMaps?.trip_type?.TypeName || null,
+            TripTypeName: item.tripType?.TypeName || null,
             TripDirection: item.TripType === 2 ? "Reverse": "Forward",
           };
         }else{
