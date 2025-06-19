@@ -404,7 +404,7 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
-    console.log("marketData: ", marketData[0].TripPlan);
+    console.log("marketData: ", marketData);
 
     const data = [...regularData, ...marketData];
     const filteredTrips = data.filter((trip) => {
@@ -534,8 +534,7 @@ module.exports.checkTripPlan = async (req, res) => {
             RouteString:
               `${item.TripPlan.route_master.source_city.CityName}-${item.TripPlan.route_master.dest_city.CityName}` ||
               null,
-            TripTypeName:
-              item.TripPlan.tripType?.TypeName || null,
+            TripTypeName: item.TripPlan.tripType?.TypeName || null,
             TripDirection: tripDirection,
             // },
           };
