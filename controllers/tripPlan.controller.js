@@ -406,7 +406,9 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
-    // console.log("ScheduleDatafromRouteMaster: ", ScheduleDatafromRouteMaster);
+   ScheduleDatafromRouteMaster.forEach((item) => {
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",item)
+   })
 
     const data = [...regularData, ...marketData];
     const filteredTrips = data.filter((trip) => {
@@ -636,7 +638,7 @@ module.exports.checkTripPlan = async (req, res) => {
             RateMapRouteType: item.Route_Master?.RouteType || null,
             RateMapTripType: item.CustRateMaps?.TripType || null,
             RouteString:
-              `${item.Route_Master.source_city.CityName}-${item?.Route_Master?.dest_city?.CityName}` ||
+              `${item?.Route_Master?.source_city?.CityName}-${item?.Route_Master?.dest_city?.CityName}` ||
               null,
             TripTypeName: item.tripType?.TypeName || null,
             TripDirection: item.TripType === 2 ? "Reverse" : "Forward",
