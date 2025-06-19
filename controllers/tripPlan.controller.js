@@ -1,6 +1,7 @@
 const { where, col, Op, literal } = require("sequelize");
 const { DBMODELS } = require("../models/init-models");
 const moment = require("moment");
+const PlanCat = require("../models/PlanCat");
 
 module.exports.checkTripPlan = async (req, res) => {
   try {
@@ -33,177 +34,179 @@ module.exports.checkTripPlan = async (req, res) => {
       };
     }
 
-    const ScheduleDatafromRouteMaster = await DBMODELS.TripPlanSchedule.findAll({
-      where: {
-        ...scheduleWhere,
-        CustType: "2",
-      },
-      include: [
-        {
-          model: DBMODELS.MarketCust,
-          as: "MarketCust",
-          // attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+    const ScheduleDatafromRouteMaster = await DBMODELS.TripPlanSchedule.findAll(
+      {
+        where: {
+          ...scheduleWhere,
+          CustType: "2",
         },
-        {
-          model: DBMODELS.Vehicle,
-          as: "Vehicle",
-          where: vehicleNo
-            ? {
-                VNumer: {
-                  [Op.like]: `%${vehicleNo}%`,
-                },
-              }
-            : {},
-          attributes: ["VehicleID", "VNumer", "FleetZize"],
-        },
-        {
-          model: DBMODELS.Driver,
-          as: "Driver",
-          attributes: ["DriverID", "DName", "Licence"],
-        },
-        {
-          model: DBMODELS.RouteMaster,
-          as: "Route_Master",
-          // required: true,
-          on: {
-            RouteId: where(
-              col("TripPlanSchedule.RouteId"),
-              "=",
-              col("Route_Master.RouteId")
-            ),
-            CustId: where(
-              col("TripPlanSchedule.CustId"),
-              "=",
-              col("Route_Master.CustId")
-            ),
+        include: [
+          {
+            model: DBMODELS.MarketCust,
+            as: "MarketCust",
+            // attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
           },
-          include: [
-            {
-              model: DBMODELS.city,
-              as: "source_city",
-              attributes: ["CityName", "latitude", "longitude"],
-            },
-            {
-              model: DBMODELS.city,
-              as: "dest_city",
-              attributes: ["CityName", "latitude", "longitude"],
-            },
-          ],
-          // attributes: ["RouteId", "RouteName", "RouteType", "RouteString"],
-        },
-        {
-          model: DBMODELS.TripType,
-          as:'tripType',
-          attributes: ["Id", "TypeName"],
-        }
-      ],
-      attributes: [
-        "ID",
-        "CustType",
-        "CustId",
-        "RouteId",
-        "TripType",
-        "VehicleId",
-        "Driver1Id",
-        "VPlaceTime",
-        "DepartureTime",
-        "TripSheet",
-        "CreatedBy",
-        "Status",
-        "StartKm",
-        "Remark",
-      ],
-      order: [["ID", "DESC"]],
-    });
-
-    const ScheduleDatafromCustRateMAps = await DBMODELS.TripPlanSchedule.findAll({
-      where: {
-        ...scheduleWhere,
-        CustType: {
-          [Op.ne]: "2",
-        },
-      },
-      include: [
-        {
-          model: DBMODELS.CustomerMaster,
-          as: "CustomerMasters",
-          attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
-        },
-        {
-          model: DBMODELS.Vehicle,
-          as: "Vehicle",
-          where: vehicleNo
-            ? {
-                VNumer: {
-                  [Op.like]: `%${vehicleNo}%`,
-                },
-              }
-            : {},
-          attributes: ["VehicleID", "VNumer", "FleetZize"],
-        },
-        {
-          model: DBMODELS.Driver,
-          as: "Driver",
-          attributes: ["DriverID", "DName", "Licence"],
-        },
-        {
-          model: DBMODELS.CustRateMap,
-          as: "CustRateMaps",
-          // required: true,
-          on: {
-            RouteId: where(
-              col("TripPlanSchedule.RouteId"),
-              "=",
-              col("CustRateMaps.RouteId")
-            ),
-            CustId: where(
-              col("TripPlanSchedule.CustId"),
-              "=",
-              col("CustRateMaps.CustId")
-            ),
-            TripType: where(
-              col("TripPlanSchedule.TripType"),
-              "=",
-              col("CustRateMaps.TripType")
-            )
+          {
+            model: DBMODELS.Vehicle,
+            as: "Vehicle",
+            where: vehicleNo
+              ? {
+                  VNumer: {
+                    [Op.like]: `%${vehicleNo}%`,
+                  },
+                }
+              : {},
+            attributes: ["VehicleID", "VNumer", "FleetZize"],
           },
-          attributes: [
-            "ID",
-            "CustId",
-            "RouteId",
-            "RouteType",
-            "TripType",
-            "RouteString",
-          ],
-          include: [
-            {
-              model: DBMODELS.TripType,
-              as: "trip_type",
-              required: true,
-              attributes: ["Id", "TypeName"],
+          {
+            model: DBMODELS.Driver,
+            as: "Driver",
+            attributes: ["DriverID", "DName", "Licence"],
+          },
+          {
+            model: DBMODELS.RouteMaster,
+            as: "Route_Master",
+            // required: true,
+            on: {
+              RouteId: where(
+                col("TripPlanSchedule.RouteId"),
+                "=",
+                col("Route_Master.RouteId")
+              ),
+              CustId: where(
+                col("TripPlanSchedule.CustId"),
+                "=",
+                col("Route_Master.CustId")
+              ),
             },
-          ],
-        },
-      ],
-      attributes: [
-        "ID",
-        "CustType",
-        "CustId",
-        "RouteId",
-        "TripType",
-        "VehicleId",
-        "Driver1Id",
-        "VPlaceTime",
-        "DepartureTime",
-        "TripSheet",
-        "CreatedBy",
-        "Status",
-        "StartKm",
-        "Remark",
-      ],
-      order: [["ID", "DESC"]],
-    });
+            include: [
+              {
+                model: DBMODELS.city,
+                as: "source_city",
+                attributes: ["CityName", "latitude", "longitude"],
+              },
+              {
+                model: DBMODELS.city,
+                as: "dest_city",
+                attributes: ["CityName", "latitude", "longitude"],
+              },
+            ],
+            // attributes: ["RouteId", "RouteName", "RouteType", "RouteString"],
+          },
+          {
+            model: DBMODELS.TripType,
+            as: "tripType",
+            attributes: ["Id", "TypeName"],
+          },
+        ],
+        attributes: [
+          "ID",
+          "CustType",
+          "CustId",
+          "RouteId",
+          "TripType",
+          "VehicleId",
+          "Driver1Id",
+          "VPlaceTime",
+          "DepartureTime",
+          "TripSheet",
+          "CreatedBy",
+          "Status",
+          "StartKm",
+          "Remark",
+        ],
+        order: [["ID", "DESC"]],
+      }
+    );
 
+    const ScheduleDatafromCustRateMAps =
+      await DBMODELS.TripPlanSchedule.findAll({
+        where: {
+          ...scheduleWhere,
+          CustType: {
+            [Op.ne]: "2",
+          },
+        },
+        include: [
+          {
+            model: DBMODELS.CustomerMaster,
+            as: "CustomerMasters",
+            attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+          },
+          {
+            model: DBMODELS.Vehicle,
+            as: "Vehicle",
+            where: vehicleNo
+              ? {
+                  VNumer: {
+                    [Op.like]: `%${vehicleNo}%`,
+                  },
+                }
+              : {},
+            attributes: ["VehicleID", "VNumer", "FleetZize"],
+          },
+          {
+            model: DBMODELS.Driver,
+            as: "Driver",
+            attributes: ["DriverID", "DName", "Licence"],
+          },
+          {
+            model: DBMODELS.CustRateMap,
+            as: "CustRateMaps",
+            // required: true,
+            on: {
+              RouteId: where(
+                col("TripPlanSchedule.RouteId"),
+                "=",
+                col("CustRateMaps.RouteId")
+              ),
+              CustId: where(
+                col("TripPlanSchedule.CustId"),
+                "=",
+                col("CustRateMaps.CustId")
+              ),
+              TripType: where(
+                col("TripPlanSchedule.TripType"),
+                "=",
+                col("CustRateMaps.TripType")
+              ),
+            },
+            attributes: [
+              "ID",
+              "CustId",
+              "RouteId",
+              "RouteType",
+              "TripType",
+              "RouteString",
+            ],
+            include: [
+              {
+                model: DBMODELS.TripType,
+                as: "trip_type",
+                required: true,
+                attributes: ["Id", "TypeName"],
+              },
+            ],
+          },
+        ],
+        attributes: [
+          "ID",
+          "CustType",
+          "CustId",
+          "RouteId",
+          "TripType",
+          "VehicleId",
+          "Driver1Id",
+          "VPlaceTime",
+          "DepartureTime",
+          "TripSheet",
+          "CreatedBy",
+          "Status",
+          "StartKm",
+          "Remark",
+        ],
+        order: [["ID", "DESC"]],
+      });
 
     let tripOperationWhere = {};
     if (status !== null && status !== undefined) {
@@ -225,14 +228,19 @@ module.exports.checkTripPlan = async (req, res) => {
       };
     }
 
-    const data = await DBMODELS.TripOperation.findAll({
+    const regularData = await DBMODELS.TripOperation.findAll({
       where: tripOperationWhere,
       // group: ['Id'],
       include: [
         {
           model: DBMODELS.TripPlan,
           as: "TripPlan",
-          where: tripPlanWhere,
+          where: {
+            ...tripPlanWhere,
+            PlanCat: {
+              [Op.ne]: 2,
+            },
+          },
           include: [
             {
               model: DBMODELS.CustomerMaster,
@@ -301,6 +309,104 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
+    const marketData = await DBMODELS.TripOperation.findAll({
+      where: tripOperationWhere,
+      // group: ['Id'],
+      include: [
+        {
+          model: DBMODELS.TripPlan,
+          as: "TripPlan",
+          where: { ...tripPlanWhere, PlanCat: 2 },
+          include: [
+            {
+              model: DBMODELS.MarketCust,
+              as: "MarketCust",
+              // attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+            },
+            {
+              model: DBMODELS.Vehicle,
+              as: "Vehicle",
+              where: vehicleNo
+                ? {
+                    VNumer: {
+                      [Op.like]: `%${vehicleNo}%`,
+                    },
+                  }
+                : {},
+              attributes: ["VehicleID", "VNumer", "FleetZize"],
+            },
+            {
+              model: DBMODELS.Driver,
+              as: "Driver",
+              attributes: ["DriverID", "DName", "Licence"],
+            },
+            {
+              model: DBMODELS.RouteMaster,
+              as: "route_master",
+              required: true,
+              // on: {
+              //   RouteId: where(
+              //     col("TripPlan.RouteId"),
+              //     "=",
+              //     col("route_master.RouteId")
+              //   ),
+              //   // CustId: where(
+              //   //   col("TripPlan.CustId"),
+              //   //   "=",
+              //   //   col("route_master.CustId")
+              //   // ),
+              // },
+              include: [
+                {
+                  model: DBMODELS.city,
+                  as: "source_city",
+                  attributes: ["CityName", "latitude", "longitude"],
+                },
+                {
+                  model: DBMODELS.city,
+                  as: "dest_city",
+                  attributes: ["CityName", "latitude", "longitude"],
+                },
+              ],
+              // attributes: ["RouteId", "RouteName", "RouteType", "RouteString"],
+            },
+            {
+              model: DBMODELS.TripType,
+              as: "tripType",
+              required: true,
+              attributes: ["Id", "TypeName"],
+            },
+            // {
+            //   model: DBMODELS.CustRateMap,
+            //   as: "CustRateMaps",
+            //   on: literal(
+            //     "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
+            //   ),
+            //   include: [
+            //     {
+            //       model: DBMODELS.TripType,
+            //       as: "trip_type",
+            //       required: true,
+            //       attributes: ["Id", "TypeName"],
+            //     },
+            //   ],
+            //   attributes: [
+            //     "ID",
+            //     "CustId",
+            //     "RouteId",
+            //     "RouteType",
+            //     "TripType",
+            //     "RouteString",
+            //   ],
+            // },
+          ],
+        },
+      ],
+    });
+
+    console.log("marketData: ", marketData[0].TripPlan);
+
+    const data = [...regularData, ...marketData];
     const filteredTrips = data.filter((trip) => {
       const tripNo = trip.TripNo;
       const lastLetter = tripNo.slice(-1);
@@ -328,12 +434,11 @@ module.exports.checkTripPlan = async (req, res) => {
         } else if (tripA && tripB && tripA.Stat + tripB.Stat === 14) {
           return false;
         }
-      } else{
-        if (lastLetter === 'A' && trip.Stat !== 7 ){
+      } else {
+        if (lastLetter === "A" && trip.Stat !== 7) {
           // console.log("yee: ",trip.TripNo, trip.Stat)
           return true;
-        }
-        else{
+        } else {
           return false;
         }
       }
@@ -344,11 +449,9 @@ module.exports.checkTripPlan = async (req, res) => {
     // });
     const ScheduleData = [
       ...ScheduleDatafromRouteMaster,
-      ...ScheduleDatafromCustRateMAps
-    ]
+      ...ScheduleDatafromCustRateMAps,
+    ];
 
-    console.log(">>>>>>>>>> : ",ScheduleDatafromRouteMaster[0])
-    
     const mergedArray = ScheduleData.concat(filteredTrips);
 
     const tripDetailsArray = mergedArray.map((item) => {
@@ -375,65 +478,129 @@ module.exports.checkTripPlan = async (req, res) => {
       }
 
       if (item.TripPlan) {
-        return {
-          Id: item.Id,
-          TripId: item.TripId,
-          TripNo: item.TripNo,
-          InvoiceCopy: item.InvoiceCopy,
-          LRCopy: item.LRCopy,
-          DAV: item.DAV,
-          GatePass: item.GatePass,
-          POD: item.POD,
-          EwayBilNo: item.EwayBilNo,
-          ATD: item.ATD,
-          CreatedBy: item.CreatedBy,
-          CreatedTime: item.CreatedTime,
-          ATA: item.ATA,
-          AmendReason: item.AmendReason,
-          Status: item.Stat,
-          StartBy: item.StartBy,
-          OnRouteBy: item.OnRouteBy,
-          CloseBy: item.CloseBy,
-          Is_Invoice: item.Is_Invoice,
-          StartKm: item.StartKm || null,
-          Remark: item.Remark || null,
-          OpeningKm: item.OpeningKm,
-          ClosingKm: item.ClosingKm,
-          ActualKm: item.ActulaKm,
-          CVerify: item.CVerify,
-          TripSheetNo: item.TripSheetNo,
+        if (item.TripPlan.PlanCat === 2) {
+          return {
+            Id: item.Id,
+            TripId: item.TripId,
+            TripNo: item.TripNo,
+            InvoiceCopy: item.InvoiceCopy,
+            LRCopy: item.LRCopy,
+            DAV: item.DAV,
+            GatePass: item.GatePass,
+            POD: item.POD,
+            EwayBilNo: item.EwayBilNo,
+            ATD: item.ATD,
+            CreatedBy: item.CreatedBy,
+            CreatedTime: item.CreatedTime,
+            ATA: item.ATA,
+            AmendReason: item.AmendReason,
+            Status: item.Stat,
+            StartBy: item.StartBy,
+            OnRouteBy: item.OnRouteBy,
+            CloseBy: item.CloseBy,
+            Is_Invoice: item.Is_Invoice,
+            StartKm: item.StartKm || null,
+            Remark: item.Remark || null,
+            OpeningKm: item.OpeningKm,
+            ClosingKm: item.ClosingKm,
+            ActualKm: item.ActulaKm,
+            CVerify: item.CVerify,
+            TripSheetNo: item.TripSheetNo,
 
-          // TripPlan: {
-          TripSheet: item.TripPlan.TripSheet,
-          VPlaceTime: item.TripPlan.VPlaceTime,
-          DepartureTime: item.TripPlan.DepartureTime,
-          RouteId: item.TripPlan.RouteId,
-          VehicleId: item.TripPlan.VehicleId,
-          Driver1Id: item.TripPlan.Driver1Id,
-          // Status: item.TripPlan.Status,
-          CreatedBy: item.TripPlan.CreatedBy,
-          TripTypeName: item.TripPlan.tripType?.TypeName || null,
+            // TripPlan: {
+            TripSheet: item.TripPlan.TripSheet,
+            VPlaceTime: item.TripPlan.VPlaceTime,
+            DepartureTime: item.TripPlan.DepartureTime,
+            RouteId: item.TripPlan.RouteId,
+            VehicleId: item.TripPlan.VehicleId,
+            Driver1Id: item.TripPlan.Driver1Id,
+            // Status: item.TripPlan.Status,
+            CreatedBy: item.TripPlan.CreatedBy,
+            TripTypeName: item.TripPlan.tripType?.TypeName || null,
 
-          CustomerName: item.TripPlan.CustomerMasters?.CustomerName || null,
-          CustCode: item.TripPlan.CustomerMasters?.CustCode || null,
-          GSTNo: item.TripPlan.CustomerMasters?.GSTNo || null,
+            CustomerName: item.TripPlan.MarketCust?.Name || null,
+            CustCode: item.TripPlan.MarketCust?.Phone || null,
+            GSTNo: item.TripPlan.CustomerMasters?.GSTNo || null,
 
-          VehicleNumber: item.TripPlan.Vehicle?.VNumer || null,
-          FleetSize: item.TripPlan.Vehicle?.FleetZize || null,
+            VehicleNumber: item.TripPlan.Vehicle?.VNumer || null,
+            FleetSize: item.TripPlan.Vehicle?.FleetZize || null,
 
-          DriverName: item.TripPlan.Driver?.DName || null,
-          DriverLicence: item.TripPlan.Driver?.Licence || null,
-          RateMapCustId: item.TripPlan.CustRateMaps?.CustId || null,
-          RateMapRouteId: item.TripPlan.CustRateMaps?.RouteId || null,
-          RateMapRouteType: item.TripPlan.CustRateMaps?.RouteType || null,
-          RateMapTripType: item.TripPlan.CustRateMaps?.TripType || null,
-          RouteString: item.TripPlan.CustRateMaps?.RouteString || null,
-          TripTypeName: item.TripPlan.CustRateMaps?.trip_type?.TypeName || null,
-          TripDirection: tripDirection,
-          // },
-        };
+            DriverName: item.TripPlan.Driver?.DName || null,
+            DriverLicence: item.TripPlan.Driver?.Licence || null,
+            RateMapCustId: item.TripPlan.route_master?.CustId || null,
+            RateMapRouteId: item.TripPlan.route_master?.RouteId || null,
+            RateMapRouteType: item.TripPlan.CustRateMaps?.RouteType || null,
+            RateMapTripType: item.TripPlan.CustRateMaps?.TripType || null,
+            RouteString:
+              `${item.TripPlan.route_master.source_city.CityName}-${item.TripPlan.route_master.dest_city.CityName}` ||
+              null,
+            TripTypeName:
+              item.TripPlan.tripType?.TypeName || null,
+            TripDirection: tripDirection,
+            // },
+          };
+        } else {
+          return {
+            Id: item.Id,
+            TripId: item.TripId,
+            TripNo: item.TripNo,
+            InvoiceCopy: item.InvoiceCopy,
+            LRCopy: item.LRCopy,
+            DAV: item.DAV,
+            GatePass: item.GatePass,
+            POD: item.POD,
+            EwayBilNo: item.EwayBilNo,
+            ATD: item.ATD,
+            CreatedBy: item.CreatedBy,
+            CreatedTime: item.CreatedTime,
+            ATA: item.ATA,
+            AmendReason: item.AmendReason,
+            Status: item.Stat,
+            StartBy: item.StartBy,
+            OnRouteBy: item.OnRouteBy,
+            CloseBy: item.CloseBy,
+            Is_Invoice: item.Is_Invoice,
+            StartKm: item.StartKm || null,
+            Remark: item.Remark || null,
+            OpeningKm: item.OpeningKm,
+            ClosingKm: item.ClosingKm,
+            ActualKm: item.ActulaKm,
+            CVerify: item.CVerify,
+            TripSheetNo: item.TripSheetNo,
+
+            // TripPlan: {
+            TripSheet: item.TripPlan.TripSheet,
+            VPlaceTime: item.TripPlan.VPlaceTime,
+            DepartureTime: item.TripPlan.DepartureTime,
+            RouteId: item.TripPlan.RouteId,
+            VehicleId: item.TripPlan.VehicleId,
+            Driver1Id: item.TripPlan.Driver1Id,
+            // Status: item.TripPlan.Status,
+            CreatedBy: item.TripPlan.CreatedBy,
+            TripTypeName: item.TripPlan.tripType?.TypeName || null,
+
+            CustomerName: item.TripPlan.CustomerMasters?.CustomerName || null,
+            CustCode: item.TripPlan.CustomerMasters?.CustCode || null,
+            GSTNo: item.TripPlan.CustomerMasters?.GSTNo || null,
+
+            VehicleNumber: item.TripPlan.Vehicle?.VNumer || null,
+            FleetSize: item.TripPlan.Vehicle?.FleetZize || null,
+
+            DriverName: item.TripPlan.Driver?.DName || null,
+            DriverLicence: item.TripPlan.Driver?.Licence || null,
+            RateMapCustId: item.TripPlan.CustRateMaps?.CustId || null,
+            RateMapRouteId: item.TripPlan.CustRateMaps?.RouteId || null,
+            RateMapRouteType: item.TripPlan.CustRateMaps?.RouteType || null,
+            RateMapTripType: item.TripPlan.CustRateMaps?.TripType || null,
+            RouteString: item.TripPlan.CustRateMaps?.RouteString || null,
+            TripTypeName:
+              item.TripPlan.CustRateMaps?.trip_type?.TypeName || null,
+            TripDirection: tripDirection,
+            // },
+          };
+        }
       } else {
-        if(item.CustType === '2'){
+        if (item.CustType === "2") {
           return {
             Id: item.ID,
             TripId: item.TripId || null,
@@ -451,27 +618,29 @@ module.exports.checkTripPlan = async (req, res) => {
             Status: item.Status,
             StartKm: item.StartKm,
             Remark: item.Remark,
-  
+
             CustomerName: item.MarketCust?.Name || null,
             CustCode: item.MarketCust?.CustCode || null,
             GSTNo: item.MarketCust?.GSTNo || null,
-  
+
             VehicleNumber: item.Vehicle?.VNumer || null,
             FleetSize: item.Vehicle?.FleetZize || null,
-  
+
             DriverName: item.Driver?.DName || null,
             DriverLicence: item.Driver?.Licence || null,
-  
+
             RateMapID: item.Route_Master?.RouteId || null,
             RateMapCustId: item.Route_Master?.CustId || null,
             RateMapRouteId: item.Route_Master?.RouteId || null,
             RateMapRouteType: item.Route_Master?.RouteType || null,
             RateMapTripType: item.CustRateMaps?.TripType || null,
-            RouteString: `${item.Route_Master.source_city.CityName}-${item.Route_Master.dest_city.CityName}` || null,
+            RouteString:
+              `${item.Route_Master.source_city.CityName}-${item.Route_Master.dest_city.CityName}` ||
+              null,
             TripTypeName: item.tripType?.TypeName || null,
-            TripDirection: item.TripType === 2 ? "Reverse": "Forward",
+            TripDirection: item.TripType === 2 ? "Reverse" : "Forward",
           };
-        }else{
+        } else {
           return {
             Id: item.ID,
             TripId: item.TripId || null,
@@ -489,17 +658,17 @@ module.exports.checkTripPlan = async (req, res) => {
             Status: item.Status,
             StartKm: item.StartKm,
             Remark: item.Remark,
-  
+
             CustomerName: item.CustomerMasters?.CustomerName || null,
             CustCode: item.CustomerMasters?.CustCode || null,
             GSTNo: item.CustomerMasters?.GSTNo || null,
-  
+
             VehicleNumber: item.Vehicle?.VNumer || null,
             FleetSize: item.Vehicle?.FleetZize || null,
-  
+
             DriverName: item.Driver?.DName || null,
             DriverLicence: item.Driver?.Licence || null,
-  
+
             RateMapID: item.CustRateMaps?.ID || null,
             RateMapCustId: item.CustRateMaps?.CustId || null,
             RateMapRouteId: item.CustRateMaps?.RouteId || null,
@@ -507,7 +676,7 @@ module.exports.checkTripPlan = async (req, res) => {
             RateMapTripType: item.CustRateMaps?.TripType || null,
             RouteString: item.CustRateMaps?.RouteString || null,
             TripTypeName: item.CustRateMaps?.trip_type?.TypeName || null,
-            TripDirection: item.TripType === 2 ? "Reverse": "Forward",
+            TripDirection: item.TripType === 2 ? "Reverse" : "Forward",
           };
         }
       }
@@ -784,6 +953,16 @@ module.exports.proceedTrip = async (req, res) => {
       return res.status(400).json({ status: "400", message: "Missing tripId" });
     }
 
+    const isExist = await DBMODELS.TripPlanSchedule.findOne({
+      where: { ID: tripId },
+    });
+
+    if (!isExist) {
+      return res
+        .status(400)
+        .json({ status: "400", message: "Trip does not exist" });
+    }
+
     const [updatedRows] = await DBMODELS.TripPlanSchedule.update(
       { is_final: 1 },
       { where: { ID: tripId } }
@@ -807,8 +986,11 @@ module.exports.proceedTrip = async (req, res) => {
       });
     }
 
+    const custType = tripScheduleData.CustType;
+
     const tripPlanData = await DBMODELS.TripPlan.create({
       ...tripScheduleData.toJSON(),
+      PlanCat: custType,
     });
 
     return res.status(201).json({
@@ -868,15 +1050,15 @@ module.exports.onRouteTripDetails = async (req, res) => {
     const formattedActualTime = moment(Act_Dept, "DD-MM-YYYY HH:mm").format(
       "YYYY-MM-DD HH:mm:ss"
     );
-   console.log(tripId);
-   console.log(tripNo);
+    console.log(tripId);
+    console.log(tripNo);
     const existTrip = await DBMODELS.TripOperation.findOne({
       where: {
         TripId: tripId,
         TripNo: tripNo,
       },
     });
-  console.log(existTrip);
+    console.log(existTrip);
     if (!existTrip) {
       return res.status(404).json({
         status: "404",
@@ -1017,7 +1199,7 @@ module.exports.marketTripPlan = async (req, res) => {
     StartKm,
   } = req.body;
 
-  console.log(req.body)
+  console.log(req.body);
   if (!CustId) {
     return res.status(400).json({ message: "customerId is required" });
   }
@@ -1063,7 +1245,9 @@ module.exports.marketTripPlan = async (req, res) => {
   });
 
   if (!checkSource || !checkDest) {
-    return res.status(400).json({ message: "Invalid source or destination city ID" });
+    return res
+      .status(400)
+      .json({ message: "Invalid source or destination city ID" });
   }
 
   const SourceName = checkSource.CityName;
@@ -1091,7 +1275,7 @@ module.exports.marketTripPlan = async (req, res) => {
     if (routes.length > 0) {
       // console.log("routes : ", routes);
       RouteID = routes[0].RouteId;
-    }else {
+    } else {
       const newRoute = await DBMODELS.RouteMaster.create({
         CustId: CustId,
         RouteCode: `${SourceName.slice(0, 2)}-${DestName.slice(0, 2)}`,
@@ -1160,11 +1344,7 @@ module.exports.marketTripPlan = async (req, res) => {
 
 module.exports.closedTrips = async (req, res) => {
   try {
-    const {
-      vehicleNo = null,
-      fromDate = null,
-      toDate = null,
-    } = req.body || {};
+    const { vehicleNo = null, fromDate = null, toDate = null } = req.body || {};
 
     let tripPlanWhere = {};
     if (fromDate && toDate) {
@@ -1261,36 +1441,37 @@ module.exports.closedTrips = async (req, res) => {
       const tripNo = trip.TripNo;
       const lastLetter = tripNo.slice(-1);
       const isClosed = trip.Stat === 7;
-    
+
       if (trip.TripPlan.TripType === 2) {
         if (lastLetter === "A" && isClosed) {
           const baseTripNo = tripNo.slice(0, -1);
-    
+
           const tripA = data.find(
             (t) => t?.TripNo === baseTripNo + "A" && t?.Stat === 7
           );
           const tripB = data.find(
             (t) => t?.TripNo === baseTripNo + "B" && t?.Stat === 7
           );
-    
+
           return tripA && tripB;
         }
         return false;
       }
-    
+
       if (trip.TripPlan.TripType === 1) {
         return lastLetter === "A" && isClosed;
       }
-    
+
       return false;
     });
- 
-    return res.status(200).json({ message: "Record found", data:filteredClosed });
+
+    return res
+      .status(200)
+      .json({ message: "Record found", data: filteredClosed });
   } catch (error) {
     console.error("Error while fetching trip operations:", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });
   }
-}
-
+};

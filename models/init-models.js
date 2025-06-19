@@ -460,6 +460,9 @@ function initModels(sequelize) {
   TripPlan.belongsTo(CustomerMaster, { as: "CustomerMasters", foreignKey: "CustId" });
   CustomerMaster.hasOne(TripPlan, { as: "TripPlan", foreignKey: "CustId" });
 
+  TripPlan.belongsTo(MarketCust, { as: "MarketCust", foreignKey: "CustId" });
+  MarketCust.hasOne(TripPlan, { as: "TripPlan", foreignKey: "CustId" });
+
   TripPlan.belongsTo( Vehicle , {as: "Vehicle", foreignKey: "VehicleId"});
   Vehicle.hasOne(TripPlan , {as: "TripPlan", foreignKey: "VehicleId"});
 
