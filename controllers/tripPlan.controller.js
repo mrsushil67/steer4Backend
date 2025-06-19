@@ -114,7 +114,7 @@ module.exports.checkTripPlan = async (req, res) => {
           "Status",
           "StartKm",
           "Remark",
-          "PlanCat"
+          "PlanCat",
         ],
         order: [["ID", "DESC"]],
       }
@@ -205,7 +205,7 @@ module.exports.checkTripPlan = async (req, res) => {
           "Status",
           "StartKm",
           "Remark",
-          "PlanCat"
+          "PlanCat",
         ],
         order: [["ID", "DESC"]],
       });
@@ -310,6 +310,9 @@ module.exports.checkTripPlan = async (req, res) => {
         },
       ],
     });
+
+    
+    console.log(regularData[0].TripPlan)
 
     const marketData = await DBMODELS.TripOperation.findAll({
       where: tripOperationWhere,
@@ -511,7 +514,7 @@ module.exports.checkTripPlan = async (req, res) => {
             RouteId: item.TripPlan.RouteId,
             VehicleId: item.TripPlan.VehicleId,
             Driver1Id: item.TripPlan.Driver1Id,
-            // Status: item.TripPlan.Status,
+            PlanCat: item.TripPlan.PlanCat,
             CreatedBy: item.TripPlan.CreatedBy,
             TripTypeName: item.TripPlan.tripType?.TypeName || null,
 
@@ -571,7 +574,7 @@ module.exports.checkTripPlan = async (req, res) => {
             RouteId: item.TripPlan.RouteId,
             VehicleId: item.TripPlan.VehicleId,
             Driver1Id: item.TripPlan.Driver1Id,
-            // Status: item.TripPlan.Status,
+            PlanCat: item.TripPlan.PlanCat,
             CreatedBy: item.TripPlan.CreatedBy,
             TripTypeName: item.TripPlan.tripType?.TypeName || null,
 
@@ -614,7 +617,7 @@ module.exports.checkTripPlan = async (req, res) => {
             Status: item.Status,
             StartKm: item.StartKm,
             Remark: item.Remark,
-
+            PlanCat: item.PlanCat,
             CustomerName: item.MarketCust?.Name || null,
             CustCode: item.MarketCust?.CustCode || null,
             GSTNo: item.MarketCust?.GSTNo || null,
@@ -654,7 +657,7 @@ module.exports.checkTripPlan = async (req, res) => {
             Status: item.Status,
             StartKm: item.StartKm,
             Remark: item.Remark,
-
+            PlanCat: item.PlanCat,
             CustomerName: item.CustomerMasters?.CustomerName || null,
             CustCode: item.CustomerMasters?.CustCode || null,
             GSTNo: item.CustomerMasters?.GSTNo || null,
@@ -791,11 +794,13 @@ module.exports.tripPlan = async (req, res) => {
 module.exports.updateTrip = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { tripId } = req.query;
+    const { tripId, PlanCat } = req.query;
 
     const {
       CustType,
       CustId,
+      source,
+      destination,
       RouteId,
       TripType,
       VehicleSize,
@@ -812,77 +817,201 @@ module.exports.updateTrip = async (req, res) => {
     console.log("Body : ", req.body);
 
     // Validate required fields
-    if (!tripId) {
+    if (!tripId || !PlanCat) {
       return res.status(400).json({
         status: "400",
-        message: "TripId is missing",
+        message: "TripId or PlanCat is missing",
       });
     }
 
-    if (
-      !CustType ||
-      !CustId ||
-      !RouteId ||
-      !TripType ||
-      !VehicleSize ||
-      !VehicleId ||
-      !Driver1Id ||
-      !VPlaceTime ||
-      !DepartureTime ||
-      !TripSheet
-    ) {
-      return res.status(400).json({
-        status: "400",
-        message: "Missing required fields",
+    if (PlanCat === '2') {
+      // Validate the required fields for PlanCat 2
+      if (
+        !CustType ||
+        !CustId ||
+        !source ||
+        !destination ||
+        !TripType ||
+        !VehicleSize ||
+        !VehicleId ||
+        !Driver1Id ||
+        !VPlaceTime ||
+        !DepartureTime ||
+        !TripSheet
+      ) {
+        return res.status(400).json({
+          status: "400",
+          message: "Missing required fields in plan Cat 2",
+        });
+      }
+
+      // Validate source and destination as integers (City IDs)
+      if (!Number.isInteger(source) || !Number.isInteger(destination)) {
+        return res
+          .status(400)
+          .json({ message: "Source or Destination must be valid CityIds" });
+      }
+
+      // Format date/time fields
+      const formattedVPlaceTime = moment(VPlaceTime, "DD-MM-YYYY HH:mm").format(
+        "YYYY-MM-DD HH:mm:ss"
+      );
+      const formattedDepartureTime = moment(
+        DepartureTime,
+        "DD-MM-YYYY HH:mm"
+      ).format("YYYY-MM-DD HH:mm:ss");
+
+      // Check if source and destination are valid cities
+      const checkSource = await DBMODELS.city.findOne({
+        where: { CityId: source },
+      });
+      const checkDest = await DBMODELS.city.findOne({
+        where: { CityId: destination },
+      });
+
+      if (!checkSource || !checkDest) {
+        return res
+          .status(400)
+          .json({ message: "Invalid source or destination city ID" });
+      }
+
+      const SourceName = checkSource.CityName;
+      const DestName = checkDest.CityName;
+
+      let RouteID;
+      // Check if the route already exists
+      const routes = await DBMODELS.RouteMaster.findAll({
+        where: { Source: source, Destination: destination },
+        include: [
+          { model: DBMODELS.city, as: "source_city" },
+          { model: DBMODELS.city, as: "dest_city" },
+        ],
+      });
+
+      if (routes.length > 0) {
+        RouteID = routes[0].RouteId;
+      } else {
+        // Create a new route if not found
+        const newRoute = await DBMODELS.RouteMaster.create({
+          CustId: CustId,
+          RouteCode: `${SourceName.slice(0, 2)}-${DestName.slice(0, 2)}`,
+          Source: source,
+          Destination: destination,
+          Distance: 0,
+          CreatedBy: req.user?.userId,
+          RouteCat: 1,
+          is_active: 1,
+        });
+
+        RouteID = newRoute.RouteId;
+      }
+
+      const updateFields = {
+        CustType,
+        CustId,
+        RouteId: RouteID,
+        TripType,
+        VehicleSize,
+        VehicleId,
+        Driver1Id,
+        Driver2Id: Driver2Id || null,
+        VPlaceTime: formattedVPlaceTime,
+        DepartureTime: formattedDepartureTime,
+        Remark: Remark || null,
+        // TripSheet: TripSheet || null,
+        StartKm,
+        UpdatedBy: userId,
+        UpdatedAt: new Date(),
+      };
+
+      console.log("updateFields paln CAt 2 : ", updateFields);
+
+      const [updatedRows] = await DBMODELS.TripPlanSchedule.update(
+        updateFields,
+        { where: { ID: tripId } }
+      );
+
+      if (updatedRows === 0) {
+        return res.status(404).json({
+          status: "404",
+          message: "Record not found or nothing to update",
+        });
+      }
+
+      return res.status(200).json({
+        status: "200",
+        message: "Record updated successfully",
+        updatedRows,
+        updatedTrip: updateFields,
+      });
+    } else {
+      // Validate fields for PlanCat !== 2
+      if (
+        !CustType ||
+        !CustId ||
+        !RouteId ||
+        !TripType ||
+        !VehicleSize ||
+        !VehicleId ||
+        !Driver1Id ||
+        !VPlaceTime ||
+        !DepartureTime ||
+        !TripSheet
+      ) {
+        return res.status(400).json({
+          status: "400",
+          message: "Missing required fields not 2",
+        });
+      }
+
+      // Format date/time fields
+      const formattedVPlaceTime = moment(VPlaceTime, "DD-MM-YYYY HH:mm").format(
+        "YYYY-MM-DD HH:mm:ss"
+      );
+      const formattedDepartureTime = moment(
+        DepartureTime,
+        "DD-MM-YYYY HH:mm"
+      ).format("YYYY-MM-DD HH:mm:ss");
+
+      const updateFields = {
+        CustType,
+        CustId,
+        RouteId,
+        TripType,
+        VehicleSize,
+        VehicleId,
+        Driver1Id,
+        Driver2Id: Driver2Id || null,
+        VPlaceTime: formattedVPlaceTime,
+        DepartureTime: formattedDepartureTime,
+        Remark: Remark || null,
+        // TripSheet: TripSheet || null,
+        StartKm,
+        UpdatedBy: userId,
+        UpdatedAt: new Date(),
+      };
+
+      console.log("updateFieldsPlanCat not 2  : ", updateFields);
+
+      const [updatedRows] = await DBMODELS.TripPlanSchedule.update(
+        updateFields,
+        { where: { ID: tripId } }
+      );
+
+      if (updatedRows === 0) {
+        return res.status(404).json({
+          status: "404",
+          message: "Record not found or nothing to update",
+        });
+      }
+
+      return res.status(200).json({
+        status: "200",
+        message: "Record updated successfully",
+        updatedRows,
+        updatedTrip: updateFields,
       });
     }
-
-    // Format date/time fields
-    const formattedVPlaceTime = moment(VPlaceTime, "DD-MM-YYYY HH:mm").format(
-      "YYYY-MM-DD HH:mm:ss"
-    );
-    const formattedDepartureTime = moment(
-      DepartureTime,
-      "DD-MM-YYYY HH:mm"
-    ).format("YYYY-MM-DD HH:mm:ss");
-
-    // Build update object
-    const updateFields = {
-      CustType,
-      CustId,
-      RouteId,
-      TripType,
-      VehicleSize,
-      VehicleId,
-      Driver1Id,
-      Driver2Id: Driver2Id || null,
-      VPlaceTime: formattedVPlaceTime,
-      DepartureTime: formattedDepartureTime,
-      Remark: Remark || null,
-      // TripSheet,
-      StartKm,
-      UpdatedBy: userId,
-      UpdatedAt: new Date(), // Optional: if you want to keep a timestamp
-    };
-
-    console.log("updateFields : ", updateFields);
-
-    const [updatedRows] = await DBMODELS.TripPlanSchedule.update(updateFields, {
-      where: { ID: tripId },
-    });
-
-    if (updatedRows === 0) {
-      return res.status(404).json({
-        status: "404",
-        message: "Record not found or nothing to update",
-      });
-    }
-
-    return res.status(200).json({
-      status: "200",
-      message: "Record updated successfully",
-      updatedRows,
-    });
   } catch (error) {
     console.log("Error while updating trip:", error);
     return res.status(500).json({
@@ -1465,7 +1594,7 @@ module.exports.closedTrips = async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: "Record found", data: filteredClosed });
+      .json({status:"200", message: "Record found", data: filteredClosed });
   } catch (error) {
     console.log("Error while fetching trip operations:", error);
     return res
