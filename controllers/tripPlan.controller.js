@@ -38,7 +38,7 @@ module.exports.checkTripPlan = async (req, res) => {
       {
         where: {
           ...scheduleWhere,
-          CustType: "2",
+          PlanCat: 2,
         },
         include: [
           {
@@ -123,8 +123,8 @@ module.exports.checkTripPlan = async (req, res) => {
       await DBMODELS.TripPlanSchedule.findAll({
         where: {
           ...scheduleWhere,
-          CustType: {
-            [Op.ne]: "2",
+          PlanCat: {
+            [Op.ne]: 2,
           },
         },
         include: [
