@@ -114,6 +114,7 @@ module.exports.checkTripPlan = async (req, res) => {
           "Status",
           "StartKm",
           "Remark",
+          "PlanCat"
         ],
         order: [["ID", "DESC"]],
       }
@@ -204,6 +205,7 @@ module.exports.checkTripPlan = async (req, res) => {
           "Status",
           "StartKm",
           "Remark",
+          "PlanCat"
         ],
         order: [["ID", "DESC"]],
       });
@@ -404,7 +406,7 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
-    console.log("marketData: ", marketData);
+    // console.log("ScheduleDatafromRouteMaster: ", ScheduleDatafromRouteMaster);
 
     const data = [...regularData, ...marketData];
     const filteredTrips = data.filter((trip) => {
