@@ -73,11 +73,11 @@ module.exports.checkTripPlan = async (req, res) => {
                 "=",
                 col("Route_Master.RouteId")
               ),
-              CustId: where(
-                col("TripPlanSchedule.CustId"),
-                "=",
-                col("Route_Master.CustId")
-              ),
+              // CustId: where(
+              //   col("TripPlanSchedule.CustId"),
+              //   "=",
+              //   col("Route_Master.CustId")
+              // ),
             },
             include: [
               {
