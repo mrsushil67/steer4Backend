@@ -765,6 +765,7 @@ module.exports.tripPlan = async (req, res) => {
       StartKm,
       Status: 1, // default
       CreatedBy: userId,
+      PlanCat: 1,
     };
 
     console.log("Data : ", dataModel);
@@ -989,7 +990,7 @@ module.exports.proceedTrip = async (req, res) => {
 
     const tripPlanData = await DBMODELS.TripPlan.create({
       ...tripScheduleData.toJSON(),
-      PlanCat: custType,
+      // PlanCat: custType,
     });
 
     return res.status(201).json({
@@ -1320,6 +1321,7 @@ module.exports.marketTripPlan = async (req, res) => {
       StartKm,
       Status: 1, // default
       CreatedBy: userId,
+      PlanCat: 2,
     };
 
     console.log("Data : ", dataModel);
