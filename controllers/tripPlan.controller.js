@@ -599,7 +599,7 @@ module.exports.checkTripPlan = async (req, res) => {
           };
         }
       } else {
-        if (item.CustType === "2") {
+        if (item.PlanCat === 2) {
           return {
             Id: item.ID,
             TripId: item.TripId || null,
@@ -634,7 +634,7 @@ module.exports.checkTripPlan = async (req, res) => {
             RateMapRouteType: item.Route_Master?.RouteType || null,
             RateMapTripType: item.CustRateMaps?.TripType || null,
             RouteString:
-              `${item.Route_Master.source_city.CityName}-${item.Route_Master.dest_city.CityName}` ||
+              `${item?.Route_Master?.source_city?.CityName}-${item?.Route_Master?.dest_city?.CityName}` ||
               null,
             TripTypeName: item.tripType?.TypeName || null,
             TripDirection: item.TripType === 2 ? "Reverse" : "Forward",
