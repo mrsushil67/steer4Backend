@@ -3,7 +3,7 @@ const { DBMODELS } = require("../models/init-models");
 
 module.exports.getAllCity = async (req, res) => {
   try {
-    const { cityName = null } = req.body || {};
+    const { cityId = null, cityName = null } = req.body || {};
 
     if (cityName === " ") {
       return res
@@ -11,13 +11,19 @@ module.exports.getAllCity = async (req, res) => {
         .json({ status: "400", message: "Invalid request" });
     }
 
-    const whereCondition = cityName
-      ? {
-          CityName: {
-            [Op.like]: `%${cityName}%`,
-          },
-        }
-      : {};
+    const whereCondition =
+      cityName || cityId
+        ? {
+            [Op.or]: [
+              {
+                CityName: {
+                  [Op.like]: `%${cityName}%`,
+                },
+              },
+              { CityId: `${cityId}` },
+            ],
+          }
+        : {};
     const allCities = await DBMODELS.city.findAll({
       where: whereCondition,
       attributes: ["CityId", "CityName", "stateId", "latitude", "longitude"],
