@@ -1187,7 +1187,7 @@ module.exports.marketTripPlan = async (req, res) => {
     CustId,
     source,
     destination,
-    // TripType,
+    TripType,
     VehicleSize,
     VehicleId,
     Driver1Id,
@@ -1209,7 +1209,7 @@ module.exports.marketTripPlan = async (req, res) => {
     !CustId ||
     !source ||
     !destination ||
-    // !TripType ||
+    !TripType ||
     !VehicleSize ||
     !VehicleId ||
     !Driver1Id ||
@@ -1309,7 +1309,7 @@ module.exports.marketTripPlan = async (req, res) => {
       CustType,
       CustId,
       RouteId: RouteID,
-      TripType: 1,
+      TripType,
       VehicleSize,
       VehicleId,
       Driver1Id,
