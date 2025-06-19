@@ -406,10 +406,6 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
-   ScheduleDatafromRouteMaster.forEach((item) => {
-    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",item)
-   })
-
     const data = [...regularData, ...marketData];
     const filteredTrips = data.filter((trip) => {
       const tripNo = trip.TripNo;
@@ -448,9 +444,6 @@ module.exports.checkTripPlan = async (req, res) => {
       }
     });
 
-    // filteredTrips.forEach((trip) => {
-    //   console.log(">>> : ", trip.Id, trip.TripNo, trip.Stat);
-    // });
     const ScheduleData = [
       ...ScheduleDatafromRouteMaster,
       ...ScheduleDatafromCustRateMAps,
@@ -698,7 +691,7 @@ module.exports.checkTripPlan = async (req, res) => {
       .status(200)
       .json({ status: "200", message: "Record found", data: tripDetailsArray });
   } catch (error) {
-    console.error("Error while fetching trip operations:", error);
+    console.log("Error while fetching trip operations:", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });
@@ -772,7 +765,7 @@ module.exports.tripPlan = async (req, res) => {
       PlanCat: 1,
     };
 
-    console.log("Data : ", dataModel);
+    // console.log("Data : ", dataModel);
 
     const data = await DBMODELS.TripPlanSchedule.create(dataModel);
 
@@ -787,7 +780,7 @@ module.exports.tripPlan = async (req, res) => {
       });
     }
 
-    console.error("Error While creating tripSheet:", error);
+    console.log("Error While creating tripSheet:", error);
 
     return res
       .status(500)
@@ -942,7 +935,7 @@ module.exports.cancelTrip = async (req, res) => {
       updatedTripPlanScheduleRows,
     });
   } catch (error) {
-    console.error("Error While updating trip:", error);
+    console.log("Error While updating trip:", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });
@@ -1004,7 +997,7 @@ module.exports.proceedTrip = async (req, res) => {
       // addedTripPlan: tripPlanData,
     });
   } catch (error) {
-    console.error("Error while proceeding trip:", error);
+    console.log("Error while proceeding trip:", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });
@@ -1019,7 +1012,7 @@ module.exports.tripOperations = async (req, res) => {
 
     return res.status(200).json({ message: "Record found", data });
   } catch (error) {
-    console.error("Error while fetching trip operations:", error);
+    console.log("Error while fetching trip operations:", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });
@@ -1054,15 +1047,15 @@ module.exports.onRouteTripDetails = async (req, res) => {
     const formattedActualTime = moment(Act_Dept, "DD-MM-YYYY HH:mm").format(
       "YYYY-MM-DD HH:mm:ss"
     );
-    console.log(tripId);
-    console.log(tripNo);
+    // console.log(tripId);
+    // console.log(tripNo);
     const existTrip = await DBMODELS.TripOperation.findOne({
       where: {
         TripId: tripId,
         TripNo: tripNo,
       },
     });
-    console.log(existTrip);
+    // console.log(existTrip);
     if (!existTrip) {
       return res.status(404).json({
         status: "404",
@@ -1328,7 +1321,7 @@ module.exports.marketTripPlan = async (req, res) => {
       PlanCat: 2,
     };
 
-    console.log("Data : ", dataModel);
+    // console.log("Data : ", dataModel);
 
     const data = await DBMODELS.TripPlanSchedule.create(dataModel);
 
@@ -1474,7 +1467,7 @@ module.exports.closedTrips = async (req, res) => {
       .status(200)
       .json({ message: "Record found", data: filteredClosed });
   } catch (error) {
-    console.error("Error while fetching trip operations:", error);
+    console.log("Error while fetching trip operations:", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server error" });
