@@ -83,12 +83,12 @@ module.exports.checkTripPlan = async (req, res) => {
               {
                 model: DBMODELS.city,
                 as: "source_city",
-                attributes: ["CityName", "latitude", "longitude"],
+                attributes: ["CityId","CityName", "latitude", "longitude"],
               },
               {
                 model: DBMODELS.city,
                 as: "dest_city",
-                attributes: ["CityName", "latitude", "longitude"],
+                attributes: ["CityId","CityName", "latitude", "longitude"],
               },
             ],
             // attributes: ["RouteId", "RouteName", "RouteType", "RouteString"],
@@ -150,6 +150,23 @@ module.exports.checkTripPlan = async (req, res) => {
             model: DBMODELS.Driver,
             as: "Driver",
             attributes: ["DriverID", "DName", "Licence"],
+          },
+          {
+            model: DBMODELS.RouteMaster,
+            as: "Route_Master",
+            attributes: ["RouteId"],
+            include: [
+              {
+                model: DBMODELS.city,
+                as: "source_city",
+                attributes: ["CityId","CityName", "latitude", "longitude"],
+              },
+              {
+                model: DBMODELS.city,
+                as: "dest_city",
+                attributes: ["CityId","CityName", "latitude", "longitude"],
+              },
+            ],
           },
           {
             model: DBMODELS.CustRateMap,
@@ -274,12 +291,12 @@ module.exports.checkTripPlan = async (req, res) => {
                 {
                   model: DBMODELS.city,
                   as: "source_city",
-                  attributes: ["CityName", "latitude", "longitude"],
+                  attributes: ["CityId","CityName", "latitude", "longitude"],
                 },
                 {
                   model: DBMODELS.city,
                   as: "dest_city",
-                  attributes: ["CityName", "latitude", "longitude"],
+                  attributes: ["CityId","CityName", "latitude", "longitude"],
                 },
               ],
             },
@@ -312,7 +329,7 @@ module.exports.checkTripPlan = async (req, res) => {
     });
 
     
-    console.log(regularData[0].TripPlan)
+    console.log(ScheduleDatafromCustRateMAps[0])
 
     const marketData = await DBMODELS.TripOperation.findAll({
       where: tripOperationWhere,
@@ -365,12 +382,12 @@ module.exports.checkTripPlan = async (req, res) => {
                 {
                   model: DBMODELS.city,
                   as: "source_city",
-                  attributes: ["CityName", "latitude", "longitude"],
+                  attributes: ["CityId","CityName", "latitude", "longitude"],
                 },
                 {
                   model: DBMODELS.city,
                   as: "dest_city",
-                  attributes: ["CityName", "latitude", "longitude"],
+                  attributes: ["CityId","CityName", "latitude", "longitude"],
                 },
               ],
               // attributes: ["RouteId", "RouteName", "RouteType", "RouteString"],
@@ -446,6 +463,8 @@ module.exports.checkTripPlan = async (req, res) => {
         }
       }
     });
+
+    // console.log("ScheduleDatafromRouteMaster : ",ScheduleDatafromRouteMaster[0].Route_Master)
 
     const ScheduleData = [
       ...ScheduleDatafromRouteMaster,
@@ -536,6 +555,8 @@ module.exports.checkTripPlan = async (req, res) => {
               null,
             TripTypeName: item.TripPlan.tripType?.TypeName || null,
             TripDirection: tripDirection,
+            source: item.TripPlan.route_master.source_city.CityId,
+            destination: item.TripPlan.route_master.dest_city.CityId,
             // },
           };
         } else {
@@ -595,6 +616,8 @@ module.exports.checkTripPlan = async (req, res) => {
             TripTypeName:
               item.TripPlan.CustRateMaps?.trip_type?.TypeName || null,
             TripDirection: tripDirection,
+            source: item?.TripPlan.route_master?.source_city.CityId,
+            destination: item?.TripPlan.route_master?.dest_city.CityId,
             // },
           };
         }
@@ -638,6 +661,8 @@ module.exports.checkTripPlan = async (req, res) => {
               null,
             TripTypeName: item.tripType?.TypeName || null,
             TripDirection: item.TripType === 2 ? "Reverse" : "Forward",
+            source: item?.Route_Master?.source_city?.CityId,
+            destination: item?.Route_Master?.dest_city?.CityId,
           };
         } else {
           return {
@@ -676,6 +701,8 @@ module.exports.checkTripPlan = async (req, res) => {
             RouteString: item.CustRateMaps?.RouteString || null,
             TripTypeName: item.CustRateMaps?.trip_type?.TypeName || null,
             TripDirection: item.TripType === 2 ? "Reverse" : "Forward",
+            source: item?.Route_Master?.source_city?.CityId,
+            destination: item?.Route_Master?.dest_city?.CityId,
           };
         }
       }
