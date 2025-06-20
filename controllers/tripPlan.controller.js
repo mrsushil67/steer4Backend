@@ -557,6 +557,8 @@ module.exports.checkTripPlan = async (req, res) => {
             TripDirection: tripDirection,
             source: item.TripPlan.route_master.source_city.CityId,
             destination: item.TripPlan.route_master.dest_city.CityId,
+            sourceName: item.TripPlan.route_master.source_city.CityName,
+            destinationName: item.TripPlan.route_master.dest_city.CityName,
             // },
           };
         } else {
@@ -618,6 +620,8 @@ module.exports.checkTripPlan = async (req, res) => {
             TripDirection: tripDirection,
             source: item?.TripPlan.route_master?.source_city.CityId,
             destination: item?.TripPlan.route_master?.dest_city.CityId,
+            sourceName: item.TripPlan.route_master.source_city.CityName,
+            destinationName: item.TripPlan.route_master.dest_city.CityName,
             // },
           };
         }
@@ -663,6 +667,8 @@ module.exports.checkTripPlan = async (req, res) => {
             TripDirection: item.TripType === 2 ? "Reverse" : "Forward",
             source: item?.Route_Master?.source_city?.CityId,
             destination: item?.Route_Master?.dest_city?.CityId,
+            sourceName: item.Route_Master.source_city.CityName,
+            destinationName: item.Route_Master.dest_city.CityName,
           };
         } else {
           return {
@@ -703,6 +709,8 @@ module.exports.checkTripPlan = async (req, res) => {
             TripDirection: item.TripType === 2 ? "Reverse" : "Forward",
             source: item?.Route_Master?.source_city?.CityId,
             destination: item?.Route_Master?.dest_city?.CityId,
+            sourceName: item.Route_Master.source_city.CityName,
+            destinationName: item.Route_Master.dest_city.CityName,
           };
         }
       }
@@ -1690,13 +1698,6 @@ module.exports.closedTrips = async (req, res) => {
       ],
     });
 
-    marketData.forEach((item) => {
-      console.log(">>>>>>>>>>>>>>>>>>>>>>item : ", item,item.TripPlan);
-      })
-
-      console.log("regularData : ", regularData.length);
-      console.log("marketData : ", marketData.length);
-      
     const data = [...regularData, ...marketData];
 
     const filteredClosed = data.filter((trip) => {
@@ -1727,6 +1728,9 @@ module.exports.closedTrips = async (req, res) => {
       return false;
     });
 
+    filteredClosed.forEach((item) => {
+      console.log(`tripId: ${item.TripId} Processing TripNo: ${item.TripNo}, Stat: ${item.Stat}, TripType: ${item.TripPlan.TripType}`);
+    });
     return res
       .status(200)
       .json({status:"200", message: "Record found", data: filteredClosed });
