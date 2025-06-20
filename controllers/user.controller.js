@@ -15,7 +15,7 @@ function generateToken(user) {
   const token = jwt.sign(
     { userId: user.User_ID, Email: user.Email },
     process.env.JWTSECRET,
-    { expiresIn: "1h" }
+    { expiresIn: "24h" }
   );
   return token;
 }
@@ -32,6 +32,7 @@ module.exports.signInUser = async (req, res) => {
 
     const user = await DBMODELS.Users.findOne({
       where: { Email },
+      attributes: { exclude: ['ShowPassword'] },
     });
 
     if (!user) {
