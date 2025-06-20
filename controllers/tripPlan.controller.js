@@ -329,7 +329,7 @@ module.exports.checkTripPlan = async (req, res) => {
     });
 
     
-    console.log(ScheduleDatafromCustRateMAps[0])
+    // console.log(ScheduleDatafromCustRateMAps[0])
 
     const marketData = await DBMODELS.TripOperation.findAll({
       where: tripOperationWhere,
