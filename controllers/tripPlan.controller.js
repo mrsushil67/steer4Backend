@@ -1700,40 +1700,40 @@ module.exports.closedTrips = async (req, res) => {
 
     const data = [...regularData, ...marketData];
 
-    const filteredClosed = data.filter((trip) => {
-      const tripNo = trip.TripNo;
-      const lastLetter = tripNo.slice(-1);
-      const isClosed = trip.Stat === 7;
+    // const filteredClosed = data.filter((trip) => {
+    //   const tripNo = trip.TripNo;
+    //   const lastLetter = tripNo.slice(-1);
+    //   const isClosed = trip.Stat === 7;
 
-      if (trip.TripPlan.TripType === 2) {
-        if (lastLetter === "A" && isClosed) {
-          const baseTripNo = tripNo.slice(0, -1);
+    //   if (trip.TripPlan.TripType === 2) {
+    //     if (lastLetter === "A" && isClosed) {
+    //       const baseTripNo = tripNo.slice(0, -1);
 
-          const tripA = data.find(
-            (t) => t?.TripNo === baseTripNo + "A" && t?.Stat === 7
-          );
-          const tripB = data.find(
-            (t) => t?.TripNo === baseTripNo + "B" && t?.Stat === 7
-          );
+    //       const tripA = data.find(
+    //         (t) => t?.TripNo === baseTripNo + "A" && t?.Stat === 7
+    //       );
+    //       const tripB = data.find(
+    //         (t) => t?.TripNo === baseTripNo + "B" && t?.Stat === 7
+    //       );
 
-          return tripA && tripB;
-        }
-        return false;
-      }
+    //       return tripA && tripB;
+    //     }
+    //     return false;
+    //   }
 
-      if (trip.TripPlan.TripType === 1) {
-        return lastLetter === "A" && isClosed;
-      }
+    //   if (trip.TripPlan.TripType === 1) {
+    //     return lastLetter === "A" && isClosed;
+    //   }
 
-      return false;
-    });
+    //   return false;
+    // });
 
-    filteredClosed.forEach((item) => {
+    data.forEach((item) => {
       console.log(`tripId: ${item.TripId} Processing TripNo: ${item.TripNo}, Stat: ${item.Stat}, TripType: ${item.TripPlan.TripType}`);
     });
     return res
       .status(200)
-      .json({status:"200", message: "Record found", data: filteredClosed });
+      .json({status:"200", message: "Record found", data: data });
   } catch (error) {
     console.log("Error while fetching trip operations:", error);
     return res
