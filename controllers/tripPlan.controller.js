@@ -1694,6 +1694,9 @@ module.exports.closedTrips = async (req, res) => {
       console.log(">>>>>>>>>>>>>>>>>>>>>>item : ", item,item.TripPlan);
       })
 
+      console.log("regularData : ", regularData.length);
+      console.log("marketData : ", marketData.length);
+      
     const data = [...regularData, ...marketData];
 
     const filteredClosed = data.filter((trip) => {
