@@ -1690,7 +1690,9 @@ module.exports.closedTrips = async (req, res) => {
       ],
     });
 
-    console.log("marketData : ", marketData);
+    marketData.forEach((item) => {
+      console.log(">>>>>>>>>>>>>>>>>>>>>>item : ", item,item.TripPlan);
+      })
 
     const data = [...regularData, ...marketData];
 
