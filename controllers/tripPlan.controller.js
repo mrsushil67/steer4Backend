@@ -719,7 +719,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: "200", message: "Record found successfully", data: tripDetailsArray });
+      .json({ status: "200", message: "Record found", data: tripDetailsArray });
   } catch (error) {
     console.log("Error while fetching trip operations:", error);
     return res
