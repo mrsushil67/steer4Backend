@@ -1515,14 +1515,18 @@ module.exports.closedTrips = async (req, res) => {
       };
     }
 
-    const data = await DBMODELS.TripOperation.findAll({
+    const regularData = await DBMODELS.TripOperation.findAll({
       // where: tripOperationWhere,
       // attributes:['Id','TripNo','TripId','Stat'],
       include: [
         {
           model: DBMODELS.TripPlan,
           as: "TripPlan",
-          where: tripPlanWhere,
+          where: {...tripPlanWhere,
+            PlanCat: {
+              [Op.ne]: 2,
+            },
+          },
           include: [
             {
               model: DBMODELS.CustomerMaster,
@@ -1590,6 +1594,105 @@ module.exports.closedTrips = async (req, res) => {
         },
       ],
     });
+
+    const marketData = await DBMODELS.TripOperation.findAll({
+      // where: tripOperationWhere,
+      // group: ['Id'],
+      include: [
+        {
+          model: DBMODELS.TripPlan,
+          as: "TripPlan",
+          where: { ...tripPlanWhere, PlanCat: 2 },
+          include: [
+            {
+              model: DBMODELS.MarketCust,
+              as: "MarketCust",
+              // attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+            },
+            {
+              model: DBMODELS.Vehicle,
+              as: "Vehicle",
+              where: vehicleNo
+                ? {
+                    VNumer: {
+                      [Op.like]: `%${vehicleNo}%`,
+                    },
+                  }
+                : {},
+              attributes: ["VehicleID", "VNumer", "FleetZize"],
+            },
+            {
+              model: DBMODELS.Driver,
+              as: "Driver",
+              attributes: ["DriverID", "DName", "Licence"],
+            },
+            {
+              model: DBMODELS.RouteMaster,
+              as: "route_master",
+              required: true,
+              // on: {
+              //   RouteId: where(
+              //     col("TripPlan.RouteId"),
+              //     "=",
+              //     col("route_master.RouteId")
+              //   ),
+              //   // CustId: where(
+              //   //   col("TripPlan.CustId"),
+              //   //   "=",
+              //   //   col("route_master.CustId")
+              //   // ),
+              // },
+              include: [
+                {
+                  model: DBMODELS.city,
+                  as: "source_city",
+                  attributes: ["CityId","CityName", "latitude", "longitude"],
+                },
+                {
+                  model: DBMODELS.city,
+                  as: "dest_city",
+                  attributes: ["CityId","CityName", "latitude", "longitude"],
+                },
+              ],
+              // attributes: ["RouteId", "RouteName", "RouteType", "RouteString"],
+            },
+            {
+              model: DBMODELS.TripType,
+              as: "tripType",
+              required: true,
+              attributes: ["Id", "TypeName"],
+            },
+            // {
+            //   model: DBMODELS.CustRateMap,
+            //   as: "CustRateMaps",
+            //   on: literal(
+            //     "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
+            //   ),
+            //   include: [
+            //     {
+            //       model: DBMODELS.TripType,
+            //       as: "trip_type",
+            //       required: true,
+            //       attributes: ["Id", "TypeName"],
+            //     },
+            //   ],
+            //   attributes: [
+            //     "ID",
+            //     "CustId",
+            //     "RouteId",
+            //     "RouteType",
+            //     "TripType",
+            //     "RouteString",
+            //   ],
+            // },
+          ],
+        },
+      ],
+    });
+
+    console.log("marketData : ", marketData);
+
+    const data = [...regularData, ...marketData];
 
     const filteredClosed = data.filter((trip) => {
       const tripNo = trip.TripNo;
