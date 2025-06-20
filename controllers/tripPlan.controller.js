@@ -1732,8 +1732,9 @@ module.exports.closedTrips = async (req, res) => {
     // });
 
     data.forEach((item) => {
-      console.log(`Id: ${Id}, tripId: ${item.TripId} Processing TripNo: ${item.TripNo}, Stat: ${item.Stat}, TripType: ${item.TripPlan.TripType}`);
+      console.log(`Id: ${item.Id}, tripId: ${item.TripId} Processing TripNo: ${item.TripNo}, Stat: ${item.Stat}, TripType: ${item.TripPlan.TripType}`);
     });
+    
     return res
       .status(200)
       .json({status:"200", message: "Record found", data: data });
