@@ -14,52 +14,52 @@ module.exports.getTripExpenceList = async (req, res) => {
               as: "Vehicle",
               attributes: ["VehicleID", "VNumer"],
             },
-            // {
-            //   model: DBMODELS.Driver,
-            //   as: "Driver",
-            //   attributes: ["DriverID", "DName"],
-            // },
-            // {
-            //   model: DBMODELS.RouteMaster,
-            //   as: "route_master",
-            //   attributes: ["RouteId"],
-            //   include: [
-            //     {
-            //       model: DBMODELS.city,
-            //       as: "source_city",
-            //       attributes: ["CityId", "CityName", "latitude", "longitude"],
-            //     },
-            //     {
-            //       model: DBMODELS.city,
-            //       as: "dest_city",
-            //       attributes: ["CityId", "CityName", "latitude", "longitude"],
-            //     },
+            {
+              model: DBMODELS.Driver,
+              as: "Driver",
+              attributes: ["DriverID", "DName"],
+            },
+            {
+              model: DBMODELS.RouteMaster,
+              as: "route_master",
+              attributes: ["RouteId"],
+              include: [
+                {
+                  model: DBMODELS.city,
+                  as: "source_city",
+                  attributes: ["CityId", "CityName", "latitude", "longitude"],
+                },
+                {
+                  model: DBMODELS.city,
+                  as: "dest_city",
+                  attributes: ["CityId", "CityName", "latitude", "longitude"],
+                },
+              ],
+            },
+            {
+              model: DBMODELS.CustRateMap,
+              as: "CustRateMaps",
+              where: {
+                RouteId: col("TripPlan.RouteId"),
+                CustId: col("TripPlan.CustId"),
+                TripType: col("TripPlan.TripType"),
+              },
+              include: [
+                {
+                  model: DBMODELS.TripType,
+                  as: "trip_type",
+                  attributes: ["Id", "TypeName"],
+                },
+              ],
+            //   attributes: [
+            //     "ID",
+            //     "CustId",
+            //     "RouteId",
+            //     "RouteType",
+            //     "TripType",
+            //     "RouteString",
             //   ],
-            // },
-            // {
-            //   model: DBMODELS.CustRateMap,
-            //   as: "CustRateMaps",
-            // //   where: {
-            // //     RouteId: col("TripPlan.RouteId"),
-            // //     CustId: col("TripPlan.CustId"),
-            // //     // TripType: col("TripPlan.TripType"),
-            // //   },
-            //   include: [
-            //     {
-            //       model: DBMODELS.TripType,
-            //       as: "trip_type",
-            //       attributes: ["Id", "TypeName"],
-            //     },
-            //   ],
-            // //   attributes: [
-            // //     "ID",
-            // //     "CustId",
-            // //     "RouteId",
-            // //     "RouteType",
-            // //     "TripType",
-            // //     "RouteString",
-            // //   ],
-            // },
+            },
           ],
         },
         {
