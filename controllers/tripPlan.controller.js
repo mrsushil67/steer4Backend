@@ -1300,6 +1300,17 @@ module.exports.closeTripDetails = async (req, res) => {
         .json({ status: "404", message: "Record not found" });
     }
 
+    const tripExist = await DBMODELS.TripPlan.findAll({
+      where: {
+        ID: tripId
+      }
+    })
+     if (!tripExist) {
+      return res
+        .status(404)
+        .json({ status: "404", message: "Trip not found in tripPlan" });
+    }
+
     const formattedActualArr = moment(Act_Arr, "DD-MM-YYYY HH:mm").format(
       "YYYY-MM-DD HH:mm:ss"
     );
@@ -1324,6 +1335,46 @@ module.exports.closeTripDetails = async (req, res) => {
       }
     );
 
+    const UpdateTripPlanCompletion = await DBMODELS.TripOperation.findAll({
+      where: {
+        TripId: tripId
+      },
+      include: [
+        {model: DBMODELS.TripPlan, as: "TripPlan"}
+      ]
+    })
+
+    for (const trip of UpdateTripPlanCompletion) {
+      const tripNo = trip.TripNo || "";
+      const baseTripNo = tripNo.slice(0, -1);
+      const lastLetter = tripNo.slice(-1); 
+      const tripType = trip?.TripPlan?.TripType;
+    
+      if (tripType === 2 && lastLetter === "A" && trip.Stat === 7) {
+        // Look for corresponding B part
+        const tripB = UpdateTripPlanCompletion.find(
+          (t) => t?.TripNo === baseTripNo + "B" && t.Stat === 7
+        );
+    
+        if (tripB) {
+          await DBMODELS.TripPlan.update(
+            { Is_Completed: 1 },
+            { where: { ID: trip.TripPlan.ID } }
+          );
+          console.log(`TripPlan ${trip.TripPlan.ID} marked completed (Type 2 A+B).`);
+        }
+      }
+    
+      if (tripType === 1 && lastLetter === "A" && trip.Stat === 7) {
+        await DBMODELS.TripPlan.update(
+          { Is_Completed: 1 },
+          { where: { ID: trip.TripPlan.ID } }
+        );
+        console.log(`TripPlan ${trip.TripPlan.ID} marked completed (Type 1 A only).`);
+      }
+    }
+    
+
     if (updatedRows === 0) {
       return res
         .status(404)
@@ -1333,7 +1384,7 @@ module.exports.closeTripDetails = async (req, res) => {
     return res.status(200).json({
       status: "200",
       message: "Trip details updated successfully",
-      updatedRows: updatedRows,
+      UpdateTripPlanCompletion: UpdateTripPlanCompletion,
     });
   } catch (error) {
     console.log("Error while close trip:", error);
