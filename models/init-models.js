@@ -508,6 +508,9 @@ function initModels(sequelize) {
   TripPlanSchedule.belongsTo(TripType ,{as: 'tripType', foreignKey: "TripType"});
   TripType.hasOne(TripPlanSchedule, {as: "TripPlanSchedule", foreignKey: "TripType"});
 
+  TripAdvance.belongsTo(TripOperation,  { as: "TripOperation", foreignKey: "TripId"});
+  TripOperation.hasOne(TripAdvance, { as: "TripAdvance", foreignKey: "TripId"});
+
   // RouteMaster.belongsTo(city, {as: 'source_city',foreignKey: 'Source'});
   // city.hasMany(RouteMaster, {as: 'source_routes', foreignKey: 'Source' });
 

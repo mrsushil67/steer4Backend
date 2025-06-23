@@ -12,6 +12,8 @@ module.exports.checkTripPlan = async (req, res) => {
       toDate = null,
     } = req.body || {};
 
+    console.log("Request body:", req.body);
+
     let scheduleWhere = {
       [Op.and]: [{ is_final: 0 }, { Status: { [Op.ne]: 6 } }],
     };
