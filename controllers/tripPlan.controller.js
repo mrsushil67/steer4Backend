@@ -1122,7 +1122,7 @@ module.exports.proceedTrip = async (req, res) => {
     });
 
     if (!isExist) {
-      console.log("Trip does not exist")
+      console.log("Trip does not exist :", tripId)
       return res
         .status(400)
         .json({ status: "400", message: "Trip does not exist" });
