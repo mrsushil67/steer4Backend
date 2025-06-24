@@ -1,9 +1,43 @@
-const { fn, col, literal } = require("sequelize");
+const { fn, col, literal, Op } = require("sequelize");
 const { DBMODELS } = require("../models/init-models");
 
 module.exports.getTripExpenceList = async (req, res) => {
   try {
+    const {
+      TripNo = null,
+      vehicleNo = null,
+      fromDate = null,
+      toDate = null,
+    } = req.body || {};
+
+    const WhereCondition = {};
+    if (TripNo !== null) {
+      WhereCondition.TripNo = TripNo;
+    }
+
+    if (vehicleNo !== null) {
+      WhereCondition["$TripPlan.Vehicle.VNumer$"] = {
+        [Op.like]: `%${vehicleNo}%`,
+      };
+    }
+
+    if (fromDate && toDate) {
+      WhereCondition.ATD = {
+        [Op.between]: [new Date(fromDate), new Date(toDate)],
+      };
+    } else if (fromDate) {
+      WhereCondition.ATD = {
+        [Op.gte]: new Date(fromDate),
+      };
+    } else if (toDate) {
+      WhereCondition.ATD = {
+        [Op.lte]: new Date(toDate),
+      };
+    }
+
+    console.log(WhereCondition)
     const getAllTripExpence = await DBMODELS.TripOperation.findAll({
+      where: WhereCondition,
       attributes: [
         "Id",
         "TripNo",
@@ -67,6 +101,12 @@ module.exports.getTripExpenceList = async (req, res) => {
               model: DBMODELS.Vehicle,
               as: "Vehicle",
               attributes: ["VehicleID", "VNumer"],
+              // where: vehicleNo
+              // ? {
+              //     VNumer : {
+              //       [Op.like]: `%${vehicleNo}%`
+              //     }
+              // }:{}
             },
             // {
             //   model: DBMODELS.Driver,
@@ -101,7 +141,6 @@ module.exports.getTripExpenceList = async (req, res) => {
                 "TripType",
                 "TAT",
                 "RouteString",
-
               ],
               on: literal(
                 "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
@@ -138,8 +177,8 @@ module.exports.getTripExpenceList = async (req, res) => {
           on: literal(
             "`TripOperation`.`TripId` = `OnRouteExp`.`TripId` AND `TripOperation`.`TripNo` = `OnRouteExp`.`TripNo`"
           ),
-          attributes: []
-        }
+          attributes: [],
+        },
       ],
       group: [
         "TripOperation.Id",
@@ -221,19 +260,25 @@ module.exports.getTripExpenceList = async (req, res) => {
     });
 
     const getTotalCash = getAllTripExpence.reduce((acc, trip) => {
-      const totalCash = Number(trip.dataValues.advanceCash) || 0; 
+      const totalCash = Number(trip.dataValues.advanceCash) || 0;
       return acc + totalCash;
     }, 0);
-    
+
     const getTotalDieselQty = getAllTripExpence.reduce((acc, trip) => {
       const totalDieselQty = Number(trip.dataValues.advanceDieselQty) || 0;
       return acc + totalDieselQty;
     }, 0);
 
-    console.log("Total : ", getTotalCash, getTotalDieselQty)
+    console.log("Total : ", getTotalCash, getTotalDieselQty);
     const total = {
       TotalCash: getTotalCash,
       TotalDieselQty: getTotalDieselQty,
+    };
+    if( getAllTripExpence.length === 0) {
+      return res.status(404).json({
+        status: "404",
+        message: "No record Found"
+      });
     }
     return res.status(200).json({
       status: "200",
