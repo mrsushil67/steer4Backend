@@ -37,7 +37,7 @@ module.exports.getTripExpenceList = async (req, res) => {
       };
     }
 
-    console.log(WhereCondition)
+    console.log(WhereCondition);
     const getAllTripExpence = await DBMODELS.TripOperation.findAll({
       where: WhereCondition,
       attributes: [
@@ -267,10 +267,17 @@ module.exports.getTripExpenceList = async (req, res) => {
     }, 0);
 
     const getOnRouteCash = getAllTripExpence.reduce((acc, trip) => {
-      console.log(trip.dataValues)
-      const totalOnRouteCash = Number(trip.dataValues.onRouteCash) || 0;
-      return acc + totalOnRouteCash;
-    })
+      console.log(trip.dataValues);
+      const totalOnRouteCash = Number(trip.dataValues.onRouteCash);
+      if (!isNaN(totalOnRouteCash)) {
+        return acc + totalOnRouteCash;
+      } else {
+        console.warn(
+          `Invalid onRouteCash value: ${trip.dataValues.onRouteCash}`
+        ); // Log invalid values
+        return acc;
+      }
+    }, 0);
 
     const getTotalDieselQty = getAllTripExpence.reduce((acc, trip) => {
       const totalDieselQty = Number(trip.dataValues.advanceDieselQty) || 0;
@@ -278,23 +285,24 @@ module.exports.getTripExpenceList = async (req, res) => {
     }, 0);
 
     const getOnRouteDieselQty = getAllTripExpence.reduce((acc, trip) => {
-      const totalOnRouteDieselQty = Number(trip.dataValues.onRouteDieselQty) || 0;
+      const totalOnRouteDieselQty =
+        Number(trip.dataValues.onRouteDieselQty) || 0;
       return acc + totalOnRouteDieselQty;
     }, 0);
 
-    console.log("Total : ", getTotalCash );
+    console.log("Total : ", getTotalCash);
     console.log("Total : ", getOnRouteCash);
     console.log("Total : ", getTotalDieselQty);
     console.log("Total : ", getOnRouteDieselQty);
     const total = {
-        TotalCash: getTotalCash + getOnRouteCash,
-        TotalDieselQty: getTotalDieselQty + getOnRouteDieselQty,
+      TotalCash: getTotalCash + getOnRouteCash,
+      TotalDieselQty: getTotalDieselQty + getOnRouteDieselQty,
     };
 
-    if( getAllTripExpence.length === 0) {
+    if (getAllTripExpence.length === 0) {
       return res.status(404).json({
         status: "404",
-        message: "No record Found"
+        message: "No record Found",
       });
     }
     return res.status(200).json({
