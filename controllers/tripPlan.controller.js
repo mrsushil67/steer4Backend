@@ -1113,6 +1113,7 @@ module.exports.proceedTrip = async (req, res) => {
     const { tripId = null } = req.body || {};
 
     if (!tripId) {
+      console.log("Missing tripId")
       return res.status(400).json({ status: "400", message: "Missing tripId" });
     }
 
@@ -1121,6 +1122,7 @@ module.exports.proceedTrip = async (req, res) => {
     });
 
     if (!isExist) {
+      console.log("Trip does not exist")
       return res
         .status(400)
         .json({ status: "400", message: "Trip does not exist" });
@@ -1132,6 +1134,7 @@ module.exports.proceedTrip = async (req, res) => {
     );
 
     if (updatedRows === 0) {
+      console.log("No records updated, status might already be the same")
       return res.status(404).json({
         status: "404",
         message: "No records updated, status might already be the same",
@@ -1143,6 +1146,7 @@ module.exports.proceedTrip = async (req, res) => {
     });
 
     if (!tripScheduleData) {
+      console.log("Record not found after update")
       return res.status(404).json({
         status: "404",
         message: "Record not found after update",
