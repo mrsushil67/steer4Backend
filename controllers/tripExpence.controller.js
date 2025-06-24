@@ -95,6 +95,11 @@ module.exports.getTripExpenceList = async (req, res) => {
           as: "TripPlan",
           include: [
             {
+              model: DBMODELS.MarketCust,
+              as: "MarketCust",
+              // attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+            },
+            {
               model: DBMODELS.CustomerMaster,
               as: "CustomerMasters",
               attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
@@ -103,12 +108,6 @@ module.exports.getTripExpenceList = async (req, res) => {
               model: DBMODELS.Vehicle,
               as: "Vehicle",
               attributes: ["VehicleID", "VNumer"],
-              // where: vehicleNo
-              // ? {
-              //     VNumer : {
-              //       [Op.like]: `%${vehicleNo}%`
-              //     }
-              // }:{}
             },
             // {
             //   model: DBMODELS.Driver,
@@ -267,12 +266,11 @@ module.exports.getTripExpenceList = async (req, res) => {
     }, 0);
 
     const getOnRouteCash = getAllTripExpence.reduce((acc, trip) => {
-      console.log(trip.dataValues);
       const totalOnRouteCash = Number(trip.dataValues.onRouteCash);
       if (!isNaN(totalOnRouteCash)) {
         return acc + totalOnRouteCash;
       } else {
-        console.warn(
+        console.log(
           `Invalid onRouteCash value: ${trip.dataValues.onRouteCash}`
         ); // Log invalid values
         return acc;
@@ -290,10 +288,6 @@ module.exports.getTripExpenceList = async (req, res) => {
       return acc + totalOnRouteDieselQty;
     }, 0);
 
-    console.log("Total : ", getTotalCash);
-    console.log("Total : ", getOnRouteCash);
-    console.log("Total : ", getTotalDieselQty);
-    console.log("Total : ", getOnRouteDieselQty);
     const total = {
       TotalCash: getTotalCash + getOnRouteCash,
       TotalDieselQty: getTotalDieselQty + getOnRouteDieselQty,
@@ -312,7 +306,7 @@ module.exports.getTripExpenceList = async (req, res) => {
       data: getAllTripExpence,
     });
   } catch (error) {
-    console.error("Error in getTripExpenceList:", error);
+    console.log("Error in getTripExpenceList:", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server Error" });
