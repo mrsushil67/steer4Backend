@@ -187,12 +187,12 @@ module.exports.getTripExpenceList = async (req, res) => {
     });
 
     const getTotalCash = getAllTripExpence.reduce((acc, trip) => {
-      const totalCash = Number(trip.dataValues.totalCash) || 0; 
+      const totalCash = Number(trip.dataValues.advanceCash) || 0; 
       return acc + totalCash;
     }, 0);
     
     const getTotalDieselQty = getAllTripExpence.reduce((acc, trip) => {
-      const totalDieselQty = Number(trip.dataValues.totalDieselQty) || 0;
+      const totalDieselQty = Number(trip.dataValues.advanceDieselQty) || 0;
       return acc + totalDieselQty;
     }, 0);
 
