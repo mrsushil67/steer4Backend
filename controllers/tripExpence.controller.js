@@ -101,7 +101,11 @@ module.exports.getTripExpenceList = async (req, res) => {
         {
           model: DBMODELS.TripAdvance,
           as: "TripAdvance",
+          on: literal(
+            "`TripOperation`.`TripId` = `TripAdvance`.`TripId` AND `TripOperation`.`TripNo` = `TripAdvance`.`TripNo`"
+          ),
           attributes: [],
+
         },
       ],
       group: [
