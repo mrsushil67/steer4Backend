@@ -22,6 +22,13 @@ module.exports.checkTripPlan = async (req, res) => {
       scheduleWhere.Status = status;
     }
 
+    if (vehicleNo !== null) {
+      scheduleWhere[Op.or] = [
+        { TripSheet: { [Op.like]: `%${vehicleNo}%` } },
+        { "$Vehicle.VNumer$": { [Op.like]: `%${vehicleNo}%` } },
+      ];
+    }
+
     if (fromDate && toDate) {
       scheduleWhere.DepartureTime = {
         [Op.between]: [new Date(fromDate), new Date(toDate)],
@@ -51,13 +58,13 @@ module.exports.checkTripPlan = async (req, res) => {
           {
             model: DBMODELS.Vehicle,
             as: "Vehicle",
-            where: vehicleNo
-              ? {
-                  VNumer: {
-                    [Op.like]: `%${vehicleNo}%`,
-                  },
-                }
-              : {},
+            // where: vehicleNo
+            //   ? {
+            //       VNumer: {
+            //         [Op.like]: `%${vehicleNo}%`,
+            //       },
+            //     }
+            //   : {},
             attributes: ["VehicleID", "VNumer", "FleetZize"],
           },
           {
@@ -85,12 +92,12 @@ module.exports.checkTripPlan = async (req, res) => {
               {
                 model: DBMODELS.city,
                 as: "source_city",
-                attributes: ["CityId","CityName", "latitude", "longitude"],
+                attributes: ["CityId", "CityName", "latitude", "longitude"],
               },
               {
                 model: DBMODELS.city,
                 as: "dest_city",
-                attributes: ["CityId","CityName", "latitude", "longitude"],
+                attributes: ["CityId", "CityName", "latitude", "longitude"],
               },
             ],
             // attributes: ["RouteId", "RouteName", "RouteType", "RouteString"],
@@ -139,13 +146,6 @@ module.exports.checkTripPlan = async (req, res) => {
           {
             model: DBMODELS.Vehicle,
             as: "Vehicle",
-            where: vehicleNo
-              ? {
-                  VNumer: {
-                    [Op.like]: `%${vehicleNo}%`,
-                  },
-                }
-              : {},
             attributes: ["VehicleID", "VNumer", "FleetZize"],
           },
           {
@@ -161,12 +161,12 @@ module.exports.checkTripPlan = async (req, res) => {
               {
                 model: DBMODELS.city,
                 as: "source_city",
-                attributes: ["CityId","CityName", "latitude", "longitude"],
+                attributes: ["CityId", "CityName", "latitude", "longitude"],
               },
               {
                 model: DBMODELS.city,
                 as: "dest_city",
-                attributes: ["CityId","CityName", "latitude", "longitude"],
+                attributes: ["CityId", "CityName", "latitude", "longitude"],
               },
             ],
           },
@@ -235,6 +235,13 @@ module.exports.checkTripPlan = async (req, res) => {
     }
 
     let tripPlanWhere = {};
+    
+    if (vehicleNo !== null) {
+      tripOperationWhere[Op.or] = [
+        { "$TripPlan.TripSheet$": { [Op.like]: `%${vehicleNo}%` } },
+        { "$TripPlan.Vehicle.VNumer$": { [Op.like]: `%${vehicleNo}%` } },
+      ];
+    }
     if (fromDate && toDate) {
       tripPlanWhere.DepartureTime = {
         [Op.between]: [new Date(fromDate), new Date(toDate)],
@@ -271,13 +278,6 @@ module.exports.checkTripPlan = async (req, res) => {
             {
               model: DBMODELS.Vehicle,
               as: "Vehicle",
-              where: vehicleNo
-                ? {
-                    VNumer: {
-                      [Op.like]: `%${vehicleNo}%`,
-                    },
-                  }
-                : {},
               attributes: ["VehicleID", "VNumer", "FleetZize"],
             },
             {
@@ -293,12 +293,12 @@ module.exports.checkTripPlan = async (req, res) => {
                 {
                   model: DBMODELS.city,
                   as: "source_city",
-                  attributes: ["CityId","CityName", "latitude", "longitude"],
+                  attributes: ["CityId", "CityName", "latitude", "longitude"],
                 },
                 {
                   model: DBMODELS.city,
                   as: "dest_city",
-                  attributes: ["CityId","CityName", "latitude", "longitude"],
+                  attributes: ["CityId", "CityName", "latitude", "longitude"],
                 },
               ],
             },
@@ -330,9 +330,6 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
-    
-    // console.log(ScheduleDatafromCustRateMAps[0])
-
     const marketData = await DBMODELS.TripOperation.findAll({
       where: tripOperationWhere,
       // group: ['Id'],
@@ -350,13 +347,13 @@ module.exports.checkTripPlan = async (req, res) => {
             {
               model: DBMODELS.Vehicle,
               as: "Vehicle",
-              where: vehicleNo
-                ? {
-                    VNumer: {
-                      [Op.like]: `%${vehicleNo}%`,
-                    },
-                  }
-                : {},
+              // where: vehicleNo
+              //   ? {
+              //       VNumer: {
+              //         [Op.like]: `%${vehicleNo}%`,
+              //       },
+              //     }
+              //   : {},
               attributes: ["VehicleID", "VNumer", "FleetZize"],
             },
             {
@@ -384,12 +381,12 @@ module.exports.checkTripPlan = async (req, res) => {
                 {
                   model: DBMODELS.city,
                   as: "source_city",
-                  attributes: ["CityId","CityName", "latitude", "longitude"],
+                  attributes: ["CityId", "CityName", "latitude", "longitude"],
                 },
                 {
                   model: DBMODELS.city,
                   as: "dest_city",
-                  attributes: ["CityId","CityName", "latitude", "longitude"],
+                  attributes: ["CityId", "CityName", "latitude", "longitude"],
                 },
               ],
               // attributes: ["RouteId", "RouteName", "RouteType", "RouteString"],
@@ -861,7 +858,7 @@ module.exports.updateTrip = async (req, res) => {
       });
     }
 
-    if (PlanCat === '2') {
+    if (PlanCat === "2") {
       // Validate the required fields for PlanCat 2
       if (
         !CustType ||
@@ -1113,7 +1110,7 @@ module.exports.proceedTrip = async (req, res) => {
     const { tripId = null } = req.body || {};
 
     if (!tripId) {
-      console.log("Missing tripId")
+      console.log("Missing tripId");
       return res.status(400).json({ status: "400", message: "Missing tripId" });
     }
 
@@ -1122,7 +1119,7 @@ module.exports.proceedTrip = async (req, res) => {
     });
 
     if (!isExist) {
-      console.log("Trip does not exist :", tripId)
+      console.log("Trip does not exist :", tripId);
       return res
         .status(400)
         .json({ status: "400", message: "Trip does not exist" });
@@ -1134,7 +1131,7 @@ module.exports.proceedTrip = async (req, res) => {
     );
 
     if (updatedRows === 0) {
-      console.log("No records updated, status might already be the same")
+      console.log("No records updated, status might already be the same");
       return res.status(404).json({
         status: "404",
         message: "No records updated, status might already be the same",
@@ -1146,7 +1143,7 @@ module.exports.proceedTrip = async (req, res) => {
     });
 
     if (!tripScheduleData) {
-      console.log("Record not found after update")
+      console.log("Record not found after update");
       return res.status(404).json({
         status: "404",
         message: "Record not found after update",
@@ -1306,10 +1303,10 @@ module.exports.closeTripDetails = async (req, res) => {
 
     const tripExist = await DBMODELS.TripPlan.findAll({
       where: {
-        ID: tripId
-      }
-    })
-     if (!tripExist) {
+        ID: tripId,
+      },
+    });
+    if (!tripExist) {
       return res
         .status(404)
         .json({ status: "404", message: "Trip not found in tripPlan" });
@@ -1341,43 +1338,44 @@ module.exports.closeTripDetails = async (req, res) => {
 
     const UpdateTripPlanCompletion = await DBMODELS.TripOperation.findAll({
       where: {
-        TripId: tripId
+        TripId: tripId,
       },
-      include: [
-        {model: DBMODELS.TripPlan, as: "TripPlan"}
-      ]
-    })
+      include: [{ model: DBMODELS.TripPlan, as: "TripPlan" }],
+    });
 
     for (const trip of UpdateTripPlanCompletion) {
       const tripNo = trip.TripNo || "";
       const baseTripNo = tripNo.slice(0, -1);
-      const lastLetter = tripNo.slice(-1); 
+      const lastLetter = tripNo.slice(-1);
       const tripType = trip?.TripPlan?.TripType;
-    
+
       if (tripType === 2 && lastLetter === "A" && trip.Stat === 7) {
         // Look for corresponding B part
         const tripB = UpdateTripPlanCompletion.find(
           (t) => t?.TripNo === baseTripNo + "B" && t.Stat === 7
         );
-    
+
         if (tripB) {
           await DBMODELS.TripPlan.update(
             { Is_Completed: 1 },
             { where: { ID: trip.TripPlan.ID } }
           );
-          console.log(`TripPlan ${trip.TripPlan.ID} marked completed (Type 2 A+B).`);
+          console.log(
+            `TripPlan ${trip.TripPlan.ID} marked completed (Type 2 A+B).`
+          );
         }
       }
-    
+
       if (tripType === 1 && lastLetter === "A" && trip.Stat === 7) {
         await DBMODELS.TripPlan.update(
           { Is_Completed: 1 },
           { where: { ID: trip.TripPlan.ID } }
         );
-        console.log(`TripPlan ${trip.TripPlan.ID} marked completed (Type 1 A only).`);
+        console.log(
+          `TripPlan ${trip.TripPlan.ID} marked completed (Type 1 A only).`
+        );
       }
     }
-    
 
     if (updatedRows === 0) {
       return res
@@ -1587,7 +1585,8 @@ module.exports.closedTrips = async (req, res) => {
         {
           model: DBMODELS.TripPlan,
           as: "TripPlan",
-          where: {...tripPlanWhere,
+          where: {
+            ...tripPlanWhere,
             PlanCat: {
               [Op.ne]: 2,
             },
@@ -1711,12 +1710,12 @@ module.exports.closedTrips = async (req, res) => {
                 {
                   model: DBMODELS.city,
                   as: "source_city",
-                  attributes: ["CityId","CityName", "latitude", "longitude"],
+                  attributes: ["CityId", "CityName", "latitude", "longitude"],
                 },
                 {
                   model: DBMODELS.city,
                   as: "dest_city",
-                  attributes: ["CityId","CityName", "latitude", "longitude"],
+                  attributes: ["CityId", "CityName", "latitude", "longitude"],
                 },
               ],
               // attributes: ["RouteId", "RouteName", "RouteType", "RouteString"],
@@ -1789,12 +1788,14 @@ module.exports.closedTrips = async (req, res) => {
     });
 
     filteredClosed.forEach((item) => {
-      console.log(`Id: ${item.Id}, tripId: ${item.TripId} Processing TripNo: ${item.TripNo}, Stat: ${item.Stat}, TripType: ${item.TripPlan.TripType}`);
+      console.log(
+        `Id: ${item.Id}, tripId: ${item.TripId} Processing TripNo: ${item.TripNo}, Stat: ${item.Stat}, TripType: ${item.TripPlan.TripType}`
+      );
     });
-    
+
     return res
       .status(200)
-      .json({status:"200", message: "Record found", data: filteredClosed });
+      .json({ status: "200", message: "Record found", data: filteredClosed });
   } catch (error) {
     console.log("Error while fetching trip operations:", error);
     return res
