@@ -41,12 +41,28 @@ module.exports.getTripExpenceList = async (req, res) => {
         [fn("MAX", col("TripAdvance.Diesel_Rate")), "Diesel_Rate"],
         [fn("MAX", col("TripAdvance.Amt")), "Amt"],
         [fn("MAX", col("TripAdvance.TotalAmt")), "TotalAmt"],
+        [fn("SUM", col("OnRouteExp.Amt")), "onRouteCash"],
+        [fn("SUM", col("OnRouteExp.TotalAmt")), "onRouteDieselAmt"],
+        [fn("SUM", col("OnRouteExp.DieselQty")), "onRouteDieselQty"],
+        [fn("MAX", col("OnRouteExp.Id")), "onRouteId"],
+        [fn("MAX", col("OnRouteExp.Ticket")), "onRouteTicket"],
+        [fn("MAX", col("OnRouteExp.TripId")), "onRouteTripId"],
+        [fn("MAX", col("OnRouteExp.TripNo")), "onRouteTripNo"],
+        // [fn("MAX", col("OnRouteExp.AdjDiesel")), "AdjDiesel"],
+        // [fn("MAX", col("OnRouteExp.RemDiesel")), "RemDiesel"],
+        // [fn("MAX", col("OnRouteExp.Diesel_Rate")), "Diesel_Rate"],
+        // [fn("MAX", col("OnRouteExp.Amt")), "Amt"],
       ],
       include: [
         {
           model: DBMODELS.TripPlan,
           as: "TripPlan",
           include: [
+            {
+              model: DBMODELS.CustomerMaster,
+              as: "CustomerMasters",
+              attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+            },
             {
               model: DBMODELS.Vehicle,
               as: "Vehicle",
@@ -106,6 +122,14 @@ module.exports.getTripExpenceList = async (req, res) => {
           ),
           attributes: [],
         },
+        {
+          model: DBMODELS.OnRouteExp,
+          as: "OnRouteExp",
+          on: literal(
+            "`TripOperation`.`TripId` = `OnRouteExp`.`TripId` AND `TripOperation`.`TripNo` = `OnRouteExp`.`TripNo`"
+          ),
+          attributes: []
+        }
       ],
       group: [
         "TripOperation.Id",
