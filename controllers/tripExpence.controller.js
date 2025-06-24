@@ -4,15 +4,17 @@ const { DBMODELS } = require("../models/init-models");
 module.exports.getTripExpenceList = async (req, res) => {
   try {
     const {
-      TripNo = null,
+      TripSheetNo = null,
       vehicleNo = null,
       fromDate = null,
       toDate = null,
     } = req.body || {};
 
     const WhereCondition = {};
-    if (TripNo !== null) {
-      WhereCondition.TripNo = TripNo;
+    if (TripSheetNo !== null) {
+      WhereCondition["$TripPlan.TripSheet$"] = {
+        [Op.like]: `%${TripSheetNo}%`,
+      };
     }
 
     if (vehicleNo !== null) {
