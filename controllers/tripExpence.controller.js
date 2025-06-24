@@ -105,7 +105,6 @@ module.exports.getTripExpenceList = async (req, res) => {
             "`TripOperation`.`TripId` = `TripAdvance`.`TripId` AND `TripOperation`.`TripNo` = `TripAdvance`.`TtripNo`"
           ),
           attributes: [],
-
         },
       ],
       group: [
@@ -187,7 +186,21 @@ module.exports.getTripExpenceList = async (req, res) => {
       ],
     });
 
-    const total = getAllTripExpence.length;
+    const getTotalCash = getAllTripExpence.reduce((acc, trip) => {
+      const totalCash = Number(trip.dataValues.totalCash) || 0; 
+      return acc + totalCash;
+    }, 0);
+    
+    const getTotalDieselQty = getAllTripExpence.reduce((acc, trip) => {
+      const totalDieselQty = Number(trip.dataValues.totalDieselQty) || 0;
+      return acc + totalDieselQty;
+    }, 0);
+
+    console.log("Total : ", getTotalCash, getTotalDieselQty)
+    const total = {
+      TotalCash: getTotalCash,
+      TotalDieselQty: getTotalDieselQty,
+    }
     return res.status(200).json({
       status: "200",
       message: "Trip Expence List",
