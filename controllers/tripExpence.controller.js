@@ -266,16 +266,31 @@ module.exports.getTripExpenceList = async (req, res) => {
       return acc + totalCash;
     }, 0);
 
+    const getOnRouteCash = getAllTripExpence.reduce((acc, trip) => {
+      console.log(trip.dataValues)
+      const totalOnRouteCash = Number(trip.dataValues.onRouteCash) || 0;
+      return acc + totalOnRouteCash;
+    })
+
     const getTotalDieselQty = getAllTripExpence.reduce((acc, trip) => {
       const totalDieselQty = Number(trip.dataValues.advanceDieselQty) || 0;
       return acc + totalDieselQty;
     }, 0);
 
-    console.log("Total : ", getTotalCash, getTotalDieselQty);
+    const getOnRouteDieselQty = getAllTripExpence.reduce((acc, trip) => {
+      const totalOnRouteDieselQty = Number(trip.dataValues.onRouteDieselQty) || 0;
+      return acc + totalOnRouteDieselQty;
+    }, 0);
+
+    console.log("Total : ", getTotalCash );
+    console.log("Total : ", getOnRouteCash);
+    console.log("Total : ", getTotalDieselQty);
+    console.log("Total : ", getOnRouteDieselQty);
     const total = {
-      TotalCash: getTotalCash,
-      TotalDieselQty: getTotalDieselQty,
+        TotalCash: getTotalCash + getOnRouteCash,
+        TotalDieselQty: getTotalDieselQty + getOnRouteDieselQty,
     };
+
     if( getAllTripExpence.length === 0) {
       return res.status(404).json({
         status: "404",
