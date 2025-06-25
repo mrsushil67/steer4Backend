@@ -3,5 +3,6 @@ const TripExpenceController = require('../controllers/tripExpence.controller')
 const { authorizedUser } = require('../middlewares/authMiddleware');
 
 TripExpenceRouter.post('/tripExpenceList',authorizedUser, TripExpenceController.getTripExpenceList);
+TripExpenceRouter.get('/expenceCategory', TripExpenceController.getExpenceCategoryList);
 
 module.exports = TripExpenceRouter;

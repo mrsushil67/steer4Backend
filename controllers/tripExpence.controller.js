@@ -3,11 +3,7 @@ const { DBMODELS } = require("../models/init-models");
 
 module.exports.getTripExpenceList = async (req, res) => {
   try {
-    const {
-      vehicleNo = null,
-      fromDate = null,
-      toDate = null,
-    } = req.body || {};
+    const { vehicleNo = null, fromDate = null, toDate = null } = req.body || {};
 
     const WhereCondition = {};
 
@@ -302,6 +298,23 @@ module.exports.getTripExpenceList = async (req, res) => {
     });
   } catch (error) {
     console.log("Error in getTripExpenceList:", error);
+    return res
+      .status(500)
+      .json({ status: "500", message: "Internal server Error" });
+  }
+};
+
+module.exports.getExpenceCategoryList = async (req, res) => {
+  try {
+    const expenceCategories = await DBMODELS.ExpenseCategory.findAll({});
+    if (expenceCategories.length === 0) {
+      return res.status(404).json({
+        status: "404",
+        message: "No Record Found",
+      });
+    }
+  } catch (error) {
+    console.log("Expence in getExpenceCategoryList : ", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server Error" });
