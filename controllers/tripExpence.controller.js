@@ -330,7 +330,7 @@ module.exports.getExpenceCategoryList = async (req, res) => {
 
 module.exports.getPaymentMode = async (req, res) => {
   try {
-    const paymentMode = await DBMODELS.PaymentType.findAll({});
+    const paymentMode = await DBMODELS.PaymentType.findAll({})
     if (paymentMode.length === 0) {
       return res.status(404).json({
         status: "404",
@@ -343,6 +343,7 @@ module.exports.getPaymentMode = async (req, res) => {
       data: paymentMode,
     });
   } catch (error) {
+    console.log(error)
     return res.status(500).json({
       status: "500",
       message: "Internal server error",
