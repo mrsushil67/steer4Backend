@@ -313,6 +313,13 @@ module.exports.getExpenceCategoryList = async (req, res) => {
         message: "No Record Found",
       });
     }
+    return res
+      .status(200)
+      .json({
+        status: "200",
+        message: "Expence Category List",
+        data: expenceCategories,
+      });
   } catch (error) {
     console.log("Expence in getExpenceCategoryList : ", error);
     return res
