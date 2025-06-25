@@ -102,11 +102,11 @@ module.exports.getTripExpenceList = async (req, res) => {
               as: "Vehicle",
               attributes: ["VehicleID", "VNumer"],
             },
-            // {
-            //   model: DBMODELS.Driver,
-            //   as: "Driver",
-            //   attributes: ["DriverID", "DName"],
-            // },
+            {
+              model: DBMODELS.Driver,
+              as: "Driver",
+              attributes: ["DriverID", "DName"],
+            },
             // {
             //   model: DBMODELS.RouteMaster,
             //   as: "route_master",
@@ -330,7 +330,7 @@ module.exports.getExpenceCategoryList = async (req, res) => {
 
 module.exports.getPaymentMode = async (req, res) => {
   try {
-    const paymentMode = await DBMODELS.PaymentType.findAll({})
+    const paymentMode = await DBMODELS.PaymentType.findAll({});
     if (paymentMode.length === 0) {
       return res.status(404).json({
         status: "404",
@@ -343,7 +343,7 @@ module.exports.getPaymentMode = async (req, res) => {
       data: paymentMode,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).json({
       status: "500",
       message: "Internal server error",
@@ -354,28 +354,26 @@ module.exports.getPaymentMode = async (req, res) => {
 
 module.exports.createTripAdvanceExpence = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = req.user.userId;
+
     const {
       TripId,
       TtripNo,
-      Cash,
+      Advance,
       DieselQty,
       DieselDate,
       DieselVendor,
-      location,
       VNumer,
       Driver1Id,
       Diesel_Rate,
       Remark,
-      Qty,
-      Amt,
-      FillCat,
+      paymentMode,
       TotalAmt,
       ExpCategory,
-      PaidBy,
+      paymentType,
     } = req.body;
 
-    if (!TripId || !TtripNo || !ExpCategory) {
+    if (!TripId || !TtripNo || !ExpCategory || !paymentType) {
       return res.status(400).json({
         status: "400",
         message: "Missing required fields",
@@ -383,7 +381,12 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
     }
 
     // Check for Cash and Diesel required fields
-    if (Cash === undefined || Cash === null || Cash === "" || Cash <= 0) {
+    if (
+      Advance === undefined ||
+      Advance === null ||
+      Advance === "" ||
+      Advance <= 0
+    ) {
       if (!DieselQty || !DieselDate || !DieselVendor || !Diesel_Rate) {
         return res.status(400).json({
           status: "400",
@@ -398,7 +401,7 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
       DieselQty === "" ||
       DieselQty <= 0
     ) {
-      if (!Cash || !Amt) {
+      if (!paymentType) {
         return res.status(400).json({
           status: "400",
           message: "Missing required fields for cash",
@@ -406,38 +409,33 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
       }
     }
 
-    // Generate a unique ticket for the trip
     const ticket = generateTicket(TripId);
 
-    // Format dates with moment before saving (including time)
     const formattedDieselDate = DieselDate
       ? moment(DieselDate, "YYYY-MM-DD HH:mm:ss").toDate()
       : null;
 
-    const currentTime = moment().format("YYYY-MM-DD HH:mm:ss"); // Current date and time for CreatedTime
+    const currentTime = moment().format("YYYY-MM-DD HH:mm:ss");
 
-    // Construct data model to be inserted into the database
     const dataModel = {
       Ticket: ticket,
       TripId,
       TtripNo,
-      Cash,
+      Cash: Advance || 0,
       DieselQty,
       DieselDt: formattedDieselDate,
       DieselVendor,
-      location,
       VNumer,
       Driver1Id,
       Diesel_Rate,
       Remark,
       CreatedBy: userId,
-      CreatedTime: currentTime, // Use the formatted current time here
-      Qty,
-      Amt,
-      FillCat,
+      CreatedTime: currentTime,
+      Amt: 0,
+      FillCat: paymentMode,
       TotalAmt,
       ExpCategory,
-      PaidBy: 1,
+      PaidBy: paymentType,
     };
 
     // Insert the data into the database
