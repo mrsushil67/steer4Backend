@@ -1,5 +1,7 @@
 const { fn, col, literal, Op } = require("sequelize");
 const { DBMODELS } = require("../models/init-models");
+const moment = require("moment");
+const generateTicket = require("../services/ExpenceTicket");
 
 module.exports.getTripExpenceList = async (req, res) => {
   try {
@@ -313,17 +315,143 @@ module.exports.getExpenceCategoryList = async (req, res) => {
         message: "No Record Found",
       });
     }
-    return res
-      .status(200)
-      .json({
-        status: "200",
-        message: "Expence Category List",
-        data: expenceCategories,
-      });
+    return res.status(200).json({
+      status: "200",
+      message: "Expence Category List",
+      data: expenceCategories,
+    });
   } catch (error) {
     console.log("Expence in getExpenceCategoryList : ", error);
     return res
       .status(500)
       .json({ status: "500", message: "Internal server Error" });
+  }
+};
+
+module.exports.getPaymentMode = async (req, res) => {
+  try {
+    const paymentMode = await DBMODELS.PaymentType.findAll({});
+    if (paymentMode.length === 0) {
+      return res.status(404).json({
+        status: "404",
+        message: "No Record Found",
+      });
+    }
+    return res.status(200).json({
+      status: "200",
+      message: "Record found",
+      data: paymentMode,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "500",
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports.createTripAdvanceExpence = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const {
+      TripId,
+      TtripNo,
+      Cash,
+      DieselQty,
+      DieselDate,
+      DieselVendor,
+      location,
+      VNumer,
+      Driver1Id,
+      Diesel_Rate,
+      Remark,
+      Qty,
+      Amt,
+      FillCat,
+      TotalAmt,
+      ExpCategory,
+      PaidBy,
+    } = req.body;
+
+    if (!TripId || !TtripNo || !ExpCategory) {
+      return res.status(400).json({
+        status: "400",
+        message: "Missing required fields",
+      });
+    }
+
+    // Check for Cash and Diesel required fields
+    if (Cash === undefined || Cash === null || Cash === "" || Cash <= 0) {
+      if (!DieselQty || !DieselDate || !DieselVendor || !Diesel_Rate) {
+        return res.status(400).json({
+          status: "400",
+          message: "Missing required fields for diesel",
+        });
+      }
+    }
+
+    if (
+      DieselQty === undefined ||
+      DieselQty === null ||
+      DieselQty === "" ||
+      DieselQty <= 0
+    ) {
+      if (!Cash || !Amt) {
+        return res.status(400).json({
+          status: "400",
+          message: "Missing required fields for cash",
+        });
+      }
+    }
+
+    // Generate a unique ticket for the trip
+    const ticket = generateTicket(TripId);
+
+    // Format dates with moment before saving (including time)
+    const formattedDieselDate = DieselDate
+      ? moment(DieselDate, "YYYY-MM-DD HH:mm:ss").toDate()
+      : null;
+
+    const currentTime = moment().format("YYYY-MM-DD HH:mm:ss"); // Current date and time for CreatedTime
+
+    // Construct data model to be inserted into the database
+    const dataModel = {
+      Ticket: ticket,
+      TripId,
+      TtripNo,
+      Cash,
+      DieselQty,
+      DieselDt: formattedDieselDate,
+      DieselVendor,
+      location,
+      VNumer,
+      Driver1Id,
+      Diesel_Rate,
+      Remark,
+      CreatedBy: userId,
+      CreatedTime: currentTime, // Use the formatted current time here
+      Qty,
+      Amt,
+      FillCat,
+      TotalAmt,
+      ExpCategory,
+      PaidBy: 1,
+    };
+
+    // Insert the data into the database
+    const tripAdvance = await DBMODELS.TripAdvance.create(dataModel);
+    return res.status(200).json({
+      status: "200",
+      message: "Trip advance expense created successfully",
+      data: tripAdvance,
+    });
+  } catch (error) {
+    console.error("Error in createTripAdvanceExpence:", error);
+    return res.status(500).json({
+      status: "500",
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 };
