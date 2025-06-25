@@ -352,6 +352,49 @@ module.exports.getPaymentMode = async (req, res) => {
   }
 };
 
+module.exports.getPumpVendor = async (req, res) => {
+  try {
+    const pumpVendor = await DBMODELS.PumpDetails.findAll({
+      include: [
+        {
+          model: DBMODELS.VendorMaster,
+          as: "VendorMaster",
+          required: true,
+          attributes: [
+            "VendId",
+            "user_id",
+            "VendName",
+            "VendCode",
+            "GstName",
+            "Phone",
+            "Email",
+            "BillingCycle",
+            "VendType",
+          ],
+        },
+      ],
+    });
+
+    if (pumpVendor.length === 0) {
+      return res.status(404).json({
+        status: "404",
+        message: "No Record Found",
+      });
+    }
+    return res.status(200).json({
+      status: "200",
+      message: "Pump Vendor List",
+      data: pumpVendor,
+    });
+  } catch (error) {
+    console.error("Error in createTripAdvanceExpence:", error);
+    return res.status(500).json({
+      status: "500",
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
 module.exports.createTripAdvanceExpence = async (req, res) => {
   try {
     const userId = req.user.userId;

@@ -4,7 +4,8 @@ const { authorizedUser } = require('../middlewares/authMiddleware');
 
 TripExpenceRouter.post('/tripExpenceList',authorizedUser, TripExpenceController.getTripExpenceList);
 TripExpenceRouter.get('/expenceCategory', TripExpenceController.getExpenceCategoryList);
-TripExpenceRouter.get('/paymentMode', TripExpenceController.getPaymentMode)
+TripExpenceRouter.get('/paymentMode', TripExpenceController.getPaymentMode);
+TripExpenceRouter.get('/getPumps', TripExpenceController.getPumpVendor);
 TripExpenceRouter.post('/addTripExpence',authorizedUser, TripExpenceController.createTripAdvanceExpence)
 
 module.exports = TripExpenceRouter;
