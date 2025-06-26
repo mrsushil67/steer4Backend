@@ -416,6 +416,8 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
       paymentType,
     } = req.body;
 
+    console.log("Body : ", req.body);
+
     if (!TripId || !TripNo || !ExpCategory || !paymentType) {
       return res.status(400).json({
         status: "400",
@@ -455,7 +457,7 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
     const ticket = generateTicket(TripId);
 
     const formattedDieselDate = DieselDate
-      ? moment(DieselDate, "YYYY-MM-DD HH:mm:ss").toDate()
+      ? moment(DieselDate, "YYYY-MM-DD").toDate()
       : null;
 
     const currentTime = moment().format("YYYY-MM-DD HH:mm:ss");
