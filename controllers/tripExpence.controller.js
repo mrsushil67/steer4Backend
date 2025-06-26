@@ -485,8 +485,8 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
 
     // Insert the data into the database
     const tripAdvance = await DBMODELS.TripAdvance.create(dataModel);
-    return res.status(200).json({
-      status: "200",
+    return res.status(201).json({
+      status: "201",
       message: "Trip advance expense created successfully",
       data: tripAdvance,
     });
