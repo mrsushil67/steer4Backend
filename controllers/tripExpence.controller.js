@@ -401,7 +401,7 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
 
     const {
       TripId,
-      TtripNo,
+      TripNo,
       Advance,
       DieselQty,
       DieselDate,
@@ -416,7 +416,7 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
       paymentType,
     } = req.body;
 
-    if (!TripId || !TtripNo || !ExpCategory || !paymentType) {
+    if (!TripId || !TripNo || !ExpCategory || !paymentType) {
       return res.status(400).json({
         status: "400",
         message: "Missing required fields",
@@ -463,7 +463,7 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
     const dataModel = {
       Ticket: ticket,
       TripId,
-      TtripNo,
+      TtripNo: TripNo,
       Cash: Advance || 0,
       DieselQty,
       DieselDt: formattedDieselDate,
