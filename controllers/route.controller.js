@@ -11,8 +11,9 @@ module.exports.getRoutelist = async (req, res) => {
         .json({ status: "400", message: "fill all fields" });
     }
 
-    const routes = await DBMODELS.CustRateMap.findAll({
+    const allRoutes = await DBMODELS.CustRateMap.findAll({
       where: { CustId, RouteType },
+      // group: ['RouteId'],
       include: [
         {
           model: DBMODELS.TripType,
@@ -22,6 +23,16 @@ module.exports.getRoutelist = async (req, res) => {
         },
       ],
     });
+
+    const routesMap = new Map();
+    allRoutes.forEach((route) => {
+      if (!routesMap.has(route.RouteId)) {
+        routesMap.set(route.RouteId, route);
+      }
+    });
+    const routes = Array.from(routesMap.values());
+
+    console.log(routes);
 
     if (routes.length === 0) {
       return res
