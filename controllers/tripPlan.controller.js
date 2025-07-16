@@ -235,7 +235,7 @@ module.exports.checkTripPlan = async (req, res) => {
     }
 
     let tripPlanWhere = {};
-    
+
     if (vehicleNo !== null) {
       tripOperationWhere[Op.or] = [
         { "$TripPlan.TripSheet$": { [Op.like]: `%${vehicleNo}%` } },
@@ -257,8 +257,12 @@ module.exports.checkTripPlan = async (req, res) => {
     }
 
     const regularData = await DBMODELS.TripOperation.findAll({
-      where: tripOperationWhere,
-      // group: ['Id'],
+      where: {
+        ...tripOperationWhere,
+        Stat: {
+          [Op.ne]: 6,
+        },
+      },
       include: [
         {
           model: DBMODELS.TripPlan,
@@ -331,7 +335,12 @@ module.exports.checkTripPlan = async (req, res) => {
     });
 
     const marketData = await DBMODELS.TripOperation.findAll({
-      where: tripOperationWhere,
+      where: {
+        ...tripOperationWhere,
+        Stat: {
+          [Op.ne]: 6,
+        },
+      },
       // group: ['Id'],
       include: [
         {
@@ -724,7 +733,7 @@ module.exports.checkTripPlan = async (req, res) => {
         .json({ status: "404", message: "No record found" });
     }
 
-    console.log("triplist : >>>>>>>>>> ",tripDetailsArray);
+    console.log("triplist : >>>>>>>>>> ", tripDetailsArray);
 
     return res
       .status(200)
