@@ -733,8 +733,6 @@ module.exports.checkTripPlan = async (req, res) => {
         .json({ status: "404", message: "No record found" });
     }
 
-    console.log("triplist : >>>>>>>>>> ", tripDetailsArray);
-
     return res
       .status(200)
       .json({ status: "200", message: "Record found", data: tripDetailsArray });
