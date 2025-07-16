@@ -501,3 +501,16 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
     });
   }
 };
+
+module.exports.showExpences = () => {
+  try {
+    console.log('This api for show expences Advance and OnRoute')
+  } catch (error) {
+    console.error("Error in showExpence:", error);
+    return res.status(500).json({
+      status: "500",
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+}
