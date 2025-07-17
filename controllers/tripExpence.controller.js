@@ -514,3 +514,269 @@ module.exports.showExpences = () => {
     });
   }
 }
+
+
+
+// module.exports.getTripExpenceList = async (req, res) => {
+//   try {
+//     const { vehicleNo = null, fromDate = null, toDate = null } = req.body || {};
+
+//     const WhereCondition = {};
+
+//     if (vehicleNo !== null) {
+//       WhereCondition[Op.or] = [
+//         { "$TripPlan.TripSheet$": { [Op.like]: `%${vehicleNo}%` } },
+//         { "$TripPlan.Vehicle.VNumer$": { [Op.like]: `%${vehicleNo}%` } },
+//       ];
+//     }
+
+//     if (fromDate && toDate) {
+//       WhereCondition.ATD = {
+//         [Op.between]: [new Date(fromDate), new Date(toDate)],
+//       };
+//     } else if (fromDate) {
+//       WhereCondition.ATD = {
+//         [Op.gte]: new Date(fromDate),
+//       };
+//     } else if (toDate) {
+//       WhereCondition.ATD = {
+//         [Op.lte]: new Date(toDate),
+//       };
+//     }
+
+//     console.log(WhereCondition);
+//     const getAllTripExpence = await DBMODELS.TripOperation.findAll({
+//       where: WhereCondition,
+//       attributes: {
+//         include: [
+//           // your SUM cases
+//           [
+//             fn(
+//               "SUM",
+//               literal(
+//                 "CASE WHEN `TripAdvance`.`PaidBy` = 1 THEN `TripAdvance`.`Cash` ELSE 0 END"
+//               )
+//             ),
+//             "AdvanceCash",
+//           ],
+//           [
+//             fn(
+//               "SUM",
+//               literal(
+//                 "CASE WHEN `TripAdvance`.`PaidBy` = 1 THEN `TripAdvance`.`DieselQty` ELSE 0 END"
+//               )
+//             ),
+//             "AdvanceDieselQty",
+//           ],
+//           [
+//             fn(
+//               "SUM",
+//               literal(
+//                 "CASE WHEN `TripAdvance`.`PaidBy` = 2 THEN `TripAdvance`.`Cash` ELSE 0 END"
+//               )
+//             ),
+//             "OnRouteCash",
+//           ],
+//           [
+//             fn(
+//               "SUM",
+//               literal(
+//                 "CASE WHEN `TripAdvance`.`PaidBy` = 2 THEN `TripAdvance`.`DieselQty` ELSE 0 END"
+//               )
+//             ),
+//             "OnRouteDieselQty",
+//           ],
+//         ],
+//       },
+//       include: [
+//         {
+//           model: DBMODELS.TripPlan,
+//           as: "TripPlan",
+//           include: [
+//             {
+//               model: DBMODELS.MarketCust,
+//               as: "MarketCust",
+//             },
+//             {
+//               model: DBMODELS.CustomerMaster,
+//               as: "CustomerMasters",
+//               attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+//             },
+//             {
+//               model: DBMODELS.Vehicle,
+//               as: "Vehicle",
+//               attributes: ["VehicleID", "VNumer"],
+//             },
+//             {
+//               model: DBMODELS.Driver,
+//               as: "Driver",
+//               attributes: ["DriverID", "DName"],
+//             },
+//             {
+//               model: DBMODELS.CustRateMap,
+//               as: "CustRateMaps",
+//               attributes: [
+//                 "ID",
+//                 "CustId",
+//                 "RouteId",
+//                 "RouteType",
+//                 "TripType",
+//                 "TAT",
+//                 "RouteString",
+//               ],
+//               on: literal(
+//                 "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
+//               ),
+//               include: [
+//                 {
+//                   model: DBMODELS.TripType,
+//                   as: "trip_type",
+//                   attributes: ["Id", "TypeName"],
+//                 },
+//               ],
+//             },
+//           ],
+//         },
+//         {
+//           model: DBMODELS.TripAdvance,
+//           as: "TripAdvance",
+//           on: literal(
+//             "`TripOperation`.`TripId` = `TripAdvance`.`TripId` AND `TripOperation`.`TripNo` = `TripAdvance`.`TtripNo`"
+//           ),
+//         },
+//       ],
+//       group: [
+//         "TripOperation.Id",
+//         "TripOperation.TripNo",
+//         "TripOperation.TripId",
+//         "TripOperation.InvoiceCopy",
+//         "TripOperation.LRCopy",
+//         "TripOperation.DAV",
+//         "TripOperation.GatePass",
+//         "TripOperation.POD",
+//         "TripOperation.EwayBilNo",
+//         "TripOperation.ATD",
+//         "TripOperation.CreatedBy",
+//         "TripOperation.CreatedTime",
+//         "TripOperation.ATA",
+//         "TripOperation.AmendReason",
+//         "TripOperation.Stat",
+//         "TripOperation.StartBy",
+//         "TripOperation.OnRouteBy",
+//         "TripOperation.CloseBy",
+//         "TripOperation.Is_Invoice",
+//         "TripOperation.Remark",
+//         "TripOperation.OpeningKm",
+//         "TripOperation.ClosingKm",
+//         "TripOperation.ActulaKm",
+//         "TripOperation.CVerify",
+//         "TripOperation.TripSheetNo",
+
+//         // TripPlan
+//         "TripPlan.ID",
+//         "TripPlan.CustId",
+//         "TripPlan.RouteId",
+//         "TripPlan.TripType",
+//         "TripPlan.VehicleId",
+//         "TripPlan.Driver1Id",
+//         "TripPlan.Driver2Id",
+//         "TripPlan.VPlaceTime",
+//         "TripPlan.DepartureTime",
+//         "TripPlan.Remark",
+//         "TripPlan.TripSheet",
+//         "TripPlan.CreatedBy",
+//         "TripPlan.CreatedTime",
+//         "TripPlan.Status",
+//         "TripPlan.Is_Amended",
+//         "TripPlan.AmendReason",
+//         "TripPlan.ParentTripNo",
+//         "TripPlan.BookingType",
+//         "TripPlan.PlanCat",
+//         "TripPlan.Is_Completed",
+//         "TripPlan.Is_Settled",
+//         "TripPlan.Is_Verified",
+//         "TripPlan.Tcat",
+//         "TripPlan.BrId",
+//         "TripPlan.Is_peak",
+
+//         // TripPlan->MarketCust
+//         "TripPlan->MarketCust.ID",
+//         "TripPlan->MarketCust.Name",
+//         "TripPlan->MarketCust.Phone",
+//         "TripPlan->MarketCust.City",
+//         "TripPlan->MarketCust.Address",
+
+//         // TripPlan->CustomerMasters
+//         "TripPlan->CustomerMasters.CustId",
+//         "TripPlan->CustomerMasters.CustomerName",
+//         "TripPlan->CustomerMasters.CustCode",
+//         "TripPlan->CustomerMasters.GSTNo",
+
+//         // TripPlan->Vehicle
+//         "TripPlan->Vehicle.VehicleID",
+//         "TripPlan->Vehicle.VNumer",
+
+//         // TripPlan->Driver
+//         "TripPlan->Driver.DriverID",
+//         "TripPlan->Driver.DName",
+
+//         // TripPlan->CustRateMaps
+//         "TripPlan->CustRateMaps.ID",
+//         "TripPlan->CustRateMaps.CustId",
+//         "TripPlan->CustRateMaps.RouteId",
+//         "TripPlan->CustRateMaps.RouteType",
+//         "TripPlan->CustRateMaps.TripType",
+//         "TripPlan->CustRateMaps.TAT",
+//         "TripPlan->CustRateMaps.RouteString",
+
+//         // TripPlan->CustRateMaps->trip_type
+//         "TripPlan->CustRateMaps->trip_type.Id",
+//         "TripPlan->CustRateMaps->trip_type.TypeName",
+
+//         // TripAdvance
+//         "TripAdvance.Id",
+//         "TripAdvance.Ticket",
+//         "TripAdvance.TripId",
+//         "TripAdvance.TtripNo",
+//         "TripAdvance.Cash",
+//         "TripAdvance.DieselQty",
+//         "TripAdvance.DieselDt",
+//         "TripAdvance.DieselVendor",
+//         "TripAdvance.Location",
+//         "TripAdvance.AdjDiesel",
+//         "TripAdvance.RemDiesel",
+//         "TripAdvance.VNumer",
+//         "TripAdvance.Driver1Id",
+//         "TripAdvance.Driver2Id",
+//         "TripAdvance.Diesel_Rate",
+//         "TripAdvance.Remark",
+//         "TripAdvance.createdBy",
+//         "TripAdvance.CreatedTime",
+//         "TripAdvance.Qty",
+//         "TripAdvance.Amt",
+//         "TripAdvance.FillCat",
+//         "TripAdvance.TotalAmt",
+//         "TripAdvance.ExpCategory",
+//         "TripAdvance.PaidBy",
+//       ],
+//     });
+
+//     if (getAllTripExpence.length === 0) {
+//       return res.status(404).json({
+//         status: "404",
+//         message: "No record Found",
+//       });
+//     }
+//     return res.status(200).json({
+//       status: "200",
+//       message: "Trip Expence List",
+//       // Total: total,
+//       data: getAllTripExpence,
+//     });
+//   } catch (error) {
+//     console.log("Error in getTripExpenceList:", error);
+//     return res
+//       .status(500)
+//       .json({ status: "500", message: "Internal server Error" });
+//   }
+// };
