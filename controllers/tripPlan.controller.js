@@ -1812,3 +1812,116 @@ module.exports.closedTrips = async (req, res) => {
       .json({ status: "500", message: "Internal server error" });
   }
 };
+
+module.exports.getTripHistory = async (req, res) => {
+  try {
+    const { vehicleNo = null, fromDate = null, toDate = null } = req.body || {};
+
+    let tripPlanWhere = {};
+    if (fromDate && toDate) {
+      tripPlanWhere.DepartureTime = {
+        [Op.between]: [new Date(fromDate), new Date(toDate)],
+      };
+    } else if (fromDate) {
+      tripPlanWhere.DepartureTime = {
+        [Op.gte]: new Date(fromDate),
+      };
+    } else if (toDate) {
+      tripPlanWhere.DepartureTime = {
+        [Op.lte]: new Date(toDate),
+      };
+    }
+    const closedTrips = await DBMODELS.TripPlan.findAll({
+      where: {
+        ...tripPlanWhere,
+        Is_Completed: 1,
+      },
+      include: [
+        {
+          model: DBMODELS.CustomerMaster,
+          as: "CustomerMasters",
+          attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+        },
+        {
+          model: DBMODELS.Vehicle,
+          as: "Vehicle",
+          where: vehicleNo
+            ? {
+                VNumer: {
+                  [Op.like]: `%${vehicleNo}%`,
+                },
+              }
+            : {},
+          attributes: ["VehicleID", "VNumer", "FleetZize"],
+        },
+        {
+          model: DBMODELS.Driver,
+          as: "Driver",
+          attributes: ["DriverID", "DName", "Licence"],
+        },
+        {
+          model: DBMODELS.RouteMaster,
+          as: "route_master",
+          attributes: ["RouteId"],
+          include: [
+            {
+              model: DBMODELS.city,
+              as: "source_city",
+              attributes: ["CityName", "latitude", "longitude"],
+            },
+            {
+              model: DBMODELS.city,
+              as: "dest_city",
+              attributes: ["CityName", "latitude", "longitude"],
+            },
+          ],
+        },
+        {
+          model: DBMODELS.CustRateMap,
+          as: "CustRateMaps",
+          // on: literal(
+          //   "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
+          // ),
+          include: [
+            {
+              model: DBMODELS.TripType,
+              as: "trip_type",
+              required: true,
+              attributes: ["Id", "TypeName"],
+            },
+          ],
+          attributes: [
+            "ID",
+            "CustId",
+            "RouteId",
+            "RouteType",
+            "TripType",
+            "RouteString",
+          ],
+        },
+        {
+          model: DBMODELS.MarketCust,
+          as: "MarketCust",
+          // attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+        },
+      ],
+    });
+
+    return res.status(200).json({
+      status: "200",
+      message: "Record Found",
+      closedTrips,
+    });
+  } catch (error) {
+    console.error("Error in TripHistory:", {
+      message: error.message,
+      stack: error.stack,
+    });
+
+    return res.status(500).json({
+      status: "500",
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};

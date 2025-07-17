@@ -3,7 +3,6 @@ const { DBMODELS } = require("../models/init-models");
 
 module.exports.CustomerStatus = async (req, res) => {
   try {
-    // Fetch required data concurrently
     const [customers, drivers, tripPlans, tripOperations] = await Promise.all([
       DBMODELS.CustomerMaster.findAll(),
       DBMODELS.Driver.findAll(),
@@ -26,7 +25,6 @@ module.exports.CustomerStatus = async (req, res) => {
       throw new Error("Failed to retrieve necessary data");
     }
 
-    // Calculate settlement stats
     let settlement_trip = 0;
     let pending_settlement = 0;
 
@@ -35,13 +33,11 @@ module.exports.CustomerStatus = async (req, res) => {
       else if (trip.Is_Settled === null) pending_settlement++;
     }
 
-    // Calculate travel status from TripPlan
     let ongoing_travel = 0;
     for (const trip of tripPlans) {
       if (trip.Status === 4) ongoing_travel++;
     }
 
-    // Calculate completed travel from TripOperation
     let completed_travel = 0;
     for (const op of tripOperations) {
       if (op.Stat === 7) completed_travel++;
