@@ -1831,39 +1831,6 @@ module.exports.getTripHistory = async (req, res) => {
         [Op.lte]: new Date(toDate),
       };
     }
-
-    const isMarketCustomer =
-      tripPlanWhere.CustId && tripPlanWhere.CustId >= 5000;
-
-    const custRateMapInclude = {
-      model: DBMODELS.CustRateMap,
-      as: "CustRateMaps",
-      include: [
-        {
-          model: DBMODELS.TripType,
-          as: "trip_type",
-          required: true,
-          attributes: ["Id", "TypeName"],
-        },
-      ],
-      attributes: [
-        "ID",
-        "CustId",
-        "RouteId",
-        "RouteType",
-        "TripType",
-        "RouteString",
-      ],
-    };
-
-    if (isMarketCustomer) {
-      custRateMapInclude.on = DBMODELS.sequelize.literal(
-        "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND " +
-          "`TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND " +
-          "`TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
-      );
-    }
-
     const closedTrips = await DBMODELS.TripPlan.findAll({
       where: {
         ...tripPlanWhere,
@@ -1909,7 +1876,29 @@ module.exports.getTripHistory = async (req, res) => {
             },
           ],
         },
-        custRateMapInclude, // use the conditional include here
+        // {
+        //   model: DBMODELS.CustRateMap,
+        //   as: "CustRateMaps",
+        //   on: literal(
+        //     "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
+        //   ),
+        //   include: [
+        //     {
+        //       model: DBMODELS.TripType,
+        //       as: "trip_type",
+        //       required: true,
+        //       attributes: ["Id", "TypeName"],
+        //     },
+        //   ],
+        //   attributes: [
+        //     "ID",
+        //     "CustId",
+        //     "RouteId",
+        //     "RouteType",
+        //     "TripType",
+        //     "RouteString",
+        //   ],
+        // },
         {
           model: DBMODELS.MarketCust,
           as: "MarketCust",
