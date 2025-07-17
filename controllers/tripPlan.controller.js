@@ -1904,6 +1904,11 @@ module.exports.getTripHistory = async (req, res) => {
           as: "MarketCust",
           // attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
         },
+        {
+          model: DBMODELS.TripOperation,
+          as: "TripOperations",
+          attributes: ['Id','TripNo','ATA','ATD']
+        }
       ],
     });
 
