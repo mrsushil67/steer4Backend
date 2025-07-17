@@ -64,6 +64,8 @@ module.exports.VehicleStatus = async (req, res) => {
     });
 
     const trips = await DBMODELS.TripPlan.findAll();
+        const tripsgh = await DBMODELS.TripOperation.findAll();
+
 
      let completed = 0;
     let ongoing = 0;
@@ -76,9 +78,22 @@ module.exports.VehicleStatus = async (req, res) => {
       }
     });
 
+     let completedd = 0;
+    let ongoingd = 0;
+
+    tripsgh.forEach((record) => {
+      if (record.Stat === 7) {
+        completedd++;
+      } else if (record.Stat === 4) {
+        ongoingd++;
+      }
+    });
+
     const data = {
       Completed_travel: completed,
-      ongoing_travel: ongoing
+      ongoing_travel: ongoing,
+      completedd:ongoingd,
+      ongoingd:ongoingd
     }
 
     return res.status(200).json({
