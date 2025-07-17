@@ -63,8 +63,6 @@ module.exports.VehicleStatus = async (req, res) => {
       },
     });
 
-    console.log("setteled :", setteled.length);
-
     const trips = await DBMODELS.TripOperation.findAll({
       where: {
         TripNo: {
