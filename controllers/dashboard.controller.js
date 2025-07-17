@@ -1,47 +1,71 @@
-const { where, Op } = require("sequelize");
+const { Op } = require("sequelize");
 const { DBMODELS } = require("../models/init-models");
 
 module.exports.CustomerStatus = async (req, res) => {
   try {
-    const totalCustomer = await DBMODELS.CustomerMaster.findAll();
-    if (!Array.isArray(totalCustomer)) {
-      throw new Error("Failed to retrieve customer data");
+    // Fetch required data concurrently
+    const [customers, drivers, tripPlans, tripOperations] = await Promise.all([
+      DBMODELS.CustomerMaster.findAll(),
+      DBMODELS.Driver.findAll(),
+      DBMODELS.TripPlan.findAll(),
+      DBMODELS.TripOperation.findAll({
+        where: {
+          TripNo: {
+            [Op.like]: "%A",
+          },
+        },
+        include: {
+          model: DBMODELS.TripPlan,
+          as: "TripPlan",
+          required: true,
+        },
+      }),
+    ]);
+
+    if (!customers || !drivers || !tripPlans || !tripOperations) {
+      throw new Error("Failed to retrieve necessary data");
     }
 
-    const totalDriver = await DBMODELS.Driver.findAll();
-    if (!Array.isArray(totalDriver)) {
-      throw new Error("Failed to retrieve driver data");
+    // Calculate settlement stats
+    let settlement_trip = 0;
+    let pending_settlement = 0;
+
+    for (const trip of tripPlans) {
+      if (trip.Is_Settled === 1) settlement_trip++;
+      else if (trip.Is_Settled === null) pending_settlement++;
     }
 
-    const setteled = await DBMODELS.TripPlan.findAll();
-    if (!Array.isArray(setteled)) {
-      throw new Error("Failed to retrieve trip plan data");
+    // Calculate travel status from TripPlan
+    let ongoing_travel = 0;
+    for (const trip of tripPlans) {
+      if (trip.Status === 4) ongoing_travel++;
     }
 
-    let countNull = 0;
-    let countOne = 0;
-
-    setteled.forEach((record) => {
-      if (record.Is_Settled === null) {
-        countNull++;
-      } else if (record.Is_Settled === 1) {
-        countOne++;
-      }
-    });
+    // Calculate completed travel from TripOperation
+    let completed_travel = 0;
+    for (const op of tripOperations) {
+      if (op.Stat === 7) completed_travel++;
+    }
 
     const data = {
-      totalCustomer: totalCustomer.length,
-      totalDriver: totalDriver.length,
-      settlement_trip: countOne,
-      pending_settlement: countNull,
+      totalCustomer: customers.length,
+      totalDriver: drivers.length,
+      settlement_trip,
+      pending_settlement,
       totalpanding_rate: 0,
       total_invoice: 0,
+      active_vehicle: 0,
+      broken_down_vehicle: 0,
+      ongoing_travel,
+      completed_travel,
+      delayed_travel: 0,
+      vehicle_availability: 0,
     };
 
     return res.status(200).json({
       status: "200",
       message: "Record Found",
-      data: data,
+      data,
     });
   } catch (error) {
     console.error("Error in CustomerStatus:", {
@@ -49,69 +73,6 @@ module.exports.CustomerStatus = async (req, res) => {
       stack: error.stack,
     });
 
-    return res.status(500).json({
-      status: "500",
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
-};
-
-module.exports.VehicleStatus = async (req, res) => {
-  try {
-
-    const trips = await DBMODELS.TripPlan.findAll();
-    const tripsgh = await DBMODELS.TripOperation.findAll({
-      where: {
-        TripNo: {
-          [Op.like]: "%" + "A",
-        },
-      },
-      include: {
-        model: DBMODELS.TripPlan,
-        as: "TripPlan",
-        required: true,
-      },
-    });
-
-    let completed = 0;
-    let ongoing = 0;
-
-    trips.forEach((record) => {
-      if (record.Status === 7) {
-        completed++;
-      } else if (record.Status === 4) {
-        ongoing++;
-      }
-    });
-
-    let completedd = 0;
-    let ongoingd = 0;
-
-    tripsgh.forEach((record) => {
-      if (record.Stat === 7) {
-        completedd++;
-      } else if (record.Stat === 4) {
-        ongoingd++;
-      }
-    });
-
-    const data = {
-      active_vehicle: 0,
-      broken_down_vehicle: 0,
-      ongoing_travel: ongoing,
-      completed_travel: completedd,
-      delayed_travel: 0,
-      vehicle_availability: 0
-    };
-
-    return res.status(200).json({
-      status: "200",
-      message: "Record Found",
-      data: data,
-    });
-  } catch (error) {
-    console.error("Error in VehicleStatus :", error);
     return res.status(500).json({
       status: "500",
       message: "Internal server error",
