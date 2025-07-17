@@ -73,6 +73,7 @@ module.exports.VehicleStatus = async (req, res) => {
       include: {
         model: DBMODELS.TripPlan,
         as: "TripPlan",
+        required: true,
       },
     });
 
