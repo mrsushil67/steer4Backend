@@ -34,6 +34,8 @@ module.exports.CustomerStatus = async (req, res) => {
       totalDriver: totalDriver.length,
       settlement_trip: countOne,
       pending_settlement: countNull,
+      totalpanding_rate: 0,
+      total_invoice: 0,
     };
 
     return res.status(200).json({
@@ -57,11 +59,6 @@ module.exports.CustomerStatus = async (req, res) => {
 
 module.exports.VehicleStatus = async (req, res) => {
   try {
-    const tripPlan = await DBMODELS.TripPlan.findAll({
-      where: {
-        Is_Completed: 1,
-      },
-    });
 
     const trips = await DBMODELS.TripPlan.findAll();
     const tripsgh = await DBMODELS.TripOperation.findAll({
@@ -100,10 +97,12 @@ module.exports.VehicleStatus = async (req, res) => {
     });
 
     const data = {
-      Completed_travel: completed,
+      active_vehicle: 0,
+      broken_down_vehicle: 0,
       ongoing_travel: ongoing,
-      completedd: completedd,
-      ongoingd: ongoingd,
+      completed_travel: completedd,
+      delayed_travel: 0,
+      vehicle_availability: 0
     };
 
     return res.status(200).json({
