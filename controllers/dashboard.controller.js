@@ -92,7 +92,7 @@ module.exports.VehicleStatus = async (req, res) => {
     const data = {
       Completed_travel: completed,
       ongoing_travel: ongoing,
-      completedd:ongoingd,
+      completedd:completedd,
       ongoingd:ongoingd
     }
 
