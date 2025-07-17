@@ -70,6 +70,10 @@ module.exports.VehicleStatus = async (req, res) => {
           [Op.like]: "%" + "A",
         },
       },
+      include: {
+        model: DBMODELS.TripPlan,
+        as: "TripPlan",
+      },
     });
 
     let completed = 0;
