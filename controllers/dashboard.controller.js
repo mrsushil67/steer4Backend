@@ -63,21 +63,15 @@ module.exports.VehicleStatus = async (req, res) => {
       },
     });
 
-    const trips = await DBMODELS.TripOperation.findAll({
-      where: {
-        TripNo: {
-          [Op.like]: "%" + "A",
-        },
-      },
-    });
+    const trips = await DBMODELS.TripPlan.findAll();
 
      let completed = 0;
     let ongoing = 0;
 
     trips.forEach((record) => {
-      if (record.Stat === 7) {
+      if (record.Status === 7) {
         completed++;
-      } else if (record.Stat === 4) {
+      } else if (record.Status === 4) {
         ongoing++;
       }
     });
