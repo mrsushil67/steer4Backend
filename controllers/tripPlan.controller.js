@@ -1831,6 +1831,14 @@ module.exports.getTripHistory = async (req, res) => {
         [Op.lte]: new Date(toDate),
       };
     }
+
+    if (vehicleNo) {
+      tripPlanWhere[Op.or] = [
+        { TripSheet: { [Op.like]: `%${vehicleNo}%` } },
+        { "$Vehicle.VNumer$": { [Op.like]: `%${vehicleNo}%` } },
+      ];
+    }
+
     const closedTrips = await DBMODELS.TripPlan.findAll({
       where: {
         ...tripPlanWhere,
@@ -1845,13 +1853,13 @@ module.exports.getTripHistory = async (req, res) => {
         {
           model: DBMODELS.Vehicle,
           as: "Vehicle",
-          where: vehicleNo
-            ? {
-                VNumer: {
-                  [Op.like]: `%${vehicleNo}%`,
-                },
-              }
-            : {},
+          // where: vehicleNo
+          //   ? {
+          //       VNumer: {
+          //         [Op.like]: `%${vehicleNo}%`,
+          //       },
+          //     }
+          //   : {},
           attributes: ["VehicleID", "VNumer", "FleetZize"],
         },
         {
@@ -1907,8 +1915,8 @@ module.exports.getTripHistory = async (req, res) => {
         {
           model: DBMODELS.TripOperation,
           as: "TripOperations",
-          attributes: ['Id','TripNo','ATA','ATD']
-        }
+          attributes: ["Id", "TripNo", "ATA", "ATD"],
+        },
       ],
     });
 
