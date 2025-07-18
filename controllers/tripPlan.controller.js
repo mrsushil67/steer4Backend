@@ -236,9 +236,9 @@ module.exports.checkTripPlan = async (req, res) => {
 
     let tripPlanWhere = {};
 
-     if (status !== null && status !== undefined) {
-      tripPlanWhere.Status = status;
-    }
+    //  if (status !== null && status !== undefined) {
+    //   tripPlanWhere.Status = status;
+    // }
 
 
     if (vehicleNo !== null) {
