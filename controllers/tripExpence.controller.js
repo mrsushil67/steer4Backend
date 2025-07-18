@@ -529,7 +529,7 @@ module.exports.getTripAdvanceOnRouteExpence = async (req, res) => {
       where: {
         TripId: tripId,
       },
-      order: [["CreatedTime",'DESC']],
+      order: [["PaidBy", "ASC"]],
     });
 
     if (!expences || expences.length === 0) {
