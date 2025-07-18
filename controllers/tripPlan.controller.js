@@ -1168,7 +1168,7 @@ module.exports.proceedTrip = async (req, res) => {
 
     const tripPlanData = await DBMODELS.TripPlan.create({
       ...tripScheduleData.toJSON(),
-      // PlanCat: custType,
+      Status:0,
     });
 
     return res.status(201).json({
