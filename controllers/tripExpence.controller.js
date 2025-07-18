@@ -360,6 +360,9 @@ module.exports.getPumpVendor = async (req, res) => {
       include: [
         {
           model: DBMODELS.VendorMaster,
+          where: {
+            VendType: 2,
+          },
           as: "VendorMaster",
           required: true,
           attributes: [
