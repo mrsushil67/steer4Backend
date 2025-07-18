@@ -476,7 +476,7 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
       Driver1Id,
       Diesel_Rate,
       Remark,
-      CreatedBy: userId,
+      createdBy: userId,
       CreatedTime: currentTime,
       Amt: 0,
       FillCat: paymentMode,
@@ -547,6 +547,108 @@ module.exports.getTripAdvanceOnRouteExpence = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in TripAdvanceOnRouteExpence:", error);
+    return res.status(500).json({
+      status: "500",
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports.updateTripAdvanceOnRouteExpence = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const {
+      Id,
+      Advance,
+      DieselQty,
+      DieselDate,
+      DieselVendor,
+      Diesel_Rate,
+      Remark,
+      paymentMode,
+      TotalAmt,
+      adBlueAmount,
+      ExpCategory,
+      paymentType,
+      location,
+    } = req.body;
+
+    console.log("Body : ", req.body);
+
+    if (!Id || !ExpCategory || !paymentType) {
+      return res.status(400).json({
+        status: "400",
+        message: "Missing required fields",
+      });
+    }
+
+    if (
+      Advance === undefined ||
+      Advance === null ||
+      Advance === "" ||
+      Advance <= 0
+    ) {
+      if (!DieselQty || !DieselDate || !DieselVendor || !Diesel_Rate) {
+        return res.status(400).json({
+          status: "400",
+          message: "Missing required fields for diesel",
+        });
+      }
+    }
+
+    if (
+      DieselQty === undefined ||
+      DieselQty === null ||
+      DieselQty === "" ||
+      DieselQty <= 0
+    ) {
+      if (!paymentType) {
+        return res.status(400).json({
+          status: "400",
+          message: "Missing required fields for cash",
+        });
+      }
+    }
+
+    const formattedDieselDate = DieselDate
+      ? moment(DieselDate, "YYYY-MM-DD").toDate()
+      : null;
+
+    const currentTime = moment().format("YYYY-MM-DD HH:mm:ss");
+
+    const dataModel = {
+      Cash: Advance || 0,
+      DieselQty,
+      DieselDt: formattedDieselDate,
+      DieselVendor,
+      Diesel_Rate,
+      Remark,
+      createdBy: userId,
+      CreatedTime: currentTime,
+      Amt: 0,
+      FillCat: paymentMode,
+      TotalAmt,
+      ExpCategory,
+      Location: location,
+      PaidBy: paymentType,
+    };
+
+    console.log("dataModel : ",dataModel)
+    const updatedExpence = await DBMODELS.TripAdvance.update(dataModel, {
+      where: {
+        Id: Id,
+      },
+    });
+
+    return res.status(200).json({
+      status: "200",
+      message: "Trip advance updated successfully",
+      data: updatedExpence,
+    });
+
+  } catch (error) {
     return res.status(500).json({
       status: "500",
       message: "Internal server error",

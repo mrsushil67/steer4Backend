@@ -8,5 +8,6 @@ TripExpenceRouter.get('/paymentMode', TripExpenceController.getPaymentMode);
 TripExpenceRouter.get('/getPumps', TripExpenceController.getPumpVendor);
 TripExpenceRouter.post('/addTripExpence',authorizedUser, TripExpenceController.createTripAdvanceExpence)
 TripExpenceRouter.post('/getExpences',authorizedUser, TripExpenceController.getTripAdvanceOnRouteExpence);
+TripExpenceRouter.post('/updateExpences',authorizedUser, TripExpenceController.updateTripAdvanceOnRouteExpence);
 
 module.exports = TripExpenceRouter;
