@@ -504,7 +504,7 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
 
 module.exports.showExpences = () => {
   try {
-    console.log('This api for show expences Advance and OnRoute')
+    console.log("This api for show expences Advance and OnRoute");
   } catch (error) {
     console.error("Error in showExpence:", error);
     return res.status(500).json({
@@ -513,9 +513,47 @@ module.exports.showExpences = () => {
       error: error.message,
     });
   }
-}
+};
 
+module.exports.getTripAdvanceOnRouteExpence = async (req, res) => {
+  try {
+    const { tripId } = req.body || {};
+    if (!tripId) {
+      return res.status(400).json({
+        status: "400",
+        message: "Missing tripId",
+      });
+    }
 
+    const expences = await DBMODELS.TripAdvance.findAll({
+      where: {
+        TripId: tripId,
+      },
+      order: [["CreatedTime",'DESC']],
+    });
+
+    if (!expences || expences.length === 0) {
+      return res.status(404).json({
+        status: "404",
+        message: "No expense records found for the provided tripId.",
+      });
+    }
+
+    console.log(expences);
+    return res.status(200).json({
+      status: "200",
+      message: "Record Found",
+      data: expences,
+    });
+  } catch (error) {
+    console.error("Error in TripAdvanceOnRouteExpence:", error);
+    return res.status(500).json({
+      status: "500",
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
 
 // module.exports.getTripExpenceList = async (req, res) => {
 //   try {
