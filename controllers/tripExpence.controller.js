@@ -70,6 +70,7 @@ module.exports.getTripExpenceList = async (req, res) => {
         [fn("MAX", col("TripAdvance.Diesel_Rate")), "Diesel_Rate"],
         [fn("MAX", col("TripAdvance.Amt")), "Amt"],
         [fn("MAX", col("TripAdvance.TotalAmt")), "TotalAmt"],
+        [fn("MAX", col("TripAdvance.PaidBy")), "PaidBy"],
         // [fn("MAX", col("OnRouteExp.AdjDiesel")), "AdjDiesel"],
         // [fn("MAX", col("OnRouteExp.RemDiesel")), "RemDiesel"],
         // [fn("MAX", col("OnRouteExp.Diesel_Rate")), "Diesel_Rate"],
