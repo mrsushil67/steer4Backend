@@ -230,7 +230,7 @@ module.exports.checkTripPlan = async (req, res) => {
       });
 
     let tripOperationWhere = {};
-    if (status !== null && status !== undefined || status !== 1) {
+    if (status !== null && status !== undefined && status !== 1) {
       tripOperationWhere.Stat = {
         [Op.eq]: status,
         [Op.ne]: 6,
