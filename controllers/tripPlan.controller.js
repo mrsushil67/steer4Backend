@@ -359,7 +359,7 @@ module.exports.checkTripPlan = async (req, res) => {
     console.log("Regular.length : ", regularData.length);
 
     const marketData = await DBMODELS.TripOperation.findAll({
-      where:tripOperationWhere,
+      where: tripOperationWhere,
       // group: ['Id'],
       include: [
         {
@@ -478,7 +478,11 @@ module.exports.checkTripPlan = async (req, res) => {
 
           if (correspondingATrip && correspondingATripB) {
             return true;
-          } else if (status !== null && status !== undefined && status !== '7') {
+          } else if (
+            status !== null &&
+            status !== undefined &&
+            status !== 7
+          ) {
             return true;
           } else {
             return false;
@@ -505,7 +509,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
     const mergedArray = ScheduleData.concat(filteredTrips);
 
-    console.log('Merged Array length:', mergedArray.length);
+    console.log("Merged Array length:", mergedArray.length);
 
     const tripDetailsArray = mergedArray.map((item) => {
       let tripDirection = "";
