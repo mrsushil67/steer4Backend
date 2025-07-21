@@ -237,8 +237,7 @@ module.exports.getTripExpenceList = async (req, res) => {
         "TripPlan.CustRateMaps.trip_type.Id",
         "TripPlan.CustRateMaps.trip_type.TypeName",
       ],
-      // raw: true,
-      // logging: console.log,
+     order: [["Id", "DESC"]]
     });
 
     const getTotalCash = getAllTripExpence.reduce((acc, trip) => {
