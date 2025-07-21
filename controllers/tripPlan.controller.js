@@ -503,6 +503,8 @@ module.exports.checkTripPlan = async (req, res) => {
 
     const mergedArray = ScheduleData.concat(filteredTrips);
 
+    console.log('Merged Array length:', mergedArray.length);
+
     const tripDetailsArray = mergedArray.map((item) => {
       let tripDirection = "";
 
