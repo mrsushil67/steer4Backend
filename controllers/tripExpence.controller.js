@@ -548,10 +548,10 @@ module.exports.updateTripAdvanceOnRouteExpence = async (req, res) => {
 
     console.log("Body : ", req.body);
 
-    if (!Id || !ExpCategory || !paymentType) {
+    if (!Id || !ExpCategory) {
       return res.status(400).json({
         status: "400",
-        message: "Missing required fields Id or ExpCategory or paymentType",
+        message: "Missing required fields Id or ExpCategory",
       });
     }
 
