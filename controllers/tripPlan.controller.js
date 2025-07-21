@@ -231,10 +231,21 @@ module.exports.checkTripPlan = async (req, res) => {
 
     let tripOperationWhere = {};
     if (status !== null && status !== undefined) {
-      tripOperationWhere.Stat = status;
+      tripOperationWhere.Stat = {
+        [Op.eq]: status,
+        [Op.ne]: 6,
+      };
+    } else {
+      tripOperationWhere.Stat = {
+        [Op.ne]: 6,
+      };
     }
 
     let tripPlanWhere = {};
+
+    if (status !== null && status !== undefined) {
+      tripPlanWhere.Status = status;
+    }
 
     if (vehicleNo !== null) {
       tripOperationWhere[Op.or] = [
@@ -257,12 +268,7 @@ module.exports.checkTripPlan = async (req, res) => {
     }
 
     const regularData = await DBMODELS.TripOperation.findAll({
-      where: {
-        ...tripOperationWhere,
-        Stat: {
-          [Op.ne]: 6,
-        },
-      },
+      where: tripOperationWhere,
       include: [
         {
           model: DBMODELS.TripPlan,
@@ -1163,7 +1169,7 @@ module.exports.proceedTrip = async (req, res) => {
 
     const tripPlanData = await DBMODELS.TripPlan.create({
       ...tripScheduleData.toJSON(),
-      Status:0,
+      Status: 0,
     });
 
     return res.status(201).json({
