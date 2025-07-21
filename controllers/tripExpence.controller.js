@@ -16,20 +16,21 @@ module.exports.getTripExpenceList = async (req, res) => {
       ];
     }
 
-    if (fromDate && toDate) {
-      WhereCondition.ATD = {
-        [Op.between]: [new Date(fromDate), new Date(toDate)],
-      };
-    } else if (fromDate) {
-      WhereCondition.ATD = {
-        [Op.gte]: new Date(fromDate),
-      };
-    } else if (toDate) {
-      WhereCondition.ATD = {
-        [Op.lte]: new Date(toDate),
-      };
-    }
+    // if (fromDate && toDate) {
+    //   WhereCondition.ATD = {
+    //     [Op.between]: [new Date(fromDate), new Date(toDate)],
+    //   };
+    // } else if (fromDate) {
+    //   WhereCondition.ATD = {
+    //     [Op.gte]: new Date(fromDate),
+    //   };
+    // } else if (toDate) {
+    //   WhereCondition.ATD = {
+    //     [Op.lte]: new Date(toDate),
+    //   };
+    // }
 
+    
     console.log(WhereCondition);
     const getAllTripExpence = await DBMODELS.TripOperation.findAll({
       where: WhereCondition,
