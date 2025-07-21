@@ -359,7 +359,7 @@ module.exports.checkTripPlan = async (req, res) => {
     console.log("Regular.length : ", regularData.length);
 
     const marketData = await DBMODELS.TripOperation.findAll({
-      where:tripOperationWhere,
+      where: tripOperationWhere,
       // group: ['Id'],
       include: [
         {
@@ -457,42 +457,82 @@ module.exports.checkTripPlan = async (req, res) => {
     console.log("Market.length : ", marketData.length);
 
     const data = [...regularData, ...marketData];
+
+    const tripMap = new Map(data.map((t) => [t.TripNo, t]));
+
     const filteredTrips = data.filter((trip) => {
       const tripNo = trip.TripNo;
+      const baseTripNo = tripNo.slice(0, -1);
       const lastLetter = tripNo.slice(-1);
+      const tripType = trip.TripPlan?.TripType;
 
-      if (trip.TripPlan.TripType === 2) {
-        const tripA = data.find((t) => t?.TripNo === tripNo.slice(0, -1) + "A");
-        const tripB = trip;
-
+      if (tripType === 2) {
         if (lastLetter === "A" && trip.Stat !== 7) {
           return true;
-        } else if (lastLetter === "B") {
-          const correspondingATrip = data.find(
-            (t) => t?.TripNo === tripNo.slice(0, -1) + "A" && t?.Stat === 7
-          );
+        }
 
-          const correspondingATripB = data.find(
-            (t) => t?.TripNo === tripNo.slice(0, -1) + "B" && t?.Stat !== 7
-          );
+        if (lastLetter === "B") {
+          const correspondingATrip = tripMap.get(baseTripNo + "A");
+          const correspondingBTrip = tripMap.get(baseTripNo + "B");
 
-          if (correspondingATrip && correspondingATripB) {
+          if (
+            correspondingATrip?.Stat === 7 &&
+            correspondingBTrip?.Stat !== 7
+          ) {
             return true;
-          } else {
+          }
+
+          if (
+            correspondingATrip &&
+            correspondingBTrip &&
+            correspondingATrip.Stat + correspondingBTrip.Stat === 14
+          ) {
             return false;
           }
-        } else if (tripA && tripB && tripA.Stat + tripB.Stat === 14) {
-          return false;
         }
+
+        return false;
       } else {
-        if (lastLetter === "A" && trip.Stat !== 7) {
-          // console.log("yee: ",trip.TripNo, trip.Stat)
-          return true;
-        } else {
-          return false;
-        }
+        return lastLetter === "A" && trip.Stat !== 7;
       }
     });
+
+    // const filteredTrips = data.filter((trip) => {
+    //   const tripNo = trip.TripNo;
+    //   const lastLetter = tripNo.slice(-1);
+
+    //   if (trip.TripPlan.TripType === 2) {
+    //     const tripA = data.find((t) => t?.TripNo === tripNo.slice(0, -1) + "A");
+    //     const tripB = trip;
+
+    //     if (lastLetter === "A" && trip.Stat !== 7) {
+    //       return true;
+    //     } else if (lastLetter === "B") {
+    //       const correspondingATrip = data.find(
+    //         (t) => t?.TripNo === tripNo.slice(0, -1) + "A" && t?.Stat === 7
+    //       );
+
+    //       const correspondingATripB = data.find(
+    //         (t) => t?.TripNo === tripNo.slice(0, -1) + "B" && t?.Stat !== 7
+    //       );
+
+    //       if (correspondingATrip && correspondingATripB) {
+    //         return true;
+    //       } else {
+    //         return false;
+    //       }
+    //     } else if (tripA && tripB && tripA.Stat + tripB.Stat === 14) {
+    //       return false;
+    //     }
+    //   } else {
+    //     if (lastLetter === "A" && trip.Stat !== 7) {
+    //       // console.log("yee: ",trip.TripNo, trip.Stat)
+    //       return true;
+    //     } else {
+    //       return false;
+    //     }
+    //   }
+    // });
 
     // console.log("ScheduleDatafromRouteMaster : ",ScheduleDatafromRouteMaster[0].Route_Master)
 
@@ -503,7 +543,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
     const mergedArray = ScheduleData.concat(filteredTrips);
 
-    console.log('Merged Array length:', mergedArray.length);
+    console.log("Merged Array length:", mergedArray.length);
 
     const tripDetailsArray = mergedArray.map((item) => {
       let tripDirection = "";
