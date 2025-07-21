@@ -251,7 +251,7 @@ module.exports.getTripExpenceList = async (req, res) => {
     }, 0);
 
     const total = {
-      TotalCash: getTotalCash ,
+      TotalCash: getTotalCash,
       TotalDieselQty: getTotalDieselQty,
     };
 
@@ -550,7 +550,7 @@ module.exports.updateTripAdvanceOnRouteExpence = async (req, res) => {
     if (!Id || !ExpCategory || !paymentType) {
       return res.status(400).json({
         status: "400",
-        message: "Missing required fields",
+        message: "Missing required fields Id or ExpCategory or paymentType",
       });
     }
 
@@ -563,7 +563,7 @@ module.exports.updateTripAdvanceOnRouteExpence = async (req, res) => {
       if (!DieselQty || !DieselDate || !DieselVendor || !Diesel_Rate) {
         return res.status(400).json({
           status: "400",
-          message: "Missing required fields for diesel",
+          message: "Missing required fields for diesel DieselQty, DieselDate, DieselVendor, Diesel_Rate",
         });
       }
     }
@@ -577,7 +577,7 @@ module.exports.updateTripAdvanceOnRouteExpence = async (req, res) => {
       if (!paymentType) {
         return res.status(400).json({
           status: "400",
-          message: "Missing required fields for cash",
+          message: "Missing required fields for cash PaymentType",
         });
       }
     }
@@ -605,7 +605,7 @@ module.exports.updateTripAdvanceOnRouteExpence = async (req, res) => {
       PaidBy: paymentType,
     };
 
-    console.log("dataModel : ",dataModel)
+    console.log("dataModel : ", dataModel);
     const updatedExpence = await DBMODELS.TripAdvance.update(dataModel, {
       where: {
         Id: Id,
@@ -617,7 +617,7 @@ module.exports.updateTripAdvanceOnRouteExpence = async (req, res) => {
       message: "Trip advance updated successfully",
       data: updatedExpence,
     });
-
+    
   } catch (error) {
     return res.status(500).json({
       status: "500",
