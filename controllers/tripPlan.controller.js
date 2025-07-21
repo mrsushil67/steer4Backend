@@ -359,12 +359,7 @@ module.exports.checkTripPlan = async (req, res) => {
     console.log("Regular.length : ", regularData.length);
 
     const marketData = await DBMODELS.TripOperation.findAll({
-      where: {
-        ...tripOperationWhere,
-        Stat: {
-          [Op.ne]: 6,
-        },
-      },
+      where:tripOperationWhere,
       // group: ['Id'],
       include: [
         {
