@@ -15,11 +15,17 @@ module.exports.checkTripPlan = async (req, res) => {
     console.log("Request body:", req.body);
 
     let scheduleWhere = {
-      [Op.and]: [{ is_final: 0 }, { Status: { [Op.ne]: 6 } }],
+      is_final: 0,
     };
 
     if (status !== null) {
-      scheduleWhere.Status = status;
+      scheduleWhere.Status = {
+        [Op.and]: [{ [Op.eq]: status }, { [Op.ne]: 6 }],
+      };
+    } else {
+      scheduleWhere.Status = {
+        [Op.ne]: 6,
+      };
     }
 
     if (vehicleNo !== null) {
@@ -129,6 +135,11 @@ module.exports.checkTripPlan = async (req, res) => {
       }
     );
 
+    console.log(
+      "ScheduleDatafromRouteMaster.lengthg : ",
+      ScheduleDatafromRouteMaster.length
+    );
+
     const ScheduleDatafromCustRateMAps =
       await DBMODELS.TripPlanSchedule.findAll({
         where: {
@@ -228,6 +239,11 @@ module.exports.checkTripPlan = async (req, res) => {
         ],
         order: [["ID", "DESC"]],
       });
+
+    console.log(
+      "ScheduleDatafromCustRateMAps.length : ",
+      ScheduleDatafromCustRateMAps.length
+    );
 
     let tripOperationWhere = {};
     if (status !== null && status !== undefined && status !== 1) {
@@ -340,6 +356,8 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
+    console.log("Regular.length : ", regularData.length);
+
     const marketData = await DBMODELS.TripOperation.findAll({
       where: {
         ...tripOperationWhere,
@@ -439,6 +457,9 @@ module.exports.checkTripPlan = async (req, res) => {
         },
       ],
     });
+
+    console.log("Regular.length : ", regularData.length);
+    console.log("Market.length : ", marketData.length);
 
     const data = [...regularData, ...marketData];
     const filteredTrips = data.filter((trip) => {
@@ -738,6 +759,7 @@ module.exports.checkTripPlan = async (req, res) => {
         .status(404)
         .json({ status: "404", message: "No record found" });
     }
+    console.log("Trip Details Array length:", tripDetailsArray.length);
 
     return res
       .status(200)
