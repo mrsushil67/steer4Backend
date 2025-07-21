@@ -9,7 +9,7 @@ module.exports.getTripExpenceList = async (req, res) => {
 
     const WhereCondition = {};
 
-    if (vehicleNo !== null) {
+    if (vehicleNo) {
       WhereCondition[Op.or] = [
         { "$TripPlan.TripSheet$": { [Op.like]: `%${vehicleNo}%` } },
         { "$TripPlan.Vehicle.VNumer$": { [Op.like]: `%${vehicleNo}%` } },
