@@ -70,13 +70,6 @@ module.exports.getTripExpenceList = async (req, res) => {
         [fn("MAX", col("TripAdvance.Diesel_Rate")), "Diesel_Rate"],
         [fn("MAX", col("TripAdvance.Amt")), "Amt"],
         [fn("MAX", col("TripAdvance.TotalAmt")), "TotalAmt"],
-        [fn("SUM", col("OnRouteExp.Amt")), "onRouteCash"],
-        [fn("SUM", col("OnRouteExp.TotalAmt")), "onRouteDieselAmt"],
-        [fn("SUM", col("OnRouteExp.DieselQty")), "onRouteDieselQty"],
-        [fn("MAX", col("OnRouteExp.Id")), "onRouteId"],
-        [fn("MAX", col("OnRouteExp.Ticket")), "onRouteTicket"],
-        [fn("MAX", col("OnRouteExp.TripId")), "onRouteTripId"],
-        [fn("MAX", col("OnRouteExp.TripNo")), "onRouteTripNo"],
         // [fn("MAX", col("OnRouteExp.AdjDiesel")), "AdjDiesel"],
         // [fn("MAX", col("OnRouteExp.RemDiesel")), "RemDiesel"],
         // [fn("MAX", col("OnRouteExp.Diesel_Rate")), "Diesel_Rate"],
@@ -162,14 +155,6 @@ module.exports.getTripExpenceList = async (req, res) => {
           as: "TripAdvance",
           on: literal(
             "`TripOperation`.`TripId` = `TripAdvance`.`TripId` AND `TripOperation`.`TripNo` = `TripAdvance`.`TtripNo`"
-          ),
-          attributes: [],
-        },
-        {
-          model: DBMODELS.OnRouteExp,
-          as: "OnRouteExp",
-          on: literal(
-            "`TripOperation`.`TripId` = `OnRouteExp`.`TripId` AND `TripOperation`.`TripNo` = `OnRouteExp`.`TripNo`"
           ),
           attributes: [],
         },
@@ -260,32 +245,14 @@ module.exports.getTripExpenceList = async (req, res) => {
       return acc + totalCash;
     }, 0);
 
-    const getOnRouteCash = getAllTripExpence.reduce((acc, trip) => {
-      const totalOnRouteCash = Number(trip?.dataValues?.onRouteCash);
-      if (!isNaN(totalOnRouteCash)) {
-        return acc + totalOnRouteCash;
-      } else {
-        console.log(
-          `Invalid onRouteCash value: ${trip?.dataValues?.onRouteCash}`
-        ); // Log invalid values
-        return acc;
-      }
-    }, 0);
-
     const getTotalDieselQty = getAllTripExpence.reduce((acc, trip) => {
       const totalDieselQty = Number(trip?.dataValues?.advanceDieselQty) || 0;
       return acc + totalDieselQty;
     }, 0);
 
-    const getOnRouteDieselQty = getAllTripExpence.reduce((acc, trip) => {
-      const totalOnRouteDieselQty =
-        Number(trip?.dataValues?.onRouteDieselQty) || 0;
-      return acc + totalOnRouteDieselQty;
-    }, 0);
-
     const total = {
-      TotalCash: getTotalCash + getOnRouteCash,
-      TotalDieselQty: getTotalDieselQty + getOnRouteDieselQty,
+      TotalCash: getTotalCash ,
+      TotalDieselQty: getTotalDieselQty,
     };
 
     if (getAllTripExpence.length === 0) {
