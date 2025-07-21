@@ -236,10 +236,6 @@ module.exports.checkTripPlan = async (req, res) => {
 
     let tripPlanWhere = {};
 
-     if (status !== null && status !== undefined) {
-      tripOperationWhere.Stat = status;
-    }
-
     if (vehicleNo !== null) {
       tripOperationWhere[Op.or] = [
         { "$TripPlan.TripSheet$": { [Op.like]: `%${vehicleNo}%` } },
