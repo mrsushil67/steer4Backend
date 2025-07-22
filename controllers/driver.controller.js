@@ -45,11 +45,11 @@ module.exports.getDriversList = async (req, res) => {
 
     const drivers = await DBMODELS.Driver.findAll({
       where: { DriverID: { [Op.in]: driverIds } },
-      attributes: ["DriverID", "DName", "Licence"],
+      attributes: ["DriverID", "DName", "Licence", "BloclStataus"],
     });
 
     console.log("Fetched drivers: ", drivers);
-    
+
     if(drivers.BloclStataus = 2) {
       console.log("Driver is blocked");
       return res.status(403).json({ message: "Driver is blocked", status: false });
