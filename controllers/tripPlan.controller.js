@@ -106,7 +106,7 @@ module.exports.checkTripPlan = async (req, res) => {
                 attributes: ["CityId", "CityName", "latitude", "longitude"],
               },
             ],
-            // attributes: ["RouteId", "RouteName", "RouteType", "RouteString"],
+            attributes: ["RouteId", "Distance", "RouteCat"],
           },
           {
             model: DBMODELS.TripType,
@@ -167,7 +167,7 @@ module.exports.checkTripPlan = async (req, res) => {
           {
             model: DBMODELS.RouteMaster,
             as: "Route_Master",
-            attributes: ["RouteId"],
+            attributes: ["RouteId", "Distance", "RouteCat"],
             include: [
               {
                 model: DBMODELS.city,
@@ -314,7 +314,7 @@ module.exports.checkTripPlan = async (req, res) => {
             {
               model: DBMODELS.RouteMaster,
               as: "route_master",
-              attributes: ["RouteId"],
+              attributes: ["RouteId", "Distance", "RouteCat"],
               include: [
                 {
                   model: DBMODELS.city,
@@ -352,6 +352,11 @@ module.exports.checkTripPlan = async (req, res) => {
               ],
             },
           ],
+        },
+        {
+          model: DBMODELS.TripPlanSchedule,
+          as: "TripPlanSchedule",
+          attributes: ["StartKm"],
         },
       ],
     });
@@ -417,7 +422,7 @@ module.exports.checkTripPlan = async (req, res) => {
                   attributes: ["CityId", "CityName", "latitude", "longitude"],
                 },
               ],
-              // attributes: ["RouteId", "RouteName", "RouteType", "RouteString"],
+              attributes: ["RouteId", "Distance", "RouteCat"],
             },
             {
               model: DBMODELS.TripType,
@@ -450,6 +455,11 @@ module.exports.checkTripPlan = async (req, res) => {
             // },
           ],
         },
+        {
+          model: DBMODELS.TripPlanSchedule,
+          as: "TripPlanSchedule",
+          attributes: ["StartKm"],
+        },
       ],
     });
 
@@ -478,11 +488,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
           if (correspondingATrip && correspondingATripB) {
             return true;
-          } else if (
-            status !== null &&
-            status !== undefined &&
-            status !== 7
-          ) {
+          } else if (status !== null && status !== undefined && status !== 7) {
             return true;
           } else {
             return false;
@@ -536,6 +542,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
       if (item.TripPlan) {
         if (item.TripPlan.PlanCat === 2) {
+          console.log("yyy: ", item.TripPlanSchedule.StartKm);
           return {
             Id: item.Id,
             TripId: item.TripId,
@@ -556,7 +563,7 @@ module.exports.checkTripPlan = async (req, res) => {
             OnRouteBy: item.OnRouteBy,
             CloseBy: item.CloseBy,
             Is_Invoice: item.Is_Invoice,
-            StartKm: item.StartKm || null,
+            StartKm: item.TripPlanSchedule.StartKm || null,
             Remark: item.Remark || null,
             OpeningKm: item.OpeningKm,
             ClosingKm: item.ClosingKm,
@@ -593,6 +600,7 @@ module.exports.checkTripPlan = async (req, res) => {
               null,
             TripTypeName: item.TripPlan.tripType?.TypeName || null,
             TripDirection: tripDirection,
+            distance: item.TripPlan.route_master?.Distance || null,
             source: item.TripPlan.route_master.source_city.CityId,
             destination: item.TripPlan.route_master.dest_city.CityId,
             sourceName: item.TripPlan.route_master.source_city.CityName,
@@ -620,7 +628,7 @@ module.exports.checkTripPlan = async (req, res) => {
             OnRouteBy: item.OnRouteBy,
             CloseBy: item.CloseBy,
             Is_Invoice: item.Is_Invoice,
-            StartKm: item.StartKm || null,
+            StartKm: item.TripPlanSchedule.StartKm || null,
             Remark: item.Remark || null,
             OpeningKm: item.OpeningKm,
             ClosingKm: item.ClosingKm,
@@ -656,6 +664,7 @@ module.exports.checkTripPlan = async (req, res) => {
             TripTypeName:
               item.TripPlan.CustRateMaps?.trip_type?.TypeName || null,
             TripDirection: tripDirection,
+            distance: item.TripPlan.route_master?.Distance || null,
             source: item?.TripPlan.route_master?.source_city.CityId,
             destination: item?.TripPlan.route_master?.dest_city.CityId,
             sourceName: item.TripPlan.route_master.source_city.CityName,
@@ -703,6 +712,7 @@ module.exports.checkTripPlan = async (req, res) => {
               null,
             TripTypeName: item.tripType?.TypeName || null,
             TripDirection: item.TripType === 2 ? "Reverse" : "Forward",
+            distance: item?.Route_Master?.Distance || null,
             source: item?.Route_Master?.source_city?.CityId,
             destination: item?.Route_Master?.dest_city?.CityId,
             sourceName: item.Route_Master.source_city.CityName,
@@ -745,6 +755,7 @@ module.exports.checkTripPlan = async (req, res) => {
             RouteString: item.CustRateMaps?.RouteString || null,
             TripTypeName: item.CustRateMaps?.trip_type?.TypeName || null,
             TripDirection: item.TripType === 2 ? "Reverse" : "Forward",
+            distance: item?.Route_Master?.Distance || null,
             source: item?.Route_Master?.source_city?.CityId,
             destination: item?.Route_Master?.dest_city?.CityId,
             sourceName: item.Route_Master.source_city.CityName,
