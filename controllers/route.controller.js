@@ -32,7 +32,7 @@ module.exports.getRoutelist = async (req, res) => {
     });
     const routes = Array.from(routesMap.values());
 
-    console.log(routes);
+    console.log(allRoutes);
 
     if (routes.length === 0) {
       return res
@@ -42,7 +42,7 @@ module.exports.getRoutelist = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: "200", message: "Records found", routes });
+      .json({ status: "200", message: "Records found", allRoutes });
   } catch (error) {
     console.error("Error fetching route list:", error);
     return res
