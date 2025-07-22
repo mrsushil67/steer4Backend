@@ -60,7 +60,7 @@ module.exports.getVehicleSize = async (req, res) => {
       : {};
 
     const vehicleSize = await DBMODELS.Vehiclesize.findAll({
-      where: whereCondition,
+      where: {...whereCondition, is_active: { [Op.ne]: 0 }},
     });
 
     if (vehicleSize.length === 0) {
