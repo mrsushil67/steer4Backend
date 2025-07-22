@@ -37,6 +37,7 @@ module.exports.getDriversList = async (req, res) => {
     });
 
     if (assignedDrivers.length === 0) {
+      console.log("No drivers assigned to this vehicle");
       return res.status(404).json({ status: "404", message: "Not Assign Driver to this Vehicle"});
     }
 
@@ -48,10 +49,12 @@ module.exports.getDriversList = async (req, res) => {
     });
 
     if(drivers.BloclStataus = 2) {
+      console.log("Driver is blocked");
       return res.status(403).json({ message: "Driver is blocked", status: false });
     }
 
     if (drivers.length === 0) {
+      console.log("No drivers found for the given Driver IDs");
       return res.status(404).json({ message: "No drivers found for the given Driver IDs", status: false });
     }
 
