@@ -50,7 +50,7 @@ module.exports.getDriversList = async (req, res) => {
 
     console.log("Fetched drivers: ", drivers);
 
-    if(drivers.BlockStataus === 2) {
+    if(drivers.BlockStataus === "2") {
       console.log("Driver is blocked");
       return res.status(403).json({ message: "Driver is blocked", status: false });
     }
