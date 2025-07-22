@@ -14,12 +14,21 @@ module.exports.getRoutelist = async (req, res) => {
     const allRoutes = await DBMODELS.CustRateMap.findAll({
       where: { CustId, RouteType },
       include: [
-      {
-        model: DBMODELS.TripType,
-        as: "trip_type",
-        required: true,
-        attributes: ["Id", "TypeName"],
-      },
+        {
+          model: DBMODELS.TripType,
+          as: "trip_type",
+          required: true,
+          attributes: ["Id", "TypeName"],
+        },
+        {
+          model: DBMODELS.RouteMaster,
+          as: "Route",
+          required: true,
+          attributes: ["RouteId", "CustId", "RouteCode", "Source", "Destination", "is_active"],
+          where: {
+            is_active: { [Op.ne]: 0 }
+          }
+        },
       ],
     });
 
@@ -27,23 +36,23 @@ module.exports.getRoutelist = async (req, res) => {
     const routesMap = new Map();
     allRoutes.forEach((route) => {
       if (!routesMap.has(route.RouteId)) {
-      routesMap.set(route.RouteId, {
-        ...route.toJSON(),
-        trip_types: [],
-      });
+        routesMap.set(route.RouteId, {
+          ...route.toJSON(),
+          trip_types: [],
+        });
       }
       const tripType = route.trip_type
-      ? {
-        Id: route.trip_type.Id,
-        TypeName: route.trip_type.TypeName,
-        }
-      : null;
+        ? {
+            Id: route.trip_type.Id,
+            TypeName: route.trip_type.TypeName,
+          }
+        : null;
       if (tripType) {
-      routesMap.get(route.RouteId).trip_types.push(tripType);
+        routesMap.get(route.RouteId).trip_types.push(tripType);
       }
     });
     const routes = Array.from(routesMap.values());
-    
+
     console.log(routes);
 
     if (routes.length === 0) {
