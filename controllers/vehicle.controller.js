@@ -25,7 +25,7 @@ module.exports.getVehicleList = async (req, res) => {
       : { FleetZize: vehicleSize };
 
     const vehicles = await DBMODELS.Vehicle.findAll({
-      where: whereCondition,
+      where: {...whereCondition, is_active: { [Op.ne]: 0 }},
       attributes: ["VehicleID", "VNumer"],
       limit: 20,
     });
