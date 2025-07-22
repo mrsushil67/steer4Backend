@@ -11,7 +11,7 @@ module.exports.getRoutelist = async (req, res) => {
         .json({ status: "400", message: "fill all fields" });
     }
 
-    const allRoutes = await DBMODELS.CustRateMap.findAll({
+    const routes = await DBMODELS.CustRateMap.findAll({
       where: { CustId, RouteType },
       // group: ['RouteId'],
       include: [
@@ -24,15 +24,15 @@ module.exports.getRoutelist = async (req, res) => {
       ],
     });
 
-    const routesMap = new Map();
-    allRoutes.forEach((route) => {
-      if (!routesMap.has(route.RouteId)) {
-        routesMap.set(route.RouteId, route);
-      }
-    });
-    const routes = Array.from(routesMap.values());
+    // const routesMap = new Map();
+    // allRoutes.forEach((route) => {
+    //   if (!routesMap.has(route.RouteId)) {
+    //     routesMap.set(route.RouteId, route);
+    //   }
+    // });
+    // const routes = Array.from(routesMap.values());
 
-    console.log(allRoutes);
+    // console.log(routes);
 
     if (routes.length === 0) {
       return res
@@ -42,7 +42,7 @@ module.exports.getRoutelist = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: "200", message: "Records found", allRoutes });
+      .json({ status: "200", message: "Records found", routes });
   } catch (error) {
     console.error("Error fetching route list:", error);
     return res
