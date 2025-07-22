@@ -11,28 +11,40 @@ module.exports.getRoutelist = async (req, res) => {
         .json({ status: "400", message: "fill all fields" });
     }
 
-    const routes = await DBMODELS.CustRateMap.findAll({
+    const allRoutes = await DBMODELS.CustRateMap.findAll({
       where: { CustId, RouteType },
-      // group: ['RouteId'],
       include: [
-        {
-          model: DBMODELS.TripType,
-          as: "trip_type",
-          required: true,
-          attributes: ["Id", "TypeName"],
-        },
+      {
+        model: DBMODELS.TripType,
+        as: "trip_type",
+        required: true,
+        attributes: ["Id", "TypeName"],
+      },
       ],
     });
 
-    // const routesMap = new Map();
-    // allRoutes.forEach((route) => {
-    //   if (!routesMap.has(route.RouteId)) {
-    //     routesMap.set(route.RouteId, route);
-    //   }
-    // });
-    // const routes = Array.from(routesMap.values());
-
-    // console.log(routes);
+    // Group routes by RouteId and collect trip types as an array
+    const routesMap = new Map();
+    allRoutes.forEach((route) => {
+      if (!routesMap.has(route.RouteId)) {
+      routesMap.set(route.RouteId, {
+        ...route.toJSON(),
+        trip_types: [],
+      });
+      }
+      const tripType = route.trip_type
+      ? {
+        Id: route.trip_type.Id,
+        TypeName: route.trip_type.TypeName,
+        }
+      : null;
+      if (tripType) {
+      routesMap.get(route.RouteId).trip_types.push(tripType);
+      }
+    });
+    const routes = Array.from(routesMap.values());
+    
+    console.log(routes);
 
     if (routes.length === 0) {
       return res
