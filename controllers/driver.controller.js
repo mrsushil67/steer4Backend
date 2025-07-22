@@ -25,10 +25,12 @@ module.exports.getDriverLisence = async (req, res) => {
 
 module.exports.getDriversList = async (req, res) => {
   try {
-    const { VehicleID = null } = req.body || {}
+    const { VehicleID = null } = req.body || {};
 
     if (!VehicleID) {
-      return res.status(400).json({ message: "VehicleID is required", status: false });
+      return res
+        .status(400)
+        .json({ message: "VehicleID is required", status: false });
     }
 
     const assignedDrivers = await DBMODELS.DriverAssigntToVehicle.findAll({
@@ -38,7 +40,9 @@ module.exports.getDriversList = async (req, res) => {
 
     if (assignedDrivers.length === 0) {
       console.log("No drivers assigned to this vehicle");
-      return res.status(404).json({ status: "404", message: "Not Assign Driver to this Vehicle"});
+      return res
+        .status(404)
+        .json({ status: "404", message: "Not Assign Driver to this Vehicle" });
     }
 
     const driverIds = assignedDrivers.map((assignment) => assignment.Did);
@@ -49,21 +53,37 @@ module.exports.getDriversList = async (req, res) => {
     });
 
     console.log("Fetched drivers: ", drivers);
+    const isBlocked = drivers.some((driver) => driver.BlockStataus === 2);
 
-    if(drivers.BlockStataus === "2") {
-      console.log("Driver is blocked");
-      return res.status(403).json({ message: "Driver is blocked", status: false });
+    if (isBlocked) {
+      console.log("One or more drivers are blocked");
+      return res
+        .status(403)
+        .json({ message: "One or more drivers are blocked", status: false });
     }
 
     if (drivers.length === 0) {
       console.log("No drivers found for the given Driver IDs");
-      return res.status(404).json({ message: "No drivers found for the given Driver IDs", status: false });
+      return res
+        .status(404)
+        .json({
+          message: "No drivers found for the given Driver IDs",
+          status: false,
+        });
     }
 
-    return res.status(200).json({status: "200", message: "Drivers fetched successfully", drivers});
+    return res
+      .status(200)
+      .json({
+        status: "200",
+        message: "Drivers fetched successfully",
+        drivers,
+      });
   } catch (error) {
     console.error("Error fetching drivers list: ", error.message);
-    return res.status(500).json({ message: "Internal Server Error", status: false });
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", status: false });
   }
 };
 
