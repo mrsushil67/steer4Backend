@@ -47,6 +47,10 @@ module.exports.getDriversList = async (req, res) => {
       attributes: ["DriverID", "DName", "Licence"],
     });
 
+    if(drivers.BloclStataus = 2) {
+      return res.status(403).json({ message: "Driver is blocked", status: false });
+    }
+
     if (drivers.length === 0) {
       return res.status(404).json({ message: "No drivers found for the given Driver IDs", status: false });
     }
