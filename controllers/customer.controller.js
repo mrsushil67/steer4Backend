@@ -27,7 +27,7 @@ module.exports.getCustomerList = async (req, res) => {
       : { ServiceType };
 
     const customers = await DBMODELS.CustomerMaster.findAll({
-      where: whereCondition,
+      where: {...whereCondition, is_active: { [Op.ne]: 0 }},
       attributes: [
         "CustId",
         "CustomerName",
