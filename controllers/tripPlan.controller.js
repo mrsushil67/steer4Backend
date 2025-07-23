@@ -538,7 +538,7 @@ module.exports.checkTripPlan = async (req, res) => {
     console.log("Merged Array length:", mergedArray.length);
 
     const tripDetailsArray = mergedArray.map((item) => {
-      console.log("Processing item:", item);
+      console.log("Processing item:", item.TripPlan);
       let tripDirection = "";
 
       if (item.TripPlan) {
