@@ -105,6 +105,11 @@ module.exports.checkTripPlan = async (req, res) => {
                 as: "dest_city",
                 attributes: ["CityId", "CityName", "latitude", "longitude"],
               },
+              {
+                model: DBMODELS.CustRouteMap,
+                as: "CustRouteMaps",
+                attributes: ["TAT"],
+              },
             ],
             attributes: ["RouteId", "Distance", "RouteCat"],
           },
@@ -178,6 +183,11 @@ module.exports.checkTripPlan = async (req, res) => {
                 model: DBMODELS.city,
                 as: "dest_city",
                 attributes: ["CityId", "CityName", "latitude", "longitude"],
+              },
+              {
+                model: DBMODELS.CustRouteMap,
+                as: "CustRouteMaps",
+                attributes: ["TAT"],
               },
             ],
           },
@@ -326,6 +336,11 @@ module.exports.checkTripPlan = async (req, res) => {
                   as: "dest_city",
                   attributes: ["CityId", "CityName", "latitude", "longitude"],
                 },
+                {
+                  model: DBMODELS.CustRouteMap,
+                  as: "CustRouteMaps",
+                  attributes: ["TAT"],
+                },
               ],
             },
             {
@@ -420,6 +435,11 @@ module.exports.checkTripPlan = async (req, res) => {
                   model: DBMODELS.city,
                   as: "dest_city",
                   attributes: ["CityId", "CityName", "latitude", "longitude"],
+                },
+                {
+                  model: DBMODELS.CustRouteMap,
+                  as: "CustRouteMaps",
+                  attributes: ["TAT"],
                 },
               ],
               attributes: ["RouteId", "Distance", "RouteCat"],
@@ -605,6 +625,7 @@ module.exports.checkTripPlan = async (req, res) => {
             destination: item?.TripPlan?.route_master?.dest_city?.CityId,
             sourceName: item?.TripPlan?.route_master?.source_city?.CityName,
             destinationName: item?.TripPlan?.route_master?.dest_city?.CityName,
+            tat: item?.TripPlan?.route_master?.CustRouteMaps?.TAT || null,
             // },
           };
         } else {
@@ -669,6 +690,7 @@ module.exports.checkTripPlan = async (req, res) => {
             destination: item?.TripPlan?.route_master?.dest_city.CityId,
             sourceName: item?.TripPlan?.route_master?.source_city.CityName,
             destinationName: item?.TripPlan?.route_master?.dest_city.CityName,
+            tat: item?.TripPlan?.route_master?.CustRouteMaps?.TAT || null,
             // },
           };
         }
@@ -717,6 +739,7 @@ module.exports.checkTripPlan = async (req, res) => {
             destination: item?.Route_Master?.dest_city?.CityId,
             sourceName: item?.Route_Master?.source_city?.CityName,
             destinationName: item?.Route_Master?.dest_city?.CityName,
+            tat: item?.Route_Master?.CustRouteMaps?.TAT || null,
           };
         } else {
           return {
@@ -760,6 +783,7 @@ module.exports.checkTripPlan = async (req, res) => {
             destination: item?.Route_Master?.dest_city?.CityId,
             sourceName: item?.Route_Master?.source_city?.CityName,
             destinationName: item?.Route_Master?.dest_city?.CityName,
+            tat: item?.Route_Master?.CustRouteMaps?.TAT || null,
           };
         }
       }
