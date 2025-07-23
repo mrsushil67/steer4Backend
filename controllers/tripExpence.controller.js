@@ -416,6 +416,7 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
     if (
       DieselQty === undefined ||
       DieselQty === null ||
+      DieselQty === "" ||
       DieselQty <= 0
     ) {
       if (!paymentType || !ExpCategory) {
@@ -426,6 +427,9 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
       }
     }
 
+    const parsedDieselQty = DieselQty !== '' ? parseFloat(DieselQty) : null;
+const parsedDieselRate = Diesel_Rate !== '' ? parseFloat(Diesel_Rate) : null;
+const parsedTotalAmt = TotalAmt !== '' ? parseFloat(TotalAmt) : null;
     const ticket = generateTicket(TripId);
 
     const formattedDieselDate = DieselDate
@@ -439,18 +443,18 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
       TripId,
       TtripNo: TripNo,
       Cash: Advance || 0,
-      DieselQty,
+      DieselQty: parsedDieselQty,
       DieselDt: formattedDieselDate,
       DieselVendor,
       VNumer,
       Driver1Id,
-      Diesel_Rate,
+      Diesel_Rate: parsedDieselRate,
       Remark,
       createdBy: userId,
       CreatedTime: currentTime,
       Amt: 0,
       FillCat: paymentMode,
-      TotalAmt,
+      TotalAmt: parsedTotalAmt,
       ExpCategory,
       PaidBy: paymentType,
     };
