@@ -600,11 +600,11 @@ module.exports.checkTripPlan = async (req, res) => {
               null,
             TripTypeName: item.TripPlan.tripType?.TypeName || null,
             TripDirection: tripDirection,
-            distance: item.TripPlan.route_master?.Distance || null,
-            source: item.TripPlan.route_master.source_city.CityId,
-            destination: item.TripPlan.route_master.dest_city.CityId,
-            sourceName: item.TripPlan.route_master.source_city.CityName,
-            destinationName: item.TripPlan.route_master.dest_city.CityName,
+            distance: item?.TripPlan?.route_master?.Distance || null,
+            source: item?.TripPlan?.route_master?.source_city?.CityId,
+            destination: item?.TripPlan?.route_master?.dest_city?.CityId,
+            sourceName: item?.TripPlan?.route_master?.source_city?.CityName,
+            destinationName: item?.TripPlan?.route_master?.dest_city?.CityName,
             // },
           };
         } else {
@@ -664,11 +664,11 @@ module.exports.checkTripPlan = async (req, res) => {
             TripTypeName:
               item.TripPlan.CustRateMaps?.trip_type?.TypeName || null,
             TripDirection: tripDirection,
-            distance: item.TripPlan.route_master?.Distance || null,
-            source: item?.TripPlan.route_master?.source_city.CityId,
-            destination: item?.TripPlan.route_master?.dest_city.CityId,
-            sourceName: item.TripPlan.route_master.source_city.CityName,
-            destinationName: item.TripPlan.route_master.dest_city.CityName,
+            distance: item?.TripPlan?.route_master?.Distance || null,
+            source: item?.TripPlan?.route_master?.source_city.CityId,
+            destination: item?.TripPlan?.route_master?.dest_city.CityId,
+            sourceName: item?.TripPlan?.route_master?.source_city.CityName,
+            destinationName: item?.TripPlan?.route_master?.dest_city.CityName,
             // },
           };
         }
@@ -715,8 +715,8 @@ module.exports.checkTripPlan = async (req, res) => {
             distance: item?.Route_Master?.Distance || null,
             source: item?.Route_Master?.source_city?.CityId,
             destination: item?.Route_Master?.dest_city?.CityId,
-            sourceName: item.Route_Master.source_city.CityName,
-            destinationName: item.Route_Master.dest_city.CityName,
+            sourceName: item?.Route_Master?.source_city?.CityName,
+            destinationName: item?.Route_Master?.dest_city?.CityName,
           };
         } else {
           return {
@@ -758,8 +758,8 @@ module.exports.checkTripPlan = async (req, res) => {
             distance: item?.Route_Master?.Distance || null,
             source: item?.Route_Master?.source_city?.CityId,
             destination: item?.Route_Master?.dest_city?.CityId,
-            sourceName: item.Route_Master.source_city.CityName,
-            destinationName: item.Route_Master.dest_city.CityName,
+            sourceName: item?.Route_Master?.source_city?.CityName,
+            destinationName: item?.Route_Master?.dest_city?.CityName,
           };
         }
       }
