@@ -416,7 +416,6 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
     if (
       DieselQty === undefined ||
       DieselQty === null ||
-      DieselQty === "" ||
       DieselQty <= 0
     ) {
       if (!paymentType || !ExpCategory) {
