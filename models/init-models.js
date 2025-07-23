@@ -442,7 +442,7 @@ function initModels(sequelize) {
   CustRateMap.belongsTo(RouteMaster, { as: "Route", foreignKey: "RouteId"});
   RouteMaster.hasMany(CustRateMap, { as: "CustRateMaps", foreignKey: "RouteId"});
 
-  CustRouteMap.hasMany(RouteMaster, { as: "Route", foreignKey: "RouteId"});
+  CustRouteMap.hasOne(RouteMaster, { as: "Route", foreignKey: "RouteId"});
   RouteMaster.belongsTo(CustRouteMap, { as: "CustRouteMaps", foreignKey: "RouteId"});
 
   Docket.belongsTo(TripCharges, { as: "TripCharge", foreignKey: "TripChargeId"});
