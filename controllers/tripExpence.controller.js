@@ -391,7 +391,7 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
 
     console.log("Body : ", req.body);
 
-    if (!TripId || !TripNo || !ExpCategory || !paymentType) {
+    if (!TripId || !TripNo || !paymentType) {
       return res.status(400).json({
         status: "400",
         message: "Missing required fields",
@@ -419,10 +419,10 @@ module.exports.createTripAdvanceExpence = async (req, res) => {
       DieselQty === "" ||
       DieselQty <= 0
     ) {
-      if (!paymentType) {
+      if (!paymentType || !ExpCategory) {
         return res.status(400).json({
           status: "400",
-          message: "Missing required fields for cash",
+          message: "Missing required fields for cash or expense category",
         });
       }
     }
