@@ -15,6 +15,7 @@ const TripRouter = require("./routes/tripPlan.route");
 const CityRouter = require("./routes/city.route");
 const TripExpenceRouter = require("./routes/tripExpence.route");
 const DashboardRouter = require("./routes/dashboard.route");
+const SettlemantRouter = require("./routes/tripsettlement.route");
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
@@ -37,5 +38,6 @@ app.use('/api/v1/trip', TripRouter);
 app.use('/api/v1/city', CityRouter);
 app.use('/api/v1/tripExpence', TripExpenceRouter);
 app.use('/api/v1/dashboard', DashboardRouter);
+app.use('/api/v1/tripSettlement', SettlemantRouter);
 
 module.exports = app;
