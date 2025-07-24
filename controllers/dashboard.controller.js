@@ -56,12 +56,12 @@ module.exports.CustomerStatus = async (req, res) => {
       pending_settlement,
       totalpanding_rate: 0,
       total_invoice: 0,
-      active_vehicle: available_vehicles,
+      active_vehicle: 0,
       broken_down_vehicle: 0,
       ongoing_travel,
       completed_travel,
       delayed_travel: 0,
-      vehicle_availability: 0,
+      vehicle_availability: available_vehicles,
     };
 
     return res.status(200).json({
