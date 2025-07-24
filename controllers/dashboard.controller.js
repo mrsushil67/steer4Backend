@@ -3,7 +3,7 @@ const { DBMODELS } = require("../models/init-models");
 
 module.exports.CustomerStatus = async (req, res) => {
   try {
-    const [customers, drivers, tripPlans, tripOperations, vehicleAvailables] = await Promise.all([
+    const [customers, drivers, tripPlans, tripOperations, vehicleAvailables, invoices] = await Promise.all([
       DBMODELS.CustomerMaster.findAll(),
       DBMODELS.Driver.findAll(),
       DBMODELS.TripPlan.findAll(),
@@ -20,9 +20,10 @@ module.exports.CustomerStatus = async (req, res) => {
         },
       }),
       DBMODELS.VehicleAvailable.findAll(),
+      DBMODELS.InvoiceMaster.findAll(),
     ]);
 
-    if (!customers || !drivers || !tripPlans || !tripOperations || !vehicleAvailables) {
+    if (!customers || !drivers || !tripPlans || !tripOperations || !vehicleAvailables || !invoices) {
       throw new Error("Failed to retrieve necessary data");
     }
 
@@ -49,13 +50,15 @@ module.exports.CustomerStatus = async (req, res) => {
       if (op.VStatus === 2) available_vehicles++;
     }
 
+    const Total_invoices = invoices.length
+
     const data = {
       totalCustomer: customers.length,
       totalDriver: drivers.length,
       settlement_trip,
       pending_settlement,
       totalpanding_rate: 0,
-      total_invoice: 0,
+      total_invoice: Total_invoices,
       active_vehicle: 0,
       broken_down_vehicle: 0,
       ongoing_travel,
