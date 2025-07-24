@@ -102,23 +102,23 @@ module.exports.getTripExpenceList = async (req, res) => {
               as: "Driver",
               attributes: ["DriverID", "DName"],
             },
-            // {
-            //   model: DBMODELS.RouteMaster,
-            //   as: "route_master",
-            //   attributes: ["RouteId"],
-            //   include: [
-            //     {
-            //       model: DBMODELS.city,
-            //       as: "source_city",
-            //       attributes: ["CityId", "CityName", "latitude", "longitude"],
-            //     },
-            //     {
-            //       model: DBMODELS.city,
-            //       as: "dest_city",
-            //       attributes: ["CityId", "CityName", "latitude", "longitude"],
-            //     },
-            //   ],
-            // },
+            {
+              model: DBMODELS.RouteMaster,
+              as: "route_master",
+              attributes: ["RouteId"],
+              include: [
+                {
+                  model: DBMODELS.city,
+                  as: "source_city",
+                  attributes: ["CityId", "CityName"],
+                },
+                {
+                  model: DBMODELS.city,
+                  as: "dest_city",
+                  attributes: ["CityId", "CityName"],
+                },
+              ],
+            },
             {
               model: DBMODELS.CustRateMap,
               as: "CustRateMaps",
