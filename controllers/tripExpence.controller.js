@@ -491,17 +491,17 @@ module.exports.showExpences = () => {
 
 module.exports.getTripAdvanceOnRouteExpence = async (req, res) => {
   try {
-    const { tripId } = req.body || {};
-    if (!tripId) {
+    const { TripNo } = req.body || {};
+    if (!TripNo) {
       return res.status(400).json({
         status: "400",
-        message: "Missing tripId",
+        message: "Missing TripNo",
       });
     }
 
     const expences = await DBMODELS.TripAdvance.findAll({
       where: {
-        TripId: tripId,
+        TtripNo: TripNo,
       },
       order: [["PaidBy", "ASC"]],
     });
