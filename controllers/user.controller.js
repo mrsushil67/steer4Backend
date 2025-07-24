@@ -63,3 +63,34 @@ module.exports.signInUser = async (req, res) => {
       .json({ message: "Internal Server Error", status: false });
   }
 };
+
+module.exports.userProfile = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    console.log("User ID from request:", userId);
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized User",userId });
+    }
+
+    const user = await DBMODELS.Users.findOne({
+      where: { User_ID: userId },
+      attributes: { exclude: ['password', 'ShowPassword'] },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      status: "200",
+      message: "User profile fetched successfully",
+      user,
+    });
+  } catch (error) {
+    console.error("Error fetching user profile: ", error.message);
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", status: false });
+    
+  }
+}
