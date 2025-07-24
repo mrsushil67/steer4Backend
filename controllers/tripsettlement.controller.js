@@ -167,7 +167,10 @@ module.exports.createTripSettlement = async (req, res) => {
 
     const tripSettlement = await DBMODELS.TripSettlement.create(data);
 
-    return res.status(201).json(tripSettlement);
+    return res.status(201).json({
+      status: "201",
+      message: "Trip settlement created successfully"
+    });
   } catch (error) {
     console.error("Error creating trip settlement:", error);
     return res.status(500).json({ error: "Internal server error." });
@@ -186,7 +189,11 @@ module.exports.getTripSettlement = async (req, res) => {
     if (!tripSettlement) {
       return res.status(404).json({ error: "Trip settlement not found." });
     }
-    return res.status(200).json(tripSettlement);
+    return res.status(200).json({
+        status: "200",
+        message: "Record Found",
+        tripSettlement,
+    });
   } catch (error) {
     console.error("Error fetching trip settlement:", error);
     return res.status(500).json({ error: "Internal server error." });
