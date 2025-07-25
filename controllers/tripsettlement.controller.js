@@ -25,10 +25,6 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         [col("Driver.DName"), "SecoundDriverName"],
         [col("Driver.Licence"), "SecoundLicence"],
         [
-          fn("GROUP_CONCAT", literal('TripPlan.DepartureTime SEPARATOR ","')),
-          "DeptTime",
-        ],
-        [
           fn(
             "GROUP_CONCAT",
             literal('DISTINCT CustomerMasters.CustomerName SEPARATOR ","')
@@ -87,8 +83,28 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       },
       raw: true,
     });
+    // 2. Fetch TripOperations separately
+    const tripOperations = await DBMODELS.TripOperation.findAll({
+      where: { TripId: tripId },
+      attributes: ["TripNo", "ATD", "ATA"],
+      raw: true,
+    });
 
-    // 2. Fetch TripAdvance (PaidBy = 1)
+    let ATD = null;
+    let ATA = null;
+
+    const opA = tripOperations.find((op) => op.TripNo?.trim().endsWith("A"));
+    const opB = tripOperations.find((op) => op.TripNo?.trim().endsWith("B"));
+
+    if (opA && opB) {
+      ATD = opA.ATD;
+      ATA = opB.ATA;
+    } else if (opA) {
+      ATD = opA.ATD;
+      ATA = opA.ATA;
+    }
+
+    // 3. Fetch TripAdvance (PaidBy = 1)
     const tripAdvance = await DBMODELS.TripAdvance.findAll({
       attributes: ["*", [col("TripPlan.TripSheet"), "TripSheet"]],
       include: [
@@ -150,7 +166,11 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
     };
 
     const tripSettlement = {
-      tripPlan,
+      tripPlan: {
+        ...tripPlan,
+        ATD,
+        ATA,
+      },
       tripAdvance,
       tripOnroute,
       totalExpence,
