@@ -237,7 +237,7 @@ module.exports.createTripSettlement = async (req, res) => {
       HandlingChrgs,
       OtherChargs,
       BalanceCash,
-      Date,
+      date,
       FastTagNew,
       TCash,
       HChargs,
@@ -266,6 +266,8 @@ module.exports.createTripSettlement = async (req, res) => {
         .json({ error: "missing TCash or TDiesel required." });
     }
 
+    const formattedDate = date ? moment(date, "YYYY-MM-DD").format("YYYY-MM-DD") : new Date();
+    const formattedDeptDate = DeptDate ? moment(DeptDate, "YYYY-MM-DD").format("YYYY-MM-DD") : new Date();
     const data = {
       StartKms,
       CloseKms,
@@ -281,7 +283,7 @@ module.exports.createTripSettlement = async (req, res) => {
       HandlingChrgs,
       OtherChargs,
       BalanceCash,
-      Date,
+      Date:formattedDate,
       FastTagNew,
       TCash,
       HChargs,
@@ -290,7 +292,7 @@ module.exports.createTripSettlement = async (req, res) => {
       Remark,
       MechCharge,
       CustName,
-      DeptDate,
+      DeptDate: formattedDeptDate,
       ATA,
       dalaCharge,
       DalaChargeRemark,
