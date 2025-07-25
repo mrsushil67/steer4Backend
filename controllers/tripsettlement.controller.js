@@ -86,7 +86,10 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         },
       ],
       where: {
-        ID: tripId,
+        [Op.and]: [
+          { ID: tripId },
+          { Is_Completed: 1 }
+        ]
       },
       raw: true,
     });
