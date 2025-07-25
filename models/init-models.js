@@ -516,6 +516,9 @@ function initModels(sequelize) {
 
   PumpDetails.belongsTo(VendorMaster, { as: "VendorMaster", foreignKey: "VendorId"});
   VendorMaster.hasOne(PumpDetails, {as: "PumpDetails", foreignKey: "VendorId"});
+
+  TripAdvance.belongsTo(TripPlan, {as: 'TripPlan', foreignKey: 'TripId'});
+  TripPlan.hasMany(TripAdvance, {as: 'TripAdvances',foreignKey: 'TripId'});
   
   // RouteMaster.belongsTo(city, {as: 'source_city',foreignKey: 'Source'});
   // city.hasMany(RouteMaster, {as: 'source_routes', foreignKey: 'Source' });
