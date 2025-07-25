@@ -24,6 +24,8 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         [col("Driver.Licence"), "FristDrverLicence"],
         [col("Driver.DName"), "SecoundDriverName"],
         [col("Driver.Licence"), "SecoundLicence"],
+        [col("CustRateMaps.RouteString"), "RouteString"],
+        [col("CustRateMaps.Rate"), "Rate"],
         [
           fn(
             "GROUP_CONCAT",
@@ -77,6 +79,11 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
             },
           ],
         },
+        {
+              model: DBMODELS.CustRateMap,
+              as: "CustRateMaps",
+              attributes: [],
+        }
       ],
       where: {
         ID: tripId,
@@ -284,7 +291,9 @@ module.exports.createTripSettlement = async (req, res) => {
     } = req.body;
 
     if (!TCash || !TDiesel) {
-      return res.status(400).json({ error: "missing TCash or TDiesel required." });
+      return res
+        .status(400)
+        .json({ error: "missing TCash or TDiesel required." });
     }
 
     const formattedCreatedDate = CreatedDate
