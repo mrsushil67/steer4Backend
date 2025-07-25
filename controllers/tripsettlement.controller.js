@@ -125,16 +125,18 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
     });
 
     // const totalExpence = {
-    //   TripAdvance: tripAdvance.reduce((sum, item) => sum + parseFloat(item.Amount || 0), 0),
-    //   TripOnroute: tripOnroute.reduce((sum, item) => sum + parseFloat(item.Amount || 0), 0),
+    //   TotalTipCash: tripAdvance.reduce((sum, item) => sum + (item.Cash || 0), 0),
+    //   TotalTripDiesel: tripAdvance.reduce((sum, item) => sum + (item.Diesel || 0), 0),
     // }
-    // Send Response
-    res.json({
+    
+    const tripSettlement = {
       tripPlan,
       tripAdvance,
       tripOnroute,
       // totalExpence,
-    });
+    };
+
+    return res.status(200).json({status: "200", message: "Record Found", tripSettlement});
   } catch (error) {
     console.error("Error fetching details for trip settlement:", error);
     return res.status(500).json({ error: "Internal server error." });
