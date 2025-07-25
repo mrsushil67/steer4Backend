@@ -94,7 +94,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       include: [
         {
           model: DBMODELS.TripPlan,
-          as: 'TripPlan',
+          as: "TripPlan",
           attributes: [],
           required: false,
         },
@@ -112,7 +112,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       include: [
         {
           model: DBMODELS.TripPlan,
-          as: 'TripPlan',
+          as: "TripPlan",
           attributes: [],
           required: false,
         },
@@ -124,19 +124,41 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       raw: true,
     });
 
-    // const totalExpence = {
-    //   TotalTipCash: tripAdvance.reduce((sum, item) => sum + (item.Cash || 0), 0),
-    //   TotalTripDiesel: tripAdvance.reduce((sum, item) => sum + (item.Diesel || 0), 0),
-    // }
-    
+    const round = (n) => parseFloat(n.toFixed(2));
+
+    const totalExpence = {
+      TotalTipCash: round(
+        tripAdvance.reduce(
+          (sum, item) => sum + (parseFloat(item.Cash) || 0),
+          0
+        ) +
+          tripOnroute.reduce(
+            (sum, item) => sum + (parseFloat(item.Cash) || 0),
+            0
+          )
+      ),
+      TotalTripDiesel: round(
+        tripAdvance.reduce(
+          (sum, item) => sum + (parseFloat(item.DieselQty) || 0),
+          0
+        ) +
+          tripOnroute.reduce(
+            (sum, item) => sum + (parseFloat(item.DieselQty) || 0),
+            0
+          )
+      ),
+    };
+
     const tripSettlement = {
       tripPlan,
       tripAdvance,
       tripOnroute,
-      // totalExpence,
+      totalExpence,
     };
 
-    return res.status(200).json({status: "200", message: "Record Found", tripSettlement});
+    return res
+      .status(200)
+      .json({ status: "200", message: "Record Found", tripSettlement });
   } catch (error) {
     console.error("Error fetching details for trip settlement:", error);
     return res.status(500).json({ error: "Internal server error." });
