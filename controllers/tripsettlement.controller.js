@@ -290,6 +290,8 @@ module.exports.createTripSettlement = async (req, res) => {
       // TCommission,
     } = req.body;
 
+    console.log("Body : ", req.body);
+
     if (!TCash || !TDiesel) {
       return res
         .status(400)
