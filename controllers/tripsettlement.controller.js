@@ -207,6 +207,12 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       totalExpence,
     };
 
+    if (tripSettlement.tripPlan.TripId === null){
+      return res
+        .status(404)
+        .json({ status: "404", message: "Trip settlement not found for the given trip ID." });
+    }
+
     return res
       .status(200)
       .json({ status: "200", message: "Record Found", tripSettlement });
