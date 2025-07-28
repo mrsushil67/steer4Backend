@@ -139,6 +139,10 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         "ExpCategory",
         "PaidBy",
         [col("TripPlan.TripSheet"), "TripSheet"],
+        [col("PumpDetails.Id"),"PumpId"],
+        [col("PumpDetails.Dipo"), "PumpDepo"],
+        [col("PumpDetails.PumpName"),"PumpName"],
+        [col("PumpDetails.VendorId"), "PumpVendorId"]
       ],
       include: [
         {
@@ -150,7 +154,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         {
           model: DBMODELS.PumpDetails,
           as: "PumpDetails",
-          // required: false,
+          attributes:[],
         },
       ],
       where: {
@@ -190,6 +194,10 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         "ExpCategory",
         "PaidBy",
         [col("TripPlan.TripSheet"), "TripSheet"],
+        [col("PumpDetails.Id"),"PumpId"],
+        [col("PumpDetails.Dipo"), "PumpDepo"],
+        [col("PumpDetails.PumpName"),"PumpName"],
+        [col("PumpDetails.VendorId"), "PumpVendorId"]
       ],
       include: [
         {
@@ -201,7 +209,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         {
           model: DBMODELS.PumpDetails,
           as: "PumpDetails",
-          // required: false,
+          attributes:[],
         },
       ],
       where: {
