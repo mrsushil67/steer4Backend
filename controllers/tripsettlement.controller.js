@@ -420,12 +420,19 @@ module.exports.getTripSettlement = async (req, res) => {
 
 module.exports.getPandingSettlementrips = async (req, res) => {
   try {
-    
+    const { tripsheetNo = null } = req.body || {};
+
+    const tripPlanWhere = {
+      Is_Completed: 1,
+      Is_Settled: { [Op.eq]: null },
+    };
+
+    if (tripsheetNo) {
+      tripPlanWhere.TripSheet = { [Op.like]: `%${tripsheetNo}%` };
+    }
+
     const latestTripOps = await DBMODELS.TripOperation.findAll({
-      attributes: [
-        "TripId",
-        [fn("MAX", col("Id")), "MaxId"],
-      ],
+      attributes: ["TripId", [fn("MAX", col("Id")), "MaxId"]],
       group: ["TripId"],
       raw: true,
     });
@@ -437,12 +444,7 @@ module.exports.getPandingSettlementrips = async (req, res) => {
       include: {
         model: DBMODELS.TripPlan,
         as: "TripPlan",
-        where: {
-          [Op.and]: [
-            { Is_Completed: 1 }, 
-            { Is_Settled: { [Op.eq]: null } }
-          ]
-        },
+        where: tripPlanWhere,
       },
     });
 
@@ -454,4 +456,3 @@ module.exports.getPandingSettlementrips = async (req, res) => {
     return res.status(500).json({ error: "Internal server error." });
   }
 };
-
