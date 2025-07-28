@@ -1,4 +1,4 @@
-const sequelize = require('../config/databaseConnection');
+const sequelize = require("../config/databaseConnection");
 var DataTypes = require("sequelize").DataTypes;
 var _Accident = require("./Accident");
 var _AccidentVehiceImages = require("./AccidentVehiceImages");
@@ -302,7 +302,10 @@ function initModels(sequelize) {
   var ImpBank = _ImpBank(sequelize, DataTypes);
   var ImpTransaction = _ImpTransaction(sequelize, DataTypes);
   var ImpTransactionDetails = _ImpTransactionDetails(sequelize, DataTypes);
-  var ImpTransactionDetailsExp = _ImpTransactionDetailsExp(sequelize, DataTypes);
+  var ImpTransactionDetailsExp = _ImpTransactionDetailsExp(
+    sequelize,
+    DataTypes
+  );
   var InvType = _InvType(sequelize, DataTypes);
   var InvoiceDetail = _InvoiceDetail(sequelize, DataTypes);
   var InvoiceMaster = _InvoiceMaster(sequelize, DataTypes);
@@ -426,110 +429,207 @@ function initModels(sequelize) {
   var states = _states(sequelize, DataTypes);
   var stationery = _stationery(sequelize, DataTypes);
   var text = _text(sequelize, DataTypes);
-  
+
   TripOperation.belongsTo(TripPlan, { as: "TripPlan", foreignKey: "TripId" });
-  TripPlan.hasMany(TripOperation, { as: "TripOperations", foreignKey: "TripId" });
+  TripPlan.hasMany(TripOperation, {
+    as: "TripOperations",
+    foreignKey: "TripId",
+  });
 
-  CustRateMap.belongsTo(CustomerMaster, { as: "Cust", foreignKey: "CustId"});
-  CustomerMaster.hasMany(CustRateMap, { as: "CustRateMaps", foreignKey: "CustId"});
+  CustRateMap.belongsTo(CustomerMaster, { as: "Cust", foreignKey: "CustId" });
+  CustomerMaster.hasMany(CustRateMap, {
+    as: "CustRateMaps",
+    foreignKey: "CustId",
+  });
 
-  CustRateMap.belongsTo(CustomerSeviceType, { as: "RouteType_CustomerSeviceType", foreignKey: "RouteType"});
-  CustomerSeviceType.hasMany(CustRateMap, { as: "CustRateMaps", foreignKey: "RouteType"});
+  CustRateMap.belongsTo(CustomerSeviceType, {
+    as: "RouteType_CustomerSeviceType",
+    foreignKey: "RouteType",
+  });
+  CustomerSeviceType.hasMany(CustRateMap, {
+    as: "CustRateMaps",
+    foreignKey: "RouteType",
+  });
 
-  Docket.belongsTo(DocketPackage, { as: "Package", foreignKey: "PackageId"});
-  DocketPackage.hasMany(Docket, { as: "Dockets", foreignKey: "PackageId"});
+  Docket.belongsTo(DocketPackage, { as: "Package", foreignKey: "PackageId" });
+  DocketPackage.hasMany(Docket, { as: "Dockets", foreignKey: "PackageId" });
 
-  CustRateMap.belongsTo(RouteMaster, { as: "Route", foreignKey: "RouteId"});
-  RouteMaster.hasMany(CustRateMap, { as: "CustRateMaps", foreignKey: "RouteId"});
+  CustRateMap.belongsTo(RouteMaster, { as: "Route", foreignKey: "RouteId" });
+  RouteMaster.hasMany(CustRateMap, {
+    as: "CustRateMaps",
+    foreignKey: "RouteId",
+  });
 
-  CustRouteMap.hasOne(RouteMaster, { as: "Route", foreignKey: "RouteId"});
-  RouteMaster.belongsTo(CustRouteMap, { as: "CustRouteMaps", foreignKey: "RouteId"});
+  CustRouteMap.hasOne(RouteMaster, { as: "Route", foreignKey: "RouteId" });
+  RouteMaster.belongsTo(CustRouteMap, {
+    as: "CustRouteMaps",
+    foreignKey: "RouteId",
+  });
 
-  Docket.belongsTo(TripCharges, { as: "TripCharge", foreignKey: "TripChargeId"});
-  TripCharges.hasMany(Docket, { as: "Dockets", foreignKey: "TripChargeId"});
+  Docket.belongsTo(TripCharges, {
+    as: "TripCharge",
+    foreignKey: "TripChargeId",
+  });
+  TripCharges.hasMany(Docket, { as: "Dockets", foreignKey: "TripChargeId" });
 
-  CustRateMap.belongsTo(TripType, { as: "trip_type", foreignKey: "TripType"});
-  TripType.hasMany(CustRateMap, { as: "CustRateMaps", foreignKey: "TripType"});
+  CustRateMap.belongsTo(TripType, { as: "trip_type", foreignKey: "TripType" });
+  TripType.hasMany(CustRateMap, { as: "CustRateMaps", foreignKey: "TripType" });
 
-  city.belongsTo(states, { as: "state", foreignKey: "stateId"});
-  states.hasMany(city, { as: "cities", foreignKey: "stateId"});
+  city.belongsTo(states, { as: "state", foreignKey: "stateId" });
+  states.hasMany(city, { as: "cities", foreignKey: "stateId" });
 
-  CustomerMaster.belongsTo(RouteMaster, { as: "RouteMasters", foreignKey: "CustId" });
+  CustomerMaster.belongsTo(RouteMaster, {
+    as: "RouteMasters",
+    foreignKey: "CustId",
+  });
   RouteMaster.hasMany(RouteMaster, { as: "Cust", foreignKey: "CustId" });
 
-  TripPlan.belongsTo(CustomerMaster, { as: "CustomerMasters", foreignKey: "CustId" });
+  TripPlan.belongsTo(CustomerMaster, {
+    as: "CustomerMasters",
+    foreignKey: "CustId",
+  });
   CustomerMaster.hasOne(TripPlan, { as: "TripPlan", foreignKey: "CustId" });
 
   TripPlan.belongsTo(MarketCust, { as: "MarketCust", foreignKey: "CustId" });
   MarketCust.hasOne(TripPlan, { as: "TripPlan", foreignKey: "CustId" });
 
-  TripPlan.belongsTo( Vehicle , {as: "Vehicle", foreignKey: "VehicleId"});
-  Vehicle.hasOne(TripPlan , {as: "TripPlan", foreignKey: "VehicleId"});
+  TripPlan.belongsTo(Vehicle, { as: "Vehicle", foreignKey: "VehicleId" });
+  Vehicle.hasOne(TripPlan, { as: "TripPlan", foreignKey: "VehicleId" });
 
-  TripPlan.belongsTo(Driver, {as: "Driver", foreignKey: "Driver1Id"});
-  Driver.hasOne(TripPlan , {as: "TripPlan", foreignKey: "Driver1Id"});
+  TripPlan.belongsTo(Driver, { as: "Driver", foreignKey: "Driver1Id" });
+  Driver.hasOne(TripPlan, { as: "TripPlan", foreignKey: "Driver1Id" });
 
   TripPlan.belongsTo(CustRateMap, { as: "CustRateMaps", foreignKey: "CustId" });
   CustRateMap.hasOne(TripPlan, { as: "TripPlan", foreignKey: "CustId" });
 
-  TripPlan.belongsTo(RouteMaster, {as : "route_master" , foreignKey: "RouteId"});
-  RouteMaster.hasOne(TripPlan, {as: "TripPlan", foreignKey: "RouteId"});
+  TripPlan.belongsTo(RouteMaster, {
+    as: "route_master",
+    foreignKey: "RouteId",
+  });
+  RouteMaster.hasOne(TripPlan, { as: "TripPlan", foreignKey: "RouteId" });
 
-  TripType.hasOne(TripPlan , { as: 'TripPlan', foreignKey: "TripType" });
-  TripPlan.belongsTo(TripType, { as: "tripType", foreignKey: "TripType" }); 
+  TripType.hasOne(TripPlan, { as: "TripPlan", foreignKey: "TripType" });
+  TripPlan.belongsTo(TripType, { as: "tripType", foreignKey: "TripType" });
 
-  RouteMaster.belongsTo(city, {as: 'source_city',foreignKey: 'Source'});
-  city.hasMany(RouteMaster, {as: 'source_routes', foreignKey: 'Source' });
+  RouteMaster.belongsTo(city, { as: "source_city", foreignKey: "Source" });
+  city.hasMany(RouteMaster, { as: "source_routes", foreignKey: "Source" });
 
-  RouteMaster.belongsTo(city, {as: 'dest_city',foreignKey: 'Destination'});
-  city.hasMany(RouteMaster, {as: 'destination_routes', foreignKey: 'Destination' });
+  RouteMaster.belongsTo(city, { as: "dest_city", foreignKey: "Destination" });
+  city.hasMany(RouteMaster, {
+    as: "destination_routes",
+    foreignKey: "Destination",
+  });
 
-  TripOperation.belongsTo(TripPlanSchedule, { as: "TripPlanSchedule", foreignKey: "TripId" });
-  TripPlanSchedule.hasMany(TripOperation, { as: "TripOperations", foreignKey: "TripId" });
+  TripOperation.belongsTo(TripPlanSchedule, {
+    as: "TripPlanSchedule",
+    foreignKey: "TripId",
+  });
+  TripPlanSchedule.hasMany(TripOperation, {
+    as: "TripOperations",
+    foreignKey: "TripId",
+  });
 
-  TripPlanSchedule.belongsTo(CustomerMaster, { as: "CustomerMasters", foreignKey: "CustId" });
-  CustomerMaster.hasOne(TripPlanSchedule, { as: "TripPlanSchedule", foreignKey: "CustId" });
+  TripPlanSchedule.belongsTo(CustomerMaster, {
+    as: "CustomerMasters",
+    foreignKey: "CustId",
+  });
+  CustomerMaster.hasOne(TripPlanSchedule, {
+    as: "TripPlanSchedule",
+    foreignKey: "CustId",
+  });
 
-  TripPlanSchedule.belongsTo(MarketCust, { as: "MarketCust", foreignKey: "CustId" });
-  MarketCust.hasOne(TripPlanSchedule, { as: "TripPlanSchedule", foreignKey: "CustId" });
+  TripPlanSchedule.belongsTo(MarketCust, {
+    as: "MarketCust",
+    foreignKey: "CustId",
+  });
+  MarketCust.hasOne(TripPlanSchedule, {
+    as: "TripPlanSchedule",
+    foreignKey: "CustId",
+  });
 
-  TripPlanSchedule.belongsTo( Vehicle , {as: "Vehicle", foreignKey: "VehicleId"});
-  Vehicle.hasOne(TripPlanSchedule , {as: "TripPlanSchedule", foreignKey: "VehicleId"});
+  TripPlanSchedule.belongsTo(Vehicle, {
+    as: "Vehicle",
+    foreignKey: "VehicleId",
+  });
+  Vehicle.hasOne(TripPlanSchedule, {
+    as: "TripPlanSchedule",
+    foreignKey: "VehicleId",
+  });
 
-  TripPlanSchedule.belongsTo(Driver, {as: "Driver", foreignKey: "Driver1Id"});
-  Driver.hasOne(TripPlanSchedule , {as: "TripPlanSchedule", foreignKey: "Driver1Id"});
+  TripPlanSchedule.belongsTo(Driver, { as: "Driver", foreignKey: "Driver1Id" });
+  Driver.hasOne(TripPlanSchedule, {
+    as: "TripPlanSchedule",
+    foreignKey: "Driver1Id",
+  });
 
-  TripPlanSchedule.belongsTo(CustRateMap, { as: "CustRateMaps", foreignKey: "CustId" });
-  CustRateMap.hasOne(TripPlanSchedule, { as: "TripPlanSchedule", foreignKey: "CustId" });
+  TripPlanSchedule.belongsTo(CustRateMap, {
+    as: "CustRateMaps",
+    foreignKey: "CustId",
+  });
+  CustRateMap.hasOne(TripPlanSchedule, {
+    as: "TripPlanSchedule",
+    foreignKey: "CustId",
+  });
 
-  TripPlanSchedule.belongsTo(RouteMaster, {as : "Route_Master" , foreignKey: "RouteId"});
-  RouteMaster.hasOne(TripPlanSchedule, {as: "TripPlanSchedule", foreignKey: "RouteId"});
+  TripPlanSchedule.belongsTo(RouteMaster, {
+    as: "Route_Master",
+    foreignKey: "RouteId",
+  });
+  RouteMaster.hasOne(TripPlanSchedule, {
+    as: "TripPlanSchedule",
+    foreignKey: "RouteId",
+  });
 
-  TripPlanSchedule.belongsTo(TripType ,{as: 'tripType', foreignKey: "TripType"});
-  TripType.hasOne(TripPlanSchedule, {as: "TripPlanSchedule", foreignKey: "TripType"});
+  TripPlanSchedule.belongsTo(TripType, {
+    as: "tripType",
+    foreignKey: "TripType",
+  });
+  TripType.hasOne(TripPlanSchedule, {
+    as: "TripPlanSchedule",
+    foreignKey: "TripType",
+  });
 
-  TripAdvance.belongsTo(TripOperation,  { as: "TripOperation", foreignKey: "TripId"});
-  TripOperation.hasMany(TripAdvance, { as: "TripAdvance", foreignKey: "TripId"});
+  TripAdvance.belongsTo(TripOperation, {
+    as: "TripOperation",
+    foreignKey: "TripId",
+  });
+  TripOperation.hasMany(TripAdvance, {
+    as: "TripAdvance",
+    foreignKey: "TripId",
+  });
 
-  OnRouteExp.belongsTo(TripOperation, { as: "TripOperation", foreignKey: "TripId"});
-  TripOperation.hasMany(OnRouteExp, {as: "OnRouteExp", foreignKey: "TripId"});
+  OnRouteExp.belongsTo(TripOperation, {
+    as: "TripOperation",
+    foreignKey: "TripId",
+  });
+  TripOperation.hasMany(OnRouteExp, { as: "OnRouteExp", foreignKey: "TripId" });
 
-  PumpDetails.belongsTo(VendorMaster, { as: "VendorMaster", foreignKey: "VendorId"});
-  VendorMaster.hasOne(PumpDetails, {as: "PumpDetails", foreignKey: "VendorId"});
+  PumpDetails.belongsTo(VendorMaster, {
+    as: "VendorMaster",
+    foreignKey: "VendorId",
+  });
+  VendorMaster.hasOne(PumpDetails, {
+    as: "PumpDetails",
+    foreignKey: "VendorId",
+  });
 
-  TripAdvance.belongsTo(TripPlan, {as: 'TripPlan', foreignKey: 'TripId'});
-  TripPlan.hasMany(TripAdvance, {as: 'TripAdvances',foreignKey: 'TripId'});
-  
-  TripAdvance.hasMany(PumpDetails, {as: 'PumpDetails', foreignKey: 'Id'});
-  PumpDetails.belongsTo(TripAdvance, {as: 'TripAdvances', foreignKey: 'DieselVendor'});
-  
+  TripAdvance.belongsTo(TripPlan, { as: "TripPlan", foreignKey: "TripId" });
+  TripPlan.hasMany(TripAdvance, { as: "TripAdvances", foreignKey: "TripId" });
+
+  TripAdvance.belongsTo(PumpDetails, {
+    as: "PumpDetails",
+    foreignKey: "DieselVendor",
+  });
+  PumpDetails.hasOne(TripAdvance, {
+    as: "TripAdvances",
+    foreignKey: "DieselVendor",
+  });
+
   // RouteMaster.belongsTo(city, {as: 'source_city',foreignKey: 'Source'});
   // city.hasMany(RouteMaster, {as: 'source_routes', foreignKey: 'Source' });
 
   // RouteMaster.belongsTo(city, {as: 'dest_city',foreignKey: 'Destination'});
   // city.hasMany(RouteMaster, {as: 'destination_routes', foreignKey: 'Destination' });
-
-
 
   return {
     Accident,
@@ -747,7 +847,7 @@ function initModels(sequelize) {
   };
 }
 
-const DBMODELS = initModels(sequelize)
+const DBMODELS = initModels(sequelize);
 module.exports = initModels;
 module.exports.initModels = initModels;
 module.exports.default = initModels;

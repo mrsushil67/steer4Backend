@@ -150,7 +150,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         {
           model: DBMODELS.PumpDetails,
           as: "PumpDetails",
-          attributes: ["PumpName","VendorId"],
+          // required: false,
         },
       ],
       where: {
@@ -159,6 +159,8 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       },
       raw: true,
     });
+
+    console.log("Trip Advance Data: ", tripAdvance);
 
     // 3. Fetch TripOnroute (PaidBy = 2)
     const tripOnroute = await DBMODELS.TripAdvance.findAll({
@@ -199,7 +201,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         {
           model: DBMODELS.PumpDetails,
           as: "PumpDetails",
-          attributes: ["PumpName","VendorId"],
+          // required: false,
         },
       ],
       where: {
@@ -209,8 +211,6 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       raw: true,
     });
 
-    console.log("Trip Advance Data: ", tripAdvance);
-    console.log("Trip Onroute Data: ", tripOnroute);
     const TotalAdvanceCash = tripAdvance.reduce(
       (sum, item) => sum + (parseFloat(item.Cash) || 0),
       0
