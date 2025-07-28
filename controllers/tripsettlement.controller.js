@@ -139,10 +139,10 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         "ExpCategory",
         "PaidBy",
         [col("TripPlan.TripSheet"), "TripSheet"],
-        [col("PumpDetails.Id"),"PumpId"],
+        [col("PumpDetails.Id"), "PumpId"],
         [col("PumpDetails.Dipo"), "PumpDepo"],
-        [col("PumpDetails.PumpName"),"PumpName"],
-        [col("PumpDetails.VendorId"), "PumpVendorId"]
+        [col("PumpDetails.PumpName"), "PumpName"],
+        [col("PumpDetails.VendorId"), "PumpVendorId"],
       ],
       include: [
         {
@@ -154,7 +154,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         {
           model: DBMODELS.PumpDetails,
           as: "PumpDetails",
-          attributes:[],
+          attributes: [],
         },
       ],
       where: {
@@ -163,7 +163,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       },
       raw: true,
     });
-    
+
     // 3. Fetch TripOnroute (PaidBy = 2)
     const tripOnroute = await DBMODELS.TripAdvance.findAll({
       attributes: [
@@ -192,10 +192,10 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         "ExpCategory",
         "PaidBy",
         [col("TripPlan.TripSheet"), "TripSheet"],
-        [col("PumpDetails.Id"),"PumpId"],
+        [col("PumpDetails.Id"), "PumpId"],
         [col("PumpDetails.Dipo"), "PumpDepo"],
-        [col("PumpDetails.PumpName"),"PumpName"],
-        [col("PumpDetails.VendorId"), "PumpVendorId"]
+        [col("PumpDetails.PumpName"), "PumpName"],
+        [col("PumpDetails.VendorId"), "PumpVendorId"],
       ],
       include: [
         {
@@ -207,7 +207,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         {
           model: DBMODELS.PumpDetails,
           as: "PumpDetails",
-          attributes:[],
+          attributes: [],
         },
       ],
       where: {
@@ -417,3 +417,41 @@ module.exports.getTripSettlement = async (req, res) => {
     return res.status(500).json({ error: "Internal server error." });
   }
 };
+
+module.exports.getPandingSettlementrips = async (req, res) => {
+  try {
+    
+    const latestTripOps = await DBMODELS.TripOperation.findAll({
+      attributes: [
+        "TripId",
+        [fn("MAX", col("Id")), "MaxId"],
+      ],
+      group: ["TripId"],
+      raw: true,
+    });
+
+    const ids = latestTripOps.map((item) => item.MaxId);
+
+    const completedTrips = await DBMODELS.TripOperation.findAll({
+      where: { Id: ids },
+      include: {
+        model: DBMODELS.TripPlan,
+        as: "TripPlan",
+        where: {
+          [Op.and]: [
+            { Is_Completed: 1 }, 
+            { Is_Settled: { [Op.eq]: null } }
+          ]
+        },
+      },
+    });
+
+    return res
+      .status(200)
+      .json({ status: "200", message: "Record Found", data: completedTrips });
+  } catch (error) {
+    console.error("Error in pending settlement:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
