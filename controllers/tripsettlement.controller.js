@@ -147,13 +147,12 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
           model: DBMODELS.TripPlan,
           as: "TripPlan",
           attributes: [],
-          // required: false,
+          required: false,
         },
         {
           model: DBMODELS.PumpDetails,
           as: "PumpDetails",
           attributes: [],
-          // required: false,
         },
       ],
       where: {
@@ -205,7 +204,6 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
           model: DBMODELS.PumpDetails,
           as: "PumpDetails",
           attributes: [],
-          required: true,
         },
       ],
       where: {
