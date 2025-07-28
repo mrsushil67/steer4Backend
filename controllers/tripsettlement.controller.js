@@ -437,6 +437,10 @@ module.exports.getPandingSettlementrips = async (req, res) => {
       raw: true,
     });
 
+    if (!latestTripOps || latestTripOps.length === 0) {
+      return res.status(404).json({ status: "404", message: "No trip operations found." });
+    }
+
     const ids = latestTripOps.map((item) => item.MaxId);
 
     const completedTrips = await DBMODELS.TripOperation.findAll({
@@ -447,6 +451,10 @@ module.exports.getPandingSettlementrips = async (req, res) => {
         where: tripPlanWhere,
       },
     });
+
+    if (!completedTrips || completedTrips.length === 0) {
+      return res.status(404).json({ status: "404", message: "No completed trips found for the provided criteria." });
+    }
 
     return res
       .status(200)
