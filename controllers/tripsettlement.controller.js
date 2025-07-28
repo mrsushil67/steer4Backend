@@ -139,8 +139,6 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         "ExpCategory",
         "PaidBy",
         [col("TripPlan.TripSheet"), "TripSheet"],
-        [col("PumpDetails.PumpName"), "PumpName"],
-        [col("PumpDetails.VendorId"), "VendorId"],
       ],
       include: [
         {
@@ -152,7 +150,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         {
           model: DBMODELS.PumpDetails,
           as: "PumpDetails",
-          attributes: [],
+          attributes: ["PumpName","VendorId"],
         },
       ],
       where: {
@@ -190,8 +188,6 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         "ExpCategory",
         "PaidBy",
         [col("TripPlan.TripSheet"), "TripSheet"],
-        [col("PumpDetails.PumpName"), "PumpName"],
-        [col("PumpDetails.VendorId"), "VendorId"],
       ],
       include: [
         {
@@ -203,7 +199,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         {
           model: DBMODELS.PumpDetails,
           as: "PumpDetails",
-          attributes: [],
+          attributes: ["PumpName","VendorId"],
         },
       ],
       where: {
@@ -213,6 +209,8 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       raw: true,
     });
 
+    console.log("Trip Advance Data: ", tripAdvance);
+    console.log("Trip Onroute Data: ", tripOnroute);
     const TotalAdvanceCash = tripAdvance.reduce(
       (sum, item) => sum + (parseFloat(item.Cash) || 0),
       0
