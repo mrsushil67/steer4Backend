@@ -163,9 +163,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       },
       raw: true,
     });
-
-    console.log("Trip Advance Data: ", tripAdvance);
-
+    
     // 3. Fetch TripOnroute (PaidBy = 2)
     const tripOnroute = await DBMODELS.TripAdvance.findAll({
       attributes: [
