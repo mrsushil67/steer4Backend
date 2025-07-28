@@ -113,11 +113,45 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
 
     // 3. Fetch TripAdvance (PaidBy = 1)
     const tripAdvance = await DBMODELS.TripAdvance.findAll({
-      attributes: ["*", [col("TripPlan.TripSheet"), "TripSheet"]],
+      attributes: [
+        "Id",
+        "Ticket",
+        "TripId",
+        "TtripNo",
+        "Cash",
+        "DieselQty",
+        "DieselDt",
+        "DieselVendor",
+        "Location",
+        "AdjDiesel",
+        "RemDiesel",
+        "VNumer",
+        "Driver1Id",
+        "Driver2Id",
+        "Diesel_Rate",
+        "Remark",
+        "createdBy",
+        "CreatedTime",
+        "Qty",
+        "Amt",
+        "FillCat",
+        "TotalAmt",
+        "ExpCategory",
+        "PaidBy",
+        [col("TripPlan.TripSheet"), "TripSheet"],
+        [col("PumpDetails.PumpName"), "PumpName"],
+        [col("PumpDetails.VendorId"), "VendorId"],
+      ],
       include: [
         {
           model: DBMODELS.TripPlan,
           as: "TripPlan",
+          attributes: [],
+          required: false,
+        },
+        {
+          model: DBMODELS.PumpDetails,
+          as: "PumpDetails",
           attributes: [],
           required: false,
         },
@@ -131,11 +165,45 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
 
     // 3. Fetch TripOnroute (PaidBy = 2)
     const tripOnroute = await DBMODELS.TripAdvance.findAll({
-      attributes: ["*", [col("TripPlan.TripSheet"), "TripSheet"]],
+      attributes: [
+        "Id",
+        "Ticket",
+        "TripId",
+        "TtripNo",
+        "Cash",
+        "DieselQty",
+        "DieselDt",
+        "DieselVendor",
+        "Location",
+        "AdjDiesel",
+        "RemDiesel",
+        "VNumer",
+        "Driver1Id",
+        "Driver2Id",
+        "Diesel_Rate",
+        "Remark",
+        "createdBy",
+        "CreatedTime",
+        "Qty",
+        "Amt",
+        "FillCat",
+        "TotalAmt",
+        "ExpCategory",
+        "PaidBy",
+        [col("TripPlan.TripSheet"), "TripSheet"],
+        [col("PumpDetails.PumpName"), "PumpName"],
+        [col("PumpDetails.VendorId"), "VendorId"],
+      ],
       include: [
         {
           model: DBMODELS.TripPlan,
           as: "TripPlan",
+          attributes: [],
+          required: false,
+        },
+        {
+          model: DBMODELS.PumpDetails,
+          as: "PumpDetails",
           attributes: [],
           required: false,
         },
@@ -260,14 +328,23 @@ module.exports.createTripSettlement = async (req, res) => {
 
     console.log("Body : ", req.body);
 
+    if (!StartKms || !CloseKms || !ExcDiesel || !BalanceCash) {
+      return res.status(400).json({ error: "Missing required fields." });
+    }
+
     if (!TCash || !TDiesel) {
       return res
         .status(400)
         .json({ error: "missing TCash or TDiesel required." });
     }
 
-    const formattedDate = date ? moment(date, "YYYY-MM-DD").format("YYYY-MM-DD") : new Date();
-    const formattedDeptDate = DeptDate ? moment(DeptDate, "YYYY-MM-DD").format("YYYY-MM-DD") : new Date();
+    const formattedDate = date
+      ? moment(date, "YYYY-MM-DD").format("YYYY-MM-DD")
+      : new Date();
+    const formattedDeptDate = DeptDate
+      ? moment(DeptDate, "YYYY-MM-DD").format("YYYY-MM-DD")
+      : new Date();
+
     const data = {
       StartKms,
       CloseKms,
@@ -283,7 +360,7 @@ module.exports.createTripSettlement = async (req, res) => {
       HandlingChrgs,
       OtherChargs,
       BalanceCash,
-      Date:formattedDate,
+      Date: formattedDate,
       FastTagNew,
       TCash,
       HChargs,
