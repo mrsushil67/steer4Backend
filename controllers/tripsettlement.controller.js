@@ -198,6 +198,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
 module.exports.createTripSettlement = async (req, res) => {
   try {
     const {
+      tripIds,
       StartKms,
       CloseKms,
       TotalRun,
@@ -234,6 +235,10 @@ module.exports.createTripSettlement = async (req, res) => {
     } = req.body;
 
     console.log("Body : ", req.body);
+
+    if (!tripIds || !Array.isArray(tripIds) || tripIds.length === 0) {
+      return res.status(400).json({ error: "tripIds array is required." });
+    }
 
     if (!StartKms || !CloseKms || !ExcDiesel || !BalanceCash) {
       return res.status(400).json({ error: "Missing required fields." });
@@ -290,9 +295,15 @@ module.exports.createTripSettlement = async (req, res) => {
 
     const tripSettlement = await DBMODELS.TripSettlement.create(data);
 
+    await DBMODELS.TripPlan.update(
+      { Is_Settled: tripSettlement.ID },
+      { where: { ID: { [Op.in]: tripIds } } }
+    );
+
     return res.status(201).json({
       status: "201",
-      message: "Trip settlement created successfully",
+      message: "Trip settlement created and trips updated successfully",
+      tripSettlementId: tripSettlement.ID,
     });
   } catch (error) {
     console.error("Error creating trip settlement:", error);
