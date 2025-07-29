@@ -33,7 +33,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         [col("Driver.Licence"), "FristDrverLicence"],
         [col("Driver.DName"), "SecoundDriverName"],
         [col("Driver.Licence"), "SecoundLicence"],
-        [col("CustRateMaps.RouteString"), "RouteString"],
+        // [col("CustRateMaps.RouteString"), "RouteString"],
          [
           fn("GROUP_CONCAT", literal('CustRateMaps.RouteString SEPARATOR ","')),
           "RouteString",
