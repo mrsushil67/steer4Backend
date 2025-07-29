@@ -82,7 +82,8 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       raw: true,
     });
 
-    const cityStrings = tripPlans.map(tp => {
+    // Build RouteString as per requirement
+    const routeStrings = tripPlans.map(tp => {
       const source = tp.SourceCity || "";
       const dest = tp.DestCity || "";
       if (tp.TripType === 2) {
@@ -97,9 +98,9 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
     const mergedTripPlan = {};
     mergedTripPlan.ID = tripPlans.map((tp) => tp.ID).join(",");
     mergedTripPlan.TripSheet = tripPlans.map((tp) => tp.TripSheet).join(",");
-    mergedTripPlan.RouteString = tripPlans.map((tp) => tp.RouteString).join(",");
-    mergedTripPlan.SourceCities = cityStrings.join(" ");
-    mergedTripPlan.DestCities = cityStrings.join(" ");
+    mergedTripPlan.RouteString = routeStrings.join(" ");
+    // mergedTripPlan.SourceCities = routeStrings.join(" ");
+    // mergedTripPlan.DestCities = routeStrings.join(" ");
 
     const firstTripPlan = tripPlans[0] || {};
     [
