@@ -14,7 +14,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         .json({ error: "At least one trip ID is required." });
     }
 
-    // Fetch trip plans for all IDs
+    console.log("tripIds : ",tripIds)
     const tripPlans = await DBMODELS.TripPlan.findAll({
       attributes: [
         [
@@ -119,6 +119,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
 
       raw: true,
     });
+    console.log("tripPlans : ",tripPlans)
 
     const tripPlanData = tripPlans[0] || {};
 
