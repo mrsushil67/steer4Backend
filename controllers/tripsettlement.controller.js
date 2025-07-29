@@ -29,6 +29,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       attributes: [
         "ID",
         "TripSheet",
+        "TripType",
         [col("Vehicle.VNumer"), "VNumer"],
         [col("Vehicle.FleetZize"), "FleetZize"],
         [col("Vehicle.VMaker"), "VehicleCompany"],
@@ -81,12 +82,24 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       raw: true,
     });
 
+    const cityStrings = tripPlans.map(tp => {
+      const source = tp.SourceCity || "";
+      const dest = tp.DestCity || "";
+      if (tp.TripType === 2) {
+        // Source-Dest-Source
+        return `${source}-${dest}-${source}`;
+      } else {
+        // Source-Dest
+        return `${source}-${dest}`;
+      }
+    });
+
     const mergedTripPlan = {};
     mergedTripPlan.ID = tripPlans.map((tp) => tp.ID).join(",");
     mergedTripPlan.TripSheet = tripPlans.map((tp) => tp.TripSheet).join(",");
     mergedTripPlan.RouteString = tripPlans.map((tp) => tp.RouteString).join(",");
-    mergedTripPlan.SourceCities = tripPlans.map((tp) => tp.SourceCity).join(",");
-    mergedTripPlan.DestCities = tripPlans.map((tp) => tp.DestCity).join(",");
+    mergedTripPlan.SourceCities = cityStrings.join(" ");
+    mergedTripPlan.DestCities = cityStrings.join(" ");
 
     const firstTripPlan = tripPlans[0] || {};
     [
