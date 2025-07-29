@@ -44,6 +44,9 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         [col("route_master->dest_city.CityName"), "DestCity"],
         [col("CustRateMaps.CustId"), "CustRateMapId"],
         [col("CustomerMasters.CustId"), "CustomerId"],
+        [col("MarketCust.Name"), "MarketCustName"],
+        [col("MarketCust.City"), "MarketCustCity"],
+        [col("MarketCust.ID"), "MarketCustomerId"],
       ],
       include: [
         { model: DBMODELS.Vehicle, as: "Vehicle", attributes: [] },
@@ -66,6 +69,11 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
           ],
           attributes: [],
         },
+        {
+              model: DBMODELS.MarketCust,
+              as: "MarketCust",
+              attributes: [],
+            },
       ],
       where: {
         [Op.and]: [{ ID: { [Op.in]: tripIds } }, { Is_Completed: 1 }],
@@ -82,7 +90,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
     [
       "VNumer", "FleetZize", "VehicleCompany", "TyreQ",
       "FirstDriverName", "FristDrverLicence", "SecoundDriverName", "SecoundLicence",
-      "Rate", "Customer", "SourceCity", "DestCity", "CustRateMapId", "CustomerId"
+      "Rate", "Customer", "SourceCity", "DestCity", "CustRateMapId", "CustomerId", "MarketCustName","MarketCustCity","MarketCustomerId"
     ].forEach((field) => {
       mergedTripPlan[field] = firstTripPlan[field] || "";
     });
@@ -90,8 +98,8 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
     const tripAdvance = await DBMODELS.TripAdvance.findAll({
       where: { TripId: { [Op.in]: tripIds }, PaidBy: 1 },
       include: [
-        { model: DBMODELS.TripPlan, as: "TripPlan", attributes: [] },
-        { model: DBMODELS.PumpDetails, as: "PumpDetails", attributes: [] },
+        { model: DBMODELS.TripPlan, as: "TripPlan",attributes:["TripSheet"] },
+        { model: DBMODELS.PumpDetails, as: "PumpDetails",attributes:["PumpName"]},
       ],
       raw: true,
     });
@@ -99,8 +107,8 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
     const tripOnroute = await DBMODELS.TripAdvance.findAll({
       where: { TripId: { [Op.in]: tripIds }, PaidBy: 2 },
       include: [
-        { model: DBMODELS.TripPlan, as: "TripPlan", attributes: [] },
-        { model: DBMODELS.PumpDetails, as: "PumpDetails", attributes: [] },
+        { model: DBMODELS.TripPlan, as: "TripPlan",attributes:["TripSheet"] },
+        { model: DBMODELS.PumpDetails, as: "PumpDetails",attributes:["PumpName"]},
       ],
       raw: true,
     });
