@@ -8,16 +8,13 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       Number
     );
 
-    console.log(tripIds);
-
     if (!Array.isArray(tripIds) || tripIds.length === 0) {
       return res
         .status(400)
         .json({ error: "At least one trip ID is required." });
     }
-    console.log(typeof tripIds);
-    console.log(Array.isArray(tripIds)); // true
 
+    // Fetch trip plans for all IDs
     const tripPlans = await DBMODELS.TripPlan.findAll({
       attributes: [
         [
@@ -33,12 +30,13 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         [col("Driver.Licence"), "FristDrverLicence"],
         [col("Driver.DName"), "SecoundDriverName"],
         [col("Driver.Licence"), "SecoundLicence"],
-        // [col("CustRateMaps.RouteString"), "RouteString"],
         [
-          fn("GROUP_CONCAT", literal('CustRateMaps.RouteString SEPARATOR " "')),
+          fn(
+            "GROUP_CONCAT",
+            literal('DISTINCT CustRateMaps.RouteString SEPARATOR " "')
+          ),
           "RouteString",
         ],
-
         [col("CustRateMaps.Rate"), "Rate"],
         [
           fn(
@@ -96,21 +94,11 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         {
           model: DBMODELS.CustRateMap,
           as: "CustRateMaps",
-          // on: literal(
-          //   "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
-          // ),
           include: [
-            {
-              model: DBMODELS.TripType,
-              as: "trip_type",
-              required: true,
-            },
+            { model: DBMODELS.TripType, as: "trip_type", required: true },
           ],
         },
       ],
-      where: {
-        [Op.and]: [{ ID: { [Op.in]: tripIds } }, { Is_Completed: 1 }],
-      },
       group: [
         "Vehicle.VNumer",
         "Vehicle.FleetZize",
@@ -125,36 +113,92 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         "route_master->source_city.CityName",
         "route_master->dest_city.CityName",
       ],
+      where: {
+        [Op.and]: [{ ID: { [Op.in]: tripIds } }, { Is_Completed: 1 }],
+      },
+
       raw: true,
     });
 
-    console.log("tripPlans : ", tripPlans);
+    const tripPlanData = tripPlans[0] || {};
 
+    const tripAdvance = await DBMODELS.TripAdvance.findAll({
+      where: {
+        TripId: { [Op.in]: tripIds },
+        PaidBy: 1,
+      },
+      include: [
+        {
+          model: DBMODELS.TripPlan,
+          as: "TripPlan",
+          attributes: [],
+          required: false,
+        },
+        { model: DBMODELS.PumpDetails, as: "PumpDetails", attributes: [] },
+      ],
+      raw: true,
+    });
+
+    const tripOnroute = await DBMODELS.TripAdvance.findAll({
+      where: {
+        TripId: { [Op.in]: tripIds },
+        PaidBy: 2,
+      },
+      include: [
+        {
+          model: DBMODELS.TripPlan,
+          as: "TripPlan",
+          attributes: [],
+          required: false,
+        },
+        { model: DBMODELS.PumpDetails, as: "PumpDetails", attributes: [] },
+      ],
+      raw: true,
+    });
+
+    // Calculate totals
+    const round = (n) => parseFloat(Number(n).toFixed(2));
+    const TotalAdvanceCash = round(
+      tripAdvance.reduce((sum, item) => sum + (parseFloat(item.Cash) || 0), 0)
+    );
+    const TotalAdvanceDiesel = round(
+      tripAdvance.reduce(
+        (sum, item) => sum + (parseFloat(item.DieselQty) || 0),
+        0
+      )
+    );
+    const TotalOnrouteCash = round(
+      tripOnroute.reduce((sum, item) => sum + (parseFloat(item.Cash) || 0), 0)
+    );
+    const TotalOnrouteDiesel = round(
+      tripOnroute.reduce(
+        (sum, item) => sum + (parseFloat(item.DieselQty) || 0),
+        0
+      )
+    );
+
+    const totalExpence = {
+      TotalTipCash: round(TotalAdvanceCash + TotalOnrouteCash),
+      TotalTripDiesel: round(TotalAdvanceDiesel + TotalOnrouteDiesel),
+    };
+
+    // Fetch trip operations for all IDs
     const tripOperations = await DBMODELS.TripOperation.findAll({
       where: { TripId: { [Op.in]: tripIds } },
-      attributes: ["TripNo", "ATD", "ATA"],
+      attributes: ["TripId", "TripNo", "ATD", "ATA"],
       raw: true,
     });
 
-    console.log("tripOperations : ", tripOperations);
-
-    let tripSettlements = [];
-
-    for (const tripPlan of tripPlans) {
-      console.log("tripPlans for loop : ", tripPlans);
-
-      const tripId = tripPlan.TripId;
-
-      let ATD = null;
-      let ATA = null;
-
+    // Get ATD and ATA for each tripId
+    const tripTimes = tripIds.map((tripId) => {
       const opA = tripOperations.find(
         (op) => op.TripId === tripId && op.TripNo?.trim().endsWith("A")
       );
       const opB = tripOperations.find(
         (op) => op.TripId === tripId && op.TripNo?.trim().endsWith("B")
       );
-
+      let ATD = null,
+        ATA = null;
       if (opA && opB) {
         ATD = opA.ATD;
         ATA = opB.ATA;
@@ -162,183 +206,44 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         ATD = opA.ATD;
         ATA = opA.ATA;
       }
+      return { tripId, ATD, ATA };
+    });
 
-      const tripAdvance = await DBMODELS.TripAdvance.findAll({
-        attributes: [
-          "Id",
-          "Ticket",
-          "TripId",
-          "TtripNo",
-          "Cash",
-          "DieselQty",
-          "DieselDt",
-          "DieselVendor",
-          "Location",
-          "AdjDiesel",
-          "RemDiesel",
-          "VNumer",
-          "Driver1Id",
-          "Driver2Id",
-          "Diesel_Rate",
-          "Remark",
-          "createdBy",
-          "CreatedTime",
-          "Qty",
-          "Amt",
-          "FillCat",
-          "TotalAmt",
-          "ExpCategory",
-          "PaidBy",
-          [col("TripPlan.TripSheet"), "TripSheet"],
-          [col("PumpDetails.Id"), "PumpId"],
-          [col("PumpDetails.Dipo"), "PumpDepo"],
-          [col("PumpDetails.PumpName"), "PumpName"],
-          [col("PumpDetails.VendorId"), "PumpVendorId"],
-        ],
-        include: [
-          {
-            model: DBMODELS.TripPlan,
-            as: "TripPlan",
-            attributes: [],
-            required: false,
-          },
-          {
-            model: DBMODELS.PumpDetails,
-            as: "PumpDetails",
-            attributes: [],
-          },
-        ],
-        where: {
-          TripId: tripId,
-          PaidBy: 1,
-        },
-        raw: true,
-      });
+    // Compose response object
+    const response = {
+      tripPlan: {
+        ...tripPlanData,
+        TripIds: tripIds.join(","),
+        ATD: tripTimes
+          .map((t) => t.ATD)
+          .filter(Boolean)
+          .join(","),
+        ATA: tripTimes
+          .map((t) => t.ATA)
+          .filter(Boolean)
+          .join(","),
+        TotalAdvanceCash,
+        TotalAdvanceDiesel,
+        TotalOnrouteCash,
+        TotalOnrouteDiesel,
+      },
+      tripAdvanceList: tripAdvance,
+      tripOnrouteList: tripOnroute,
+      totalExpence,
+    };
 
-      const tripOnroute = await DBMODELS.TripAdvance.findAll({
-        attributes: [
-          "Id",
-          "Ticket",
-          "TripId",
-          "TtripNo",
-          "Cash",
-          "DieselQty",
-          "DieselDt",
-          "DieselVendor",
-          "Location",
-          "AdjDiesel",
-          "RemDiesel",
-          "VNumer",
-          "Driver1Id",
-          "Driver2Id",
-          "Diesel_Rate",
-          "Remark",
-          "createdBy",
-          "CreatedTime",
-          "Qty",
-          "Amt",
-          "FillCat",
-          "TotalAmt",
-          "ExpCategory",
-          "PaidBy",
-          [col("TripPlan.TripSheet"), "TripSheet"],
-          [col("PumpDetails.Id"), "PumpId"],
-          [col("PumpDetails.Dipo"), "PumpDepo"],
-          [col("PumpDetails.PumpName"), "PumpName"],
-          [col("PumpDetails.VendorId"), "PumpVendorId"],
-        ],
-        include: [
-          {
-            model: DBMODELS.TripPlan,
-            as: "TripPlan",
-            attributes: [],
-            required: false,
-          },
-          {
-            model: DBMODELS.PumpDetails,
-            as: "PumpDetails",
-            attributes: [],
-          },
-        ],
-        where: {
-          TripId: tripId,
-          PaidBy: 2,
-        },
-        raw: true,
-      });
-
-      const TotalAdvanceCash = tripAdvance.reduce(
-        (sum, item) => sum + (parseFloat(item.Cash) || 0),
-        0
-      );
-      const TotalAdvanceDiesel = tripAdvance.reduce(
-        (sum, item) => sum + (parseFloat(item.DieselQty) || 0),
-        0
-      );
-      const TotalOnrouteCash = tripOnroute.reduce(
-        (sum, item) => sum + (parseFloat(item.Cash) || 0),
-        0
-      );
-      const TotalOnrouteDiesel = tripOnroute.reduce(
-        (sum, item) => sum + (parseFloat(item.DieselQty) || 0),
-        0
-      );
-
-      const round = (n) => parseFloat(n.toFixed(2));
-
-      const totalExpence = {
-        TotalTipCash: round(
-          tripAdvance.reduce(
-            (sum, item) => sum + (parseFloat(item.Cash) || 0),
-            0
-          ) +
-            tripOnroute.reduce(
-              (sum, item) => sum + (parseFloat(item.Cash) || 0),
-              0
-            )
-        ),
-        TotalTripDiesel: round(
-          tripAdvance.reduce(
-            (sum, item) => sum + (parseFloat(item.DieselQty) || 0),
-            0
-          ) +
-            tripOnroute.reduce(
-              (sum, item) => sum + (parseFloat(item.DieselQty) || 0),
-              0
-            )
-        ),
-      };
-
-      const tripSettlement = {
-        tripPlan: {
-          ...tripPlan,
-          ATD,
-          ATA,
-          TotalAdvanceCash,
-          TotalAdvanceDiesel,
-          TotalOnrouteCash,
-          TotalOnrouteDiesel,
-        },
-        tripAdvance,
-        tripOnroute,
-        totalExpence,
-      };
-
-      if (tripSettlement.tripPlan.TripId !== null) {
-        tripSettlements.push(tripSettlement);
-      }
-    }
-
-    if (tripSettlements.length === 0) {
+    if (!tripAdvance.length && !tripOnroute.length) {
       return res.status(404).json({
         status: "404",
         message: "No trip settlement found for the given trip IDs.",
       });
     }
 
-    return res
-      .status(200)
-      .json({ status: "200", message: "Records Found", tripSettlements });
+    return res.status(200).json({
+      status: "200",
+      message: "Records Found",
+      tripSettlement: response,
+    });
   } catch (error) {
     console.error("Error fetching details for trip settlement:", error);
     return res.status(500).json({ error: "Internal server error." });
