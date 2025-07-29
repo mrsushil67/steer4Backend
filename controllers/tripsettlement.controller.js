@@ -253,7 +253,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       totalExpence,
     };
 
-    if (!tripAdvance.length && !tripOnroute.length) {
+    if (!tripPlans.length) {
       return res.status(404).json({
         status: "404",
         message: "No trip settlement found for the given trip IDs.",
