@@ -4,7 +4,9 @@ const { Op, fn, col, literal, where, Sequelize } = require("sequelize");
 
 module.exports.getDetailsforTripSettlement = async (req, res) => {
   try {
-    const tripIds = req.fields?.tripIds || req.body?.tripIds;
+    const tripIds = (req.fields?.tripIds || req.body?.tripIds || []).map(
+      Number
+    );
 
     console.log(tripIds);
 
@@ -94,12 +96,35 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         {
           model: DBMODELS.CustRateMap,
           as: "CustRateMaps",
-          attributes: [],
+          // on: literal(
+          //   "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
+          // ),
+          include: [
+            {
+              model: DBMODELS.TripType,
+              as: "trip_type",
+              required: true,
+            },
+          ],
         },
       ],
       where: {
         [Op.and]: [{ ID: { [Op.in]: tripIds } }, { Is_Completed: 1 }],
       },
+      group: [
+        "Vehicle.VNumer",
+        "Vehicle.FleetZize",
+        "Vehicle.VMaker",
+        "Vehicle.TyreQ",
+        "Driver.DName",
+        "Driver.Licence",
+        "CustRateMaps.RouteString",
+        "CustRateMaps.Rate",
+        "CustomerMasters.CustomerName",
+        "TripPlan.CustId",
+        "route_master->source_city.CityName",
+        "route_master->dest_city.CityName",
+      ],
       raw: true,
     });
 
@@ -118,7 +143,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
     for (const tripPlan of tripPlans) {
       console.log("tripPlans for loop : ", tripPlans);
 
-      const tripId = tripPlan.ID;
+      const tripId = tripPlan.TripId;
 
       let ATD = null;
       let ATA = null;
