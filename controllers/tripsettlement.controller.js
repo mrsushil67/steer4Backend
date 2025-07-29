@@ -312,39 +312,92 @@ module.exports.getPandingSettlementrips = async (req, res) => {
       tripPlanWhere.TripSheet = { [Op.like]: `%${tripsheetNo}%` };
     }
 
-    const latestTripOps = await DBMODELS.TripOperation.findAll({
-      attributes: ["TripId", [fn("MAX", col("Id")), "MaxId"]],
-      group: ["TripId"],
-      raw: true,
-    });
-
-    if (!latestTripOps || latestTripOps.length === 0) {
-      return res
-        .status(404)
-        .json({ status: "404", message: "No trip operations found." });
-    }
-
-    const ids = latestTripOps.map((item) => item.MaxId);
-
     const completedTrips = await DBMODELS.TripOperation.findAll({
-      where: { Id: ids },
-      include: {
-        model: DBMODELS.TripPlan,
-        as: "TripPlan",
-        where: tripPlanWhere,
-      },
+      include: [
+        {
+          model: DBMODELS.TripPlan,
+          as: "TripPlan",
+          where: tripPlanWhere,
+          include: [
+            {
+              model: DBMODELS.CustomerMaster,
+              as: "CustomerMasters",
+              attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+            },
+            {
+              model: DBMODELS.MarketCust,
+              as: "MarketCust",
+            },
+            {
+              model: DBMODELS.Vehicle,
+              as: "Vehicle",
+              attributes: ["VehicleID", "VNumer", "FleetZize"],
+            },
+            {
+              model: DBMODELS.Driver,
+              as: "Driver",
+              attributes: ["DriverID", "DName", "Licence"],
+            },
+            {
+              model: DBMODELS.RouteMaster,
+              as: "route_master",
+              attributes: ["RouteId"],
+              include: [
+                {
+                  model: DBMODELS.city,
+                  as: "source_city",
+                  attributes: ["CityName", "latitude", "longitude"],
+                },
+                {
+                  model: DBMODELS.city,
+                  as: "dest_city",
+                  attributes: ["CityName", "latitude", "longitude"],
+                },
+              ],
+            },
+            {
+              model: DBMODELS.CustRateMap,
+              as: "CustRateMaps",
+              on: literal(
+                "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
+              ),
+              include: [
+                {
+                  model: DBMODELS.TripType,
+                  as: "trip_type",
+                  required: true,
+                  attributes: ["Id", "TypeName"],
+                },
+              ],
+              attributes: [
+                "ID",
+                "CustId",
+                "RouteId",
+                "RouteType",
+                "TripType",
+                "RouteString",
+              ],
+            },
+          ],
+        },
+      ],
     });
 
-    if (!completedTrips || completedTrips.length === 0) {
-      return res.status(404).json({
-        status: "404",
-        message: "No completed trips found for the provided criteria.",
-      });
+    const uniqueTrips = [];
+    const seenTripIds = new Set();
+
+    for (const trip of completedTrips) {
+      if (!seenTripIds.has(trip.TripId)) {
+        seenTripIds.add(trip.TripId);
+        uniqueTrips.push(trip);
+      }
     }
 
-    return res
-      .status(200)
-      .json({ status: "200", message: "Record Found", data: completedTrips });
+    return res.status(200).json({
+      status: "200",
+      message: "Record Found",
+      data: uniqueTrips,
+    });
   } catch (error) {
     console.error("Error in pending settlement:", error);
     return res.status(500).json({ error: "Internal server error." });
