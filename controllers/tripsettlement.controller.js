@@ -4,9 +4,7 @@ const { Op, fn, col, literal, where, Sequelize } = require("sequelize");
 
 module.exports.getDetailsforTripSettlement = async (req, res) => {
   try {
-    const tripIds = (req.fields?.tripIds || req.body?.tripIds || []).map(
-      Number
-    );
+    const tripIds = req.fields?.tripIds || req.body?.tripIds;
 
     console.log(tripIds);
 
@@ -34,10 +32,11 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         [col("Driver.DName"), "SecoundDriverName"],
         [col("Driver.Licence"), "SecoundLicence"],
         // [col("CustRateMaps.RouteString"), "RouteString"],
-         [
-          fn("GROUP_CONCAT", literal('CustRateMaps.RouteString SEPARATOR ","')),
+        [
+          fn("GROUP_CONCAT", literal('CustRateMaps.RouteString SEPARATOR " "')),
           "RouteString",
         ],
+
         [col("CustRateMaps.Rate"), "Rate"],
         [
           fn(
@@ -95,35 +94,12 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         {
           model: DBMODELS.CustRateMap,
           as: "CustRateMaps",
-          // on: literal(
-          //   "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
-          // ),
-          include: [
-            {
-              model: DBMODELS.TripType,
-              as: "trip_type",
-              required: true,
-            },
-          ],
+          attributes: [],
         },
       ],
       where: {
         [Op.and]: [{ ID: { [Op.in]: tripIds } }, { Is_Completed: 1 }],
       },
-      group: [
-        "Vehicle.VNumer",
-        "Vehicle.FleetZize",
-        "Vehicle.VMaker",
-        "Vehicle.TyreQ",
-        "Driver.DName",
-        "Driver.Licence",
-        "CustRateMaps.RouteString",
-        "CustRateMaps.Rate",
-        "CustomerMasters.CustomerName",
-        "TripPlan.CustId",
-        "route_master->source_city.CityName",
-        "route_master->dest_city.CityName",
-      ],
       raw: true,
     });
 
@@ -142,7 +118,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
     for (const tripPlan of tripPlans) {
       console.log("tripPlans for loop : ", tripPlans);
 
-      const tripId = tripPlan.TripId;
+      const tripId = tripPlan.ID;
 
       let ATD = null;
       let ATA = null;
@@ -485,92 +461,39 @@ module.exports.getPandingSettlementrips = async (req, res) => {
       tripPlanWhere.TripSheet = { [Op.like]: `%${tripsheetNo}%` };
     }
 
-    const completedTrips = await DBMODELS.TripOperation.findAll({
-      include: [
-        {
-          model: DBMODELS.TripPlan,
-          as: "TripPlan",
-          where: tripPlanWhere,
-          include: [
-            {
-              model: DBMODELS.CustomerMaster,
-              as: "CustomerMasters",
-              attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
-            },
-            {
-              model: DBMODELS.MarketCust,
-              as: "MarketCust",
-            },
-            {
-              model: DBMODELS.Vehicle,
-              as: "Vehicle",
-              attributes: ["VehicleID", "VNumer", "FleetZize"],
-            },
-            {
-              model: DBMODELS.Driver,
-              as: "Driver",
-              attributes: ["DriverID", "DName", "Licence"],
-            },
-            {
-              model: DBMODELS.RouteMaster,
-              as: "route_master",
-              attributes: ["RouteId"],
-              include: [
-                {
-                  model: DBMODELS.city,
-                  as: "source_city",
-                  attributes: ["CityName", "latitude", "longitude"],
-                },
-                {
-                  model: DBMODELS.city,
-                  as: "dest_city",
-                  attributes: ["CityName", "latitude", "longitude"],
-                },
-              ],
-            },
-            {
-              model: DBMODELS.CustRateMap,
-              as: "CustRateMaps",
-              on: literal(
-                "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
-              ),
-              include: [
-                {
-                  model: DBMODELS.TripType,
-                  as: "trip_type",
-                  required: true,
-                  attributes: ["Id", "TypeName"],
-                },
-              ],
-              attributes: [
-                "ID",
-                "CustId",
-                "RouteId",
-                "RouteType",
-                "TripType",
-                "RouteString",
-              ],
-            },
-          ],
-        },
-      ],
+    const latestTripOps = await DBMODELS.TripOperation.findAll({
+      attributes: ["TripId", [fn("MAX", col("Id")), "MaxId"]],
+      group: ["TripId"],
+      raw: true,
     });
 
-    const uniqueTrips = [];
-    const seenTripIds = new Set();
-
-    for (const trip of completedTrips) {
-      if (!seenTripIds.has(trip.TripId)) {
-        seenTripIds.add(trip.TripId);
-        uniqueTrips.push(trip);
-      }
+    if (!latestTripOps || latestTripOps.length === 0) {
+      return res
+        .status(404)
+        .json({ status: "404", message: "No trip operations found." });
     }
 
-    return res.status(200).json({
-      status: "200",
-      message: "Record Found",
-      data: uniqueTrips,
+    const ids = latestTripOps.map((item) => item.MaxId);
+
+    const completedTrips = await DBMODELS.TripOperation.findAll({
+      where: { Id: ids },
+      include: {
+        model: DBMODELS.TripPlan,
+        as: "TripPlan",
+        where: tripPlanWhere,
+      },
     });
+
+    if (!completedTrips || completedTrips.length === 0) {
+      return res.status(404).json({
+        status: "404",
+        message: "No completed trips found for the provided criteria.",
+      });
+    }
+
+    return res
+      .status(200)
+      .json({ status: "200", message: "Record Found", data: completedTrips });
   } catch (error) {
     console.error("Error in pending settlement:", error);
     return res.status(500).json({ error: "Internal server error." });
