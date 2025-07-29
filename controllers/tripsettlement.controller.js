@@ -4,17 +4,31 @@ const { Op, fn, col, literal, where, Sequelize } = require("sequelize");
 
 module.exports.getDetailsforTripSettlement = async (req, res) => {
   try {
-    const tripIds = (req.fields?.tripIds || req.body?.tripIds || []).map(
-      Number
-    );
+    const tripIds = (req.fields?.tripIds || req.body?.tripIds || []).map(Number);
 
     if (!Array.isArray(tripIds) || tripIds.length === 0) {
-      return res
-        .status(400)
-        .json({ error: "At least one trip ID is required." });
+      return res.status(400).json({ error: "At least one trip ID is required." });
     }
 
-    console.log("tripIds : ",tripIds)
+    // Fetch vehicle numbers for all tripIds
+    const vehicleNumbers = await DBMODELS.TripPlan.findAll({
+      where: { ID: { [Op.in]: tripIds } },
+      attributes: ["VehicleId"],
+      raw: true,
+    });
+
+    const uniqueVehicleNumbers = [
+      ...new Set(vehicleNumbers.map((item) => item.VehicleId)),
+    ];
+
+    if (uniqueVehicleNumbers.length > 1) {
+      return res.status(400).json({
+        message: "Vehicle numbers are not same in given trip IDs.",
+        vehicleNumbers: uniqueVehicleNumbers,
+      });
+    }
+
+    console.log("tripIds : ", tripIds);
     const tripPlans = await DBMODELS.TripPlan.findAll({
       attributes: [
         [
@@ -33,7 +47,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         [
           fn(
             "GROUP_CONCAT",
-            literal('DISTINCT CustRateMaps.RouteString SEPARATOR " "')
+            literal('DISTINCT CustRateMaps.RouteString SEPARATOR ","')
           ),
           "RouteString",
         ],
@@ -57,37 +71,31 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
           model: DBMODELS.Vehicle,
           as: "Vehicle",
           attributes: [],
-          required: false,
         },
         {
           model: DBMODELS.Driver,
           as: "Driver",
           attributes: [],
-          required: false,
         },
         {
           model: DBMODELS.CustomerMaster,
           as: "CustomerMasters",
           attributes: [],
-          required: false,
         },
         {
           model: DBMODELS.RouteMaster,
           as: "route_master",
           attributes: [],
-          required: false,
           include: [
             {
               model: DBMODELS.city,
               as: "source_city",
               attributes: [],
-              required: false,
             },
             {
               model: DBMODELS.city,
               as: "dest_city",
               attributes: [],
-              required: false,
             },
           ],
         },
@@ -106,7 +114,6 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         "Vehicle.TyreQ",
         "Driver.DName",
         "Driver.Licence",
-        "CustRateMaps.RouteString",
         "CustRateMaps.Rate",
         "CustomerMasters.CustomerName",
         "TripPlan.CustId",
@@ -116,12 +123,32 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       where: {
         [Op.and]: [{ ID: { [Op.in]: tripIds } }, { Is_Completed: 1 }],
       },
-
       raw: true,
     });
-    console.log("tripPlans : ",tripPlans)
+    console.log("tripPlans : ", tripPlans);
+
+    // If you want RouteString as comma separated for each trip, fetch separately and join
+    let routeStrings = [];
+    if (tripIds.length > 1) {
+      const routeRows = await DBMODELS.TripPlan.findAll({
+        where: { ID: { [Op.in]: tripIds } },
+        include: [
+          {
+            model: DBMODELS.CustRateMap,
+            as: "CustRateMaps",
+            attributes: ["RouteString"],
+          },
+        ],
+        attributes: [],
+        raw: true,
+      });
+      routeStrings = routeRows.map(r => r["CustRateMaps.RouteString"]).filter(Boolean);
+    }
 
     const tripPlanData = tripPlans[0] || {};
+    if (routeStrings.length) {
+      tripPlanData.RouteString = routeStrings.join(",");
+    }
 
     const tripAdvance = await DBMODELS.TripAdvance.findAll({
       where: {
@@ -190,39 +217,34 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       raw: true,
     });
 
-    // Get ATD and ATA for each tripId
-    const tripTimes = tripIds.map((tripId) => {
-      const opA = tripOperations.find(
-        (op) => op.TripId === tripId && op.TripNo?.trim().endsWith("A")
-      );
-      const opB = tripOperations.find(
-        (op) => op.TripId === tripId && op.TripNo?.trim().endsWith("B")
-      );
-      let ATD = null,
-        ATA = null;
-      if (opA && opB) {
-        ATD = opA.ATD;
-        ATA = opB.ATA;
-      } else if (opA) {
-        ATD = opA.ATD;
-        ATA = opA.ATA;
-      }
-      return { tripId, ATD, ATA };
-    });
+    // Get ATD and ATA for first of first and last of last
+    const formatDate = (date) =>
+      date ? moment(date).format("YYYY-MM-DD HH:mm:ss") : null;
+
+    // Sort tripIds to get first and last
+    const sortedTripIds = [...tripIds].sort((a, b) => a - b);
+
+    // Find first trip's ATD (TripNo ends with 'A')
+    const firstTripId = sortedTripIds[0];
+    const firstTripOpA = tripOperations.find(
+      (op) => op.TripId === firstTripId && op.TripNo?.trim().endsWith("A")
+    );
+    const ATD = firstTripOpA ? formatDate(firstTripOpA.ATD) : null;
+
+    // Find last trip's ATA (TripNo ends with 'B')
+    const lastTripId = sortedTripIds[sortedTripIds.length - 1];
+    const lastTripOpB = tripOperations.find(
+      (op) => op.TripId === lastTripId && op.TripNo?.trim().endsWith("B")
+    );
+    const ATA = lastTripOpB ? formatDate(lastTripOpB.ATA) : null;
 
     // Compose response object
     const response = {
       tripPlan: {
         ...tripPlanData,
         TripIds: tripIds.join(","),
-        ATD: tripTimes
-          .map((t) => t.ATD)
-          .filter(Boolean)
-          .join(","),
-        ATA: tripTimes
-          .map((t) => t.ATA)
-          .filter(Boolean)
-          .join(","),
+        ATD,
+        ATA,
         TotalAdvanceCash,
         TotalAdvanceDiesel,
         TotalOnrouteCash,
