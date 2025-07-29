@@ -543,9 +543,22 @@ module.exports.getPandingSettlementrips = async (req, res) => {
       ],
     });
 
-    return res
-      .status(200)
-      .json({ status: "200", message: "Record Found", data: completedTrips });
+    const uniqueTrips = [];
+    const seenTripIds = new Set();
+
+    for (const trip of completedTrips) {
+      if (!seenTripIds.has(trip.TripId)) {
+        seenTripIds.add(trip.TripId);
+        uniqueTrips.push(trip);
+      }
+    }
+
+    return res.status(200).json({
+      status: "200",
+      message: "Record Found",
+      data: uniqueTrips,
+    });
+
   } catch (error) {
     console.error("Error in pending settlement:", error);
     return res.status(500).json({ error: "Internal server error." });
