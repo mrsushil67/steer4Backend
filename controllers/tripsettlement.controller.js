@@ -34,6 +34,10 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         [col("Driver.DName"), "SecoundDriverName"],
         [col("Driver.Licence"), "SecoundLicence"],
         [col("CustRateMaps.RouteString"), "RouteString"],
+         [
+          fn("GROUP_CONCAT", literal('CustRateMaps.RouteString SEPARATOR ","')),
+          "RouteString",
+        ],
         [col("CustRateMaps.Rate"), "Rate"],
         [
           fn(
@@ -91,7 +95,16 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         {
           model: DBMODELS.CustRateMap,
           as: "CustRateMaps",
-          attributes: [],
+          // on: literal(
+          //   "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
+          // ),
+          include: [
+            {
+              model: DBMODELS.TripType,
+              as: "trip_type",
+              required: true,
+            },
+          ],
         },
       ],
       where: {
@@ -558,7 +571,6 @@ module.exports.getPandingSettlementrips = async (req, res) => {
       message: "Record Found",
       data: uniqueTrips,
     });
-
   } catch (error) {
     console.error("Error in pending settlement:", error);
     return res.status(500).json({ error: "Internal server error." });
