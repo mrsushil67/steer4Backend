@@ -125,9 +125,9 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       },
       raw: true,
     });
+
     console.log("tripPlans : ", tripPlans);
 
-    // If you want RouteString as comma separated for each trip, fetch separately and join
     let routeStrings = [];
     if (tripIds.length > 1) {
       const routeRows = await DBMODELS.TripPlan.findAll({
@@ -145,27 +145,28 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       routeStrings = routeRows.map(r => r["CustRateMaps.RouteString"]).filter(Boolean);
     }
 
+    console.log("routeStrings : ",routeStrings)
+    // Merge routeStrings into one value if multiple trips exist
     const tripPlanData = tripPlans[0] || {};
     if (routeStrings.length) {
       tripPlanData.RouteString = routeStrings.join(",");
     }
 
+    console.log("tripPlanData : ",tripPlanData)
+    // Fetch trip advance and onroute details
     const tripAdvance = await DBMODELS.TripAdvance.findAll({
       where: {
         TripId: { [Op.in]: tripIds },
         PaidBy: 1,
       },
       include: [
-        {
-          model: DBMODELS.TripPlan,
-          as: "TripPlan",
-          attributes: [],
-          required: false,
-        },
+        { model: DBMODELS.TripPlan, as: "TripPlan", attributes: [] },
         { model: DBMODELS.PumpDetails, as: "PumpDetails", attributes: [] },
       ],
       raw: true,
     });
+
+    console.log("tripAdvance : ",tripAdvance);
 
     const tripOnroute = await DBMODELS.TripAdvance.findAll({
       where: {
@@ -173,18 +174,14 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
         PaidBy: 2,
       },
       include: [
-        {
-          model: DBMODELS.TripPlan,
-          as: "TripPlan",
-          attributes: [],
-          required: false,
-        },
+        { model: DBMODELS.TripPlan, as: "TripPlan", attributes: [] },
         { model: DBMODELS.PumpDetails, as: "PumpDetails", attributes: [] },
       ],
       raw: true,
     });
 
-    // Calculate totals
+       console.log("tripOnroute : ",tripOnroute);
+
     const round = (n) => parseFloat(Number(n).toFixed(2));
     const TotalAdvanceCash = round(
       tripAdvance.reduce((sum, item) => sum + (parseFloat(item.Cash) || 0), 0)
@@ -217,7 +214,8 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       raw: true,
     });
 
-    // Get ATD and ATA for first of first and last of last
+    console.log("tripOperations : ",tripOperations)
+    // Get ATD and ATA for first and last trips
     const formatDate = (date) =>
       date ? moment(date).format("YYYY-MM-DD HH:mm:ss") : null;
 
