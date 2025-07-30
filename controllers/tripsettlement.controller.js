@@ -619,7 +619,7 @@ module.exports.getDriverDebit = async (req, res) => {
   }
 };
 
-module.exports.createDriverDebit = async ( req, res ) => {
+module.exports.createDriverDebit = async (req, res) => {
   try {
     const {
       driverId,
@@ -634,7 +634,7 @@ module.exports.createDriverDebit = async ( req, res ) => {
       DieselRate
     } = req.body;
 
-    if(!driverId || !settledId || !VehicleId) { 
+    if (!driverId || !settledId || !VehicleId) {
       return res.status(400).json({ error: "driverId, settledId, and VehicleId are required." });
     }
 
@@ -653,8 +653,18 @@ module.exports.createDriverDebit = async ( req, res ) => {
       category: "drivers",
       DieselRate
     };
-    await DBMODELS.DriverDebits.create(data);
-    return res.status(201).json({ status: "201", message: "Driver debit created successfully." });
+
+    const existingDebit = await DBMODELS.DriverDebits.findOne({
+      where: { SettleId: settledId }
+    });
+
+    if (existingDebit) {
+      await DBMODELS.DriverDebits.update(data, { where: { SettleId: settledId } });
+      return res.status(200).json({ status: "200", message: "Driver debit updated successfully." });
+    } else {
+      await DBMODELS.DriverDebits.create(data);
+      return res.status(201).json({ status: "201", message: "Driver debit created successfully." });
+    }
   } catch (error) {
     console.error("Error in Create Driver Debit:", error);
     return res.status(500).json({ error: "Internal server error." });
