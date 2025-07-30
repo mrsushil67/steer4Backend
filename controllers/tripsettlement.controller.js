@@ -418,7 +418,7 @@ module.exports.getTripSettlement = async (req, res) => {
         {
           model: DBMODELS.RouteMaster,
           as: "route_master",
-          attributes: ["RouteId", "TripType"],
+          attributes: [],
           include: [
             { model: DBMODELS.city, as: "source_city", attributes: ["CityName"] },
             { model: DBMODELS.city, as: "dest_city", attributes: ["CityName"] },
