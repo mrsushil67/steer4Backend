@@ -376,7 +376,7 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
-    console.log("Regular.length : ", regularData.length);
+    // console.log("Regular.length : ", regularData.length);
 
     const marketData = await DBMODELS.TripOperation.findAll({
       where: tripOperationWhere,
@@ -483,8 +483,8 @@ module.exports.checkTripPlan = async (req, res) => {
       ],
     });
 
-    console.log("Regular.length : ", regularData.length);
-    console.log("Market.length : ", marketData.length);
+    // console.log("Regular.length : ", regularData.length);
+    // console.log("Market.length : ", marketData.length);
 
     const data = [...regularData, ...marketData];
     const filteredTrips = data.filter((trip) => {
@@ -535,10 +535,10 @@ module.exports.checkTripPlan = async (req, res) => {
 
     const mergedArray = ScheduleData.concat(filteredTrips);
 
-    console.log("Merged Array length:", mergedArray.length);
+    // console.log("Merged Array length:", mergedArray.length);
 
     const tripDetailsArray = mergedArray.map((item) => {
-      console.log("Processing item:", item?.TripPlan?.route_master?.CustRouteMaps?.TAT);
+      // console.log("Processing item:", item?.TripPlan?.route_master?.CustRouteMaps?.TAT);
       let tripDirection = "";
 
       if (item.TripPlan) {
@@ -563,7 +563,7 @@ module.exports.checkTripPlan = async (req, res) => {
 
       if (item.TripPlan) {
         if (item.TripPlan.PlanCat === 2) {
-          console.log("yyy: ", item.TripPlanSchedule.StartKm);
+          // console.log("yyy: ", item.TripPlanSchedule.StartKm);
           return {
             Id: item.Id,
             TripId: item.TripId,
