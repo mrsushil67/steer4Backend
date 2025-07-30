@@ -421,8 +421,12 @@ module.exports.getPandingSettlementrips = async (req, res) => {
       Is_Settled: { [Op.eq]: null },
     };
 
+    // Add filter for TripSheet or Vehicle.VNumer
     if (tripsheetNo) {
-      tripPlanWhere.TripSheet = { [Op.like]: `%${tripsheetNo}%` };
+      tripPlanWhere[Op.or] = [
+        { TripSheet: { [Op.like]: `%${tripsheetNo}%` } },
+        // This will be used in include Vehicle filter below
+      ];
     }
 
     const completedTrips = await DBMODELS.TripOperation.findAll({
@@ -445,6 +449,13 @@ module.exports.getPandingSettlementrips = async (req, res) => {
               model: DBMODELS.Vehicle,
               as: "Vehicle",
               attributes: ["VehicleID", "VNumer", "FleetZize"],
+              ...(tripsheetNo
+                ? {
+                    where: {
+                      VNumer: { [Op.like]: `%${tripsheetNo}%` },
+                    },
+                  }
+                : {}),
             },
             {
               model: DBMODELS.Driver,
