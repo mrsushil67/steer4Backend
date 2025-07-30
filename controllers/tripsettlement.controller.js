@@ -156,10 +156,15 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
     const ATD = firstTripOpA ? formatDate(firstTripOpA.ATD) : null;
 
     const lastTripId = sortedTripIds[sortedTripIds.length - 1];
-    const lastTripOpB = tripOperations.find(
-      (op) => op.TripId === lastTripId && op.TripNo?.trim().endsWith("B")
+    let lastTripOpB = tripOperations.find(
+      (op) => op.TripId === lastTripId && op.TripNo && op.TripNo.trim().toUpperCase().endsWith("B")
     );
-    const ATA = lastTripOpB ? formatDate(lastTripOpB.ATA) : null;
+    if (!lastTripOpB) {
+      lastTripOpB = tripOperations.find(
+        (op) => op.TripId === lastTripId && op.ATA
+      );
+    }
+    const ATA = lastTripOpB && lastTripOpB.ATA ? formatDate(lastTripOpB.ATA) : null;
 
     const response = {
       tripPlan: {
