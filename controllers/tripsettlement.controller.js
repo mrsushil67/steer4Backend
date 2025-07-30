@@ -256,6 +256,9 @@ module.exports.createTripSettlement = async (req, res) => {
     const formattedDeptDate = DeptDate
       ? moment(DeptDate, "YYYY-MM-DD").format("YYYY-MM-DD")
       : new Date();
+    const formatedATA =  ATA
+      ? moment(ATA, "YYYY-MM-DD").format("YYYY-MM-DD")
+      : new Date();
 
     const data = {
       StartKms,
@@ -282,7 +285,7 @@ module.exports.createTripSettlement = async (req, res) => {
       MechCharge,
       CustName,
       DeptDate: formattedDeptDate,
-      ATA,
+      ATA: formatedATA,
       dalaCharge,
       DalaChargeRemark,
       TotalAmtPaid,
