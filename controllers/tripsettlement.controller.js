@@ -493,14 +493,13 @@ module.exports.getDriverDebit = async (req, res) => {
     const relatedTrips = await DBMODELS.TripPlan.findAll({
       where: { Is_Settled: settlementId },
       include: [
-        { model: DBMODELS.Driver, as: "Driver", attributes: ["DriverID", "DName", "Licence"] },
+        { model: DBMODELS.Driver, as: "Driver", attributes: ["Driver1ID", "DName", "Licence"] },
         { model: DBMODELS.Vehicle, as: "Vehicle", attributes: ["VehicleID", "VNumer", "FleetZize", "VMaker", "TyreQ"] },
       ],
-      attributes: ["ID", "TripSheet", "DriverId", "VehicleId"],
+      attributes: ["ID", "TripSheet", "Driver1Id", "VehicleId"],
       raw: true,
     });
 
-    // Find advances paid to driver for these trips
     const driverIds = [...new Set(relatedTrips.map(trip => trip.DriverId))];
     const driverAdvances = await DBMODELS.TripAdvance.findAll({
       where: { TripId: { [Op.in]: relatedTrips.map(trip => trip.ID) }, PaidBy: 1 },
