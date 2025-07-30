@@ -493,11 +493,11 @@ module.exports.getDriverDebit = async (req, res) => {
     // Find related trips
     const relatedTrips = await DBMODELS.TripPlan.findAll({
       where: { Is_Settled: settlementId },
-      // include: [
-      //   { model: DBMODELS.Driver, as: "Driver", attributes: ["DriverID", "DName", "Licence"] },
-      // ],
-      // attributes: ["ID", "TripSheet", "Driver1Id"],
-      // raw: true,
+      include: [
+        { model: DBMODELS.Driver, as: "Driver", attributes: ["DriverID", "DName", "Licence"] },
+      ],
+      attributes: ["ID", "TripSheet", "Driver1Id"],
+      raw: true,
     });
 
 console.log("relatedTrips : ",relatedTrips)
