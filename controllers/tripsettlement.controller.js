@@ -444,17 +444,87 @@ module.exports.getTripSettlement = async (req, res) => {
     if (relatedTrips.length > 0) {
       mergedTrip.ID = relatedTrips.map(trip => trip.ID).join(",");
       mergedTrip.TripSheet = relatedTrips.map(trip => trip.TripSheet).join(",");
-
       mergedTrip.RouteString = relatedTrips.map(trip => {
-        const source = trip.route_master?.source_city?.CityName || "";
-        const dest = trip.route_master?.dest_city?.CityName || "";
-        const tripType = trip.TripType;
-        if (parseInt(tripType) === 2) {
-          return `${source}-${dest}-${source}`;
-        } else {
-          return `${source}-${dest}`;
-        }
+      const source = trip.route_master?.source_city?.CityName || "";
+      const dest = trip.route_master?.dest_city?.CityName || "";
+      const tripType = trip.TripType;
+      if (parseInt(tripType) === 2) {
+        return `${source}-${dest}-${source}`;
+      } else {
+        return `${source}-${dest}`;
+      }
       }).join(" ");
+
+      // Take single value fields from the first trip
+      const firstTrip = relatedTrips[0];
+      [
+      "VNumer",
+      "FleetZize",
+      "VehicleCompany",
+      "TyreQ",
+      "FirstDriverName",
+      "FristDrverLicence",
+      "SecoundDriverName",
+      "SecoundLicence",
+      "Rate",
+      "Customer",
+      "CustRateMapId",
+      "CustomerId",
+      "MarketCustName",
+      "MarketCustCity",
+      "MarketCustomerId"
+      ].forEach(field => {
+      // Try to get from nested models if needed
+      switch (field) {
+        case "VNumer":
+        mergedTrip.VNumer = firstTrip.Vehicle?.VNumer || "";
+        break;
+        case "FleetZize":
+        mergedTrip.FleetZize = firstTrip.Vehicle?.FleetZize || "";
+        break;
+        case "VehicleCompany":
+        mergedTrip.VehicleCompany = firstTrip.Vehicle?.VMaker || "";
+        break;
+        case "TyreQ":
+        mergedTrip.TyreQ = firstTrip.Vehicle?.TyreQ || "";
+        break;
+        case "FirstDriverName":
+        mergedTrip.FirstDriverName = firstTrip.Driver?.DName || "";
+        break;
+        case "FristDrverLicence":
+        mergedTrip.FristDrverLicence = firstTrip.Driver?.Licence || "";
+        break;
+        case "SecoundDriverName":
+        mergedTrip.SecoundDriverName = firstTrip.Driver?.DName || "";
+        break;
+        case "SecoundLicence":
+        mergedTrip.SecoundLicence = firstTrip.Driver?.Licence || "";
+        break;
+        case "Rate":
+        mergedTrip.Rate = firstTrip.CustRateMaps?.Rate || "";
+        break;
+        case "Customer":
+        mergedTrip.Customer = firstTrip.CustomerMasters?.CustomerName || "";
+        break;
+        case "CustRateMapId":
+        mergedTrip.CustRateMapId = firstTrip.CustRateMaps?.ID || "";
+        break;
+        case "CustomerId":
+        mergedTrip.CustomerId = firstTrip.CustomerMasters?.CustId || "";
+        break;
+        case "MarketCustName":
+        mergedTrip.MarketCustName = firstTrip.MarketCust?.Name || "";
+        break;
+        case "MarketCustCity":
+        mergedTrip.MarketCustCity = firstTrip.MarketCust?.City || "";
+        break;
+        case "MarketCustomerId":
+        mergedTrip.MarketCustomerId = firstTrip.MarketCust?.ID || "";
+        break;
+        default:
+        mergedTrip[field] = firstTrip[field] || "";
+      }
+      });
     }
 
     const tripIds = relatedTrips.map(trip => trip.ID);
