@@ -520,7 +520,6 @@ module.exports.getPandingSettlementrips = async (req, res) => {
 module.exports.getDriverDebit = async (req, res) => {
   try {
     const { settlementId } = req.body;
-    console.log(settlementId);
     if (!settlementId) {
       return res.status(400).json({ error: "settlementId is required." });
     }
@@ -542,7 +541,6 @@ module.exports.getDriverDebit = async (req, res) => {
       return res.status(404).json({ error: "Trip settlement not found." });
     }
 
-    // Find related trips with vehicle details
     const relatedTrips = await DBMODELS.TripPlan.findAll({
       where: { Is_Settled: settlementId },
       include: [
@@ -557,12 +555,27 @@ module.exports.getDriverDebit = async (req, res) => {
           attributes: ["VehicleID", "VNumer", "FleetZize", "VMaker", "TyreQ"],
         },
       ],
-      attributes: ["ID", "TripSheet", "Driver1Id", "VehicleId"],
+      attributes: ["ID", "TripSheet", "Driver1Id", "Driver2Id", "VehicleId"],
       raw: true,
     });
 
-    console.log("relatedTrips : ", relatedTrips);
-    const driverIds = [...new Set(relatedTrips.map((trip) => trip.DriverId))];
+    const driverIds = [];
+    relatedTrips.forEach(trip => {
+      if (trip.Driver1Id) driverIds.push(trip.Driver1Id);
+      if (trip.Driver2Id) driverIds.push(trip.Driver2Id);
+    });
+    const uniqueDriverIds = [...new Set(driverIds)];
+
+    const vehicleInfo = relatedTrips.length > 0
+      ? {
+          VehicleID: relatedTrips[0]["Vehicle.VehicleID"] || "",
+          VNumer: relatedTrips[0]["Vehicle.VNumer"] || "",
+          FleetZize: relatedTrips[0]["Vehicle.FleetZize"] || "",
+          VMaker: relatedTrips[0]["Vehicle.VMaker"] || "",
+          TyreQ: relatedTrips[0]["Vehicle.TyreQ"] || "",
+        }
+      : {};
+
     const driverAdvances = await DBMODELS.TripAdvance.findAll({
       where: {
         TripId: { [Op.in]: relatedTrips.map((trip) => trip.ID) },
@@ -571,16 +584,16 @@ module.exports.getDriverDebit = async (req, res) => {
       attributes: ["TripId", "Cash", "DieselQty", "PaidBy"],
       raw: true,
     });
-    console.log("driverIds : ", driverIds);
-    console.log("driverAdvances : ", driverAdvances);
 
-    const driverDetails = driverIds.map((driverId) => {
-      const driverInfo = relatedTrips.find(
-        (trip) => trip.DriverId === driverId
+    const driverDetails = uniqueDriverIds.map((driverId) => {
+      const tripInfo = relatedTrips.find(
+        (trip) => trip.Driver1Id === driverId || trip.Driver2Id === driverId
       );
       const advances = driverAdvances.filter((adv) =>
         relatedTrips.find(
-          (trip) => trip.ID === adv.TripId && trip.DriverId === driverId
+          (trip) =>
+            trip.ID === adv.TripId &&
+            (trip.Driver1Id === driverId || trip.Driver2Id === driverId)
         )
       );
       const totalCash = advances.reduce(
@@ -592,24 +605,20 @@ module.exports.getDriverDebit = async (req, res) => {
         0
       );
       return {
-        DriverId: driverInfo?.["Driver.DriverID"] || "",
-        DriverName: driverInfo?.["Driver.DName"] || "",
-        Licence: driverInfo?.["Driver.Licence"] || "",
+        DriverId: driverId,
+        DriverName: tripInfo?.["Driver.DName"] || "",
+        Licence: tripInfo?.["Driver.Licence"] || "",
         TotalAdvanceCash: totalCash,
         TotalAdvanceDiesel: totalDiesel,
-        Vehicle: {
-          VehicleID: driverInfo?.["Vehicle.VehicleID"] || "",
-          VNumer: driverInfo?.["Vehicle.VNumer"] || "",
-          FleetZize: driverInfo?.["Vehicle.FleetZize"] || "",
-          VMaker: driverInfo?.["Vehicle.VMaker"] || "",
-          TyreQ: driverInfo?.["Vehicle.TyreQ"] || "",
-        },
+        Vehicle: vehicleInfo,
       };
     });
+
     const data = {
       settlement: settlementTrip,
       drivers: driverDetails,
-    }
+      vehicle: vehicleInfo,
+    };
 
     return res.status(200).json({
       status: "200",
