@@ -493,13 +493,13 @@ module.exports.getDriverDebit = async (req, res) => {
     const relatedTrips = await DBMODELS.TripPlan.findAll({
       where: { Is_Settled: settlementId },
       include: [
-        { model: DBMODELS.Driver, as: "Driver", attributes: ["Driver1ID", "DName", "Licence"] },
-        { model: DBMODELS.Vehicle, as: "Vehicle", attributes: ["VehicleID", "VNumer", "FleetZize", "VMaker", "TyreQ"] },
+        { model: DBMODELS.Driver, as: "Driver", attributes: ["DriverID", "DName", "Licence"] },
       ],
-      attributes: ["ID", "TripSheet", "Driver1Id", "VehicleId"],
+      attributes: ["ID", "TripSheet", "DriverId"],
       raw: true,
     });
 
+    // Find advances paid to driver for these trips
     const driverIds = [...new Set(relatedTrips.map(trip => trip.DriverId))];
     const driverAdvances = await DBMODELS.TripAdvance.findAll({
       where: { TripId: { [Op.in]: relatedTrips.map(trip => trip.ID) }, PaidBy: 1 },
@@ -513,25 +513,12 @@ module.exports.getDriverDebit = async (req, res) => {
       const advances = driverAdvances.filter(adv => relatedTrips.find(trip => trip.ID === adv.TripId && trip.DriverId === driverId));
       const totalCash = advances.reduce((sum, adv) => sum + (parseFloat(adv.Cash) || 0), 0);
       const totalDiesel = advances.reduce((sum, adv) => sum + (parseFloat(adv.DieselQty) || 0), 0);
-
-      // Vehicle details for this driver (from first matching trip)
-      const vehicleDetails = driverInfo
-        ? {
-            VehicleID: driverInfo["Vehicle.VehicleID"] || "",
-            VNumer: driverInfo["Vehicle.VNumer"] || "",
-            FleetZize: driverInfo["Vehicle.FleetZize"] || "",
-            VehicleCompany: driverInfo["Vehicle.VMaker"] || "",
-            TyreQ: driverInfo["Vehicle.TyreQ"] || "",
-          }
-        : {};
-
       return {
         DriverId: driverId,
         DriverName: driverInfo?.["Driver.DName"] || "",
         Licence: driverInfo?.["Driver.Licence"] || "",
         TotalAdvanceCash: totalCash,
         TotalAdvanceDiesel: totalDiesel,
-        Vehicle: vehicleDetails,
       };
     });
 
