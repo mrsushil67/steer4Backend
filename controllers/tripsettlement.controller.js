@@ -472,3 +472,78 @@ module.exports.getPandingSettlementrips = async (req, res) => {
     return res.status(500).json({ error: "Internal server error." });
   }
 };
+
+module.exports.getDriverDebit = async (req, res) => {
+  try {
+    const { settlementId } = req.body;
+    if (!settlementId) {
+      return res.status(400).json({ error: "settlementId is required." });
+    }
+
+    const settlementTrip = await DBMODELS.TripSettlement.findOne({
+      where: { ID: settlementId },
+      raw: true,
+    });
+
+    if (!settlementTrip) {
+      return res.status(404).json({ error: "Trip settlement not found." });
+    }
+
+    // Find related trips
+    const relatedTrips = await DBMODELS.TripPlan.findAll({
+      where: { Is_Settled: settlementId },
+      include: [
+        { model: DBMODELS.Driver, as: "Driver", attributes: ["DriverID", "DName", "Licence"] },
+        { model: DBMODELS.Vehicle, as: "Vehicle", attributes: ["VehicleID", "VNumer", "FleetZize", "VMaker", "TyreQ"] },
+      ],
+      attributes: ["ID", "TripSheet", "DriverId", "VehicleId"],
+      raw: true,
+    });
+
+    // Find advances paid to driver for these trips
+    const driverIds = [...new Set(relatedTrips.map(trip => trip.DriverId))];
+    const driverAdvances = await DBMODELS.TripAdvance.findAll({
+      where: { TripId: { [Op.in]: relatedTrips.map(trip => trip.ID) }, PaidBy: 1 },
+      attributes: ["TripId", "Cash", "DieselQty", "PaidBy"],
+      raw: true,
+    });
+
+    // Prepare response
+    const driverDetails = driverIds.map(driverId => {
+      const driverInfo = relatedTrips.find(trip => trip.DriverId === driverId);
+      const advances = driverAdvances.filter(adv => relatedTrips.find(trip => trip.ID === adv.TripId && trip.DriverId === driverId));
+      const totalCash = advances.reduce((sum, adv) => sum + (parseFloat(adv.Cash) || 0), 0);
+      const totalDiesel = advances.reduce((sum, adv) => sum + (parseFloat(adv.DieselQty) || 0), 0);
+
+      // Vehicle details for this driver (from first matching trip)
+      const vehicleDetails = driverInfo
+        ? {
+            VehicleID: driverInfo["Vehicle.VehicleID"] || "",
+            VNumer: driverInfo["Vehicle.VNumer"] || "",
+            FleetZize: driverInfo["Vehicle.FleetZize"] || "",
+            VehicleCompany: driverInfo["Vehicle.VMaker"] || "",
+            TyreQ: driverInfo["Vehicle.TyreQ"] || "",
+          }
+        : {};
+
+      return {
+        DriverId: driverId,
+        DriverName: driverInfo?.["Driver.DName"] || "",
+        Licence: driverInfo?.["Driver.Licence"] || "",
+        TotalAdvanceCash: totalCash,
+        TotalAdvanceDiesel: totalDiesel,
+        Vehicle: vehicleDetails,
+      };
+    });
+
+    return res.status(200).json({
+      status: "200",
+      message: "Driver debit details found",
+      settlement: settlementTrip,
+      drivers: driverDetails,
+    });
+  } catch (error) {
+    console.error("Error in Get Driver Debit:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
