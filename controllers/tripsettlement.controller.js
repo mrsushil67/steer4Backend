@@ -499,15 +499,19 @@ module.exports.getDriverDebit = async (req, res) => {
       raw: true,
     });
 
-    // Find advances paid to driver for these trips
+console.log("relatedTrips : ",relatedTrips)
     const driverIds = [...new Set(relatedTrips.map(trip => trip.DriverId))];
     const driverAdvances = await DBMODELS.TripAdvance.findAll({
       where: { TripId: { [Op.in]: relatedTrips.map(trip => trip.ID) }, PaidBy: 1 },
       attributes: ["TripId", "Cash", "DieselQty", "PaidBy"],
       raw: true,
     });
+console.log("driverIds : ",driverIds)
+console.log("driverAdvances : ",driverAdvances)
 
-    // Prepare response
+
+
+
     const driverDetails = driverIds.map(driverId => {
       const driverInfo = relatedTrips.find(trip => trip.DriverId === driverId);
       const advances = driverAdvances.filter(adv => relatedTrips.find(trip => trip.ID === adv.TripId && trip.DriverId === driverId));
