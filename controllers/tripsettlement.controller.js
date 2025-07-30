@@ -527,7 +527,14 @@ module.exports.getDriverDebit = async (req, res) => {
 
     const settlementTrip = await DBMODELS.TripSettlement.findOne({
       where: { ID: settlementId },
-      attributes:["TAdvanceCash","TAdvncDiesl","TOnRTCash","TOnRTDiesel","TCash","TDiesel"],
+      attributes: [
+        "TAdvanceCash",
+        "TAdvncDiesl",
+        "TOnRTCash",
+        "TOnRTDiesel",
+        "TCash",
+        "TDiesel"
+      ],
       raw: true,
     });
 
@@ -585,7 +592,7 @@ module.exports.getDriverDebit = async (req, res) => {
         0
       );
       return {
-        DriverId: driverId,
+        DriverId: driverInfo?.["Driver.DriverID"] || "",
         DriverName: driverInfo?.["Driver.DName"] || "",
         Licence: driverInfo?.["Driver.Licence"] || "",
         TotalAdvanceCash: totalCash,
@@ -611,3 +618,12 @@ module.exports.getDriverDebit = async (req, res) => {
     return res.status(500).json({ error: "Internal server error." });
   }
 };
+
+module.exports.createDriverDebit = async ( req, res ) => {
+  try {
+    
+  } catch (error) {
+    console.error("Error in Create Driver Debit:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+}
