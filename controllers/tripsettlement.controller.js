@@ -4,10 +4,14 @@ const { Op, fn, col, literal, where, Sequelize } = require("sequelize");
 
 module.exports.getDetailsforTripSettlement = async (req, res) => {
   try {
-    const tripIds = (req.fields?.tripIds || req.body?.tripIds || []).map(Number);
+    const tripIds = (req.fields?.tripIds || req.body?.tripIds || []).map(
+      Number
+    );
 
     if (!Array.isArray(tripIds) || tripIds.length === 0) {
-      return res.status(400).json({ error: "At least one trip ID is required." });
+      return res
+        .status(400)
+        .json({ error: "At least one trip ID is required." });
     }
 
     const vehicleNumbers = await DBMODELS.TripPlan.findAll({
@@ -16,7 +20,9 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       raw: true,
     });
 
-    const uniqueVehicleNumbers = [...new Set(vehicleNumbers.map((item) => item.VehicleId))];
+    const uniqueVehicleNumbers = [
+      ...new Set(vehicleNumbers.map((item) => item.VehicleId)),
+    ];
 
     if (uniqueVehicleNumbers.length > 1) {
       return res.status(400).json({
@@ -52,7 +58,11 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       include: [
         { model: DBMODELS.Vehicle, as: "Vehicle", attributes: [] },
         { model: DBMODELS.Driver, as: "Driver", attributes: [] },
-        { model: DBMODELS.CustomerMaster, as: "CustomerMasters", attributes: [] },
+        {
+          model: DBMODELS.CustomerMaster,
+          as: "CustomerMasters",
+          attributes: [],
+        },
         {
           model: DBMODELS.RouteMaster,
           as: "route_master",
@@ -83,7 +93,7 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
     });
 
     // Build RouteString as per requirement
-    const routeStrings = tripPlans.map(tp => {
+    const routeStrings = tripPlans.map((tp) => {
       const source = tp.SourceCity || "";
       const dest = tp.DestCity || "";
       if (tp.TripType === 2) {
@@ -104,9 +114,21 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
 
     const firstTripPlan = tripPlans[0] || {};
     [
-      "VNumer", "FleetZize", "VehicleCompany", "TyreQ",
-      "FirstDriverName", "FristDrverLicence", "SecoundDriverName", "SecoundLicence",
-      "Rate", "Customer", "CustRateMapId", "CustomerId", "MarketCustName", "MarketCustCity", "MarketCustomerId"
+      "VNumer",
+      "FleetZize",
+      "VehicleCompany",
+      "TyreQ",
+      "FirstDriverName",
+      "FristDrverLicence",
+      "SecoundDriverName",
+      "SecoundLicence",
+      "Rate",
+      "Customer",
+      "CustRateMapId",
+      "CustomerId",
+      "MarketCustName",
+      "MarketCustCity",
+      "MarketCustomerId",
     ].forEach((field) => {
       mergedTripPlan[field] = firstTripPlan[field] || "";
     });
@@ -115,7 +137,11 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       where: { TripId: { [Op.in]: tripIds }, PaidBy: 1 },
       include: [
         { model: DBMODELS.TripPlan, as: "TripPlan", attributes: ["TripSheet"] },
-        { model: DBMODELS.PumpDetails, as: "PumpDetails", attributes: ["PumpName"] },
+        {
+          model: DBMODELS.PumpDetails,
+          as: "PumpDetails",
+          attributes: ["PumpName"],
+        },
       ],
       raw: true,
     });
@@ -124,16 +150,34 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       where: { TripId: { [Op.in]: tripIds }, PaidBy: 2 },
       include: [
         { model: DBMODELS.TripPlan, as: "TripPlan", attributes: ["TripSheet"] },
-        { model: DBMODELS.PumpDetails, as: "PumpDetails", attributes: ["PumpName"] },
+        {
+          model: DBMODELS.PumpDetails,
+          as: "PumpDetails",
+          attributes: ["PumpName"],
+        },
       ],
       raw: true,
     });
 
     const round = (n) => parseFloat(Number(n).toFixed(2));
-    const TotalAdvanceCash = round(tripAdvance.reduce((sum, item) => sum + (parseFloat(item.Cash) || 0), 0));
-    const TotalAdvanceDiesel = round(tripAdvance.reduce((sum, item) => sum + (parseFloat(item.DieselQty) || 0), 0));
-    const TotalOnrouteCash = round(tripOnroute.reduce((sum, item) => sum + (parseFloat(item.Cash) || 0), 0));
-    const TotalOnrouteDiesel = round(tripOnroute.reduce((sum, item) => sum + (parseFloat(item.DieselQty) || 0), 0));
+    const TotalAdvanceCash = round(
+      tripAdvance.reduce((sum, item) => sum + (parseFloat(item.Cash) || 0), 0)
+    );
+    const TotalAdvanceDiesel = round(
+      tripAdvance.reduce(
+        (sum, item) => sum + (parseFloat(item.DieselQty) || 0),
+        0
+      )
+    );
+    const TotalOnrouteCash = round(
+      tripOnroute.reduce((sum, item) => sum + (parseFloat(item.Cash) || 0), 0)
+    );
+    const TotalOnrouteDiesel = round(
+      tripOnroute.reduce(
+        (sum, item) => sum + (parseFloat(item.DieselQty) || 0),
+        0
+      )
+    );
 
     const totalExpence = {
       TotalTipCash: round(TotalAdvanceCash + TotalOnrouteCash),
@@ -146,7 +190,8 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
       raw: true,
     });
 
-    const formatDate = (date) => date ? moment(date).format("YYYY-MM-DD HH:mm:ss") : null;
+    const formatDate = (date) =>
+      date ? moment(date).format("YYYY-MM-DD HH:mm:ss") : null;
     const sortedTripIds = [...tripIds].sort((a, b) => a - b);
 
     const firstTripId = sortedTripIds[0];
@@ -157,14 +202,18 @@ module.exports.getDetailsforTripSettlement = async (req, res) => {
 
     const lastTripId = sortedTripIds[sortedTripIds.length - 1];
     let lastTripOpB = tripOperations.find(
-      (op) => op.TripId === lastTripId && op.TripNo && op.TripNo.trim().toUpperCase().endsWith("B")
+      (op) =>
+        op.TripId === lastTripId &&
+        op.TripNo &&
+        op.TripNo.trim().toUpperCase().endsWith("B")
     );
     if (!lastTripOpB) {
       lastTripOpB = tripOperations.find(
         (op) => op.TripId === lastTripId && op.ATA
       );
     }
-    const ATA = lastTripOpB && lastTripOpB.ATA ? formatDate(lastTripOpB.ATA) : null;
+    const ATA =
+      lastTripOpB && lastTripOpB.ATA ? formatDate(lastTripOpB.ATA) : null;
 
     const response = {
       tripPlan: {
@@ -257,12 +306,7 @@ module.exports.createTripSettlement = async (req, res) => {
 
     // Helper to check for invalid date values (with time)
     const getValidDateTime = (d) => {
-      if (
-        d === undefined ||
-        d === null ||
-        d === "" ||
-        d === 0
-      ) {
+      if (d === undefined || d === null || d === "" || d === 0) {
         return moment().format("YYYY-MM-DD HH:mm:ss");
       }
       return moment(d).isValid()
@@ -314,8 +358,8 @@ module.exports.createTripSettlement = async (req, res) => {
 
     const alreadySettledTrips = await DBMODELS.TripPlan.findAll({
       where: {
-      ID: { [Op.in]: tripIds },
-      Is_Settled: { [Op.not]: null }
+        ID: { [Op.in]: tripIds },
+        Is_Settled: { [Op.not]: null },
       },
       attributes: ["ID", "Is_Settled"],
       raw: true,
@@ -323,8 +367,8 @@ module.exports.createTripSettlement = async (req, res) => {
 
     if (alreadySettledTrips.length > 0) {
       return res.status(400).json({
-      error: "One or more trips are already settled.",
-      settledTrips: alreadySettledTrips.map(t => t.ID),
+        error: "One or more trips are already settled.",
+        settledTrips: alreadySettledTrips.map((t) => t.ID),
       });
     }
 
@@ -476,7 +520,7 @@ module.exports.getPandingSettlementrips = async (req, res) => {
 module.exports.getDriverDebit = async (req, res) => {
   try {
     const { settlementId } = req.body;
-    console.log(settlementId)
+    console.log(settlementId);
     if (!settlementId) {
       return res.status(400).json({ error: "settlementId is required." });
     }
@@ -490,40 +534,68 @@ module.exports.getDriverDebit = async (req, res) => {
       return res.status(404).json({ error: "Trip settlement not found." });
     }
 
-    // Find related trips
+    // Find related trips with vehicle details
     const relatedTrips = await DBMODELS.TripPlan.findAll({
       where: { Is_Settled: settlementId },
       include: [
-        { model: DBMODELS.Driver, as: "Driver", attributes: ["DriverID", "DName", "Licence"] },
+        {
+          model: DBMODELS.Driver,
+          as: "Driver",
+          attributes: ["DriverID", "DName", "Licence"],
+        },
+        {
+          model: DBMODELS.Vehicle,
+          as: "Vehicle",
+          attributes: ["VehicleID", "VNumer", "FleetZize", "VMaker", "TyreQ"],
+        },
       ],
-      attributes: ["ID", "TripSheet", "Driver1Id"],
+      attributes: ["ID", "TripSheet", "DriverId", "VehicleId"],
       raw: true,
     });
 
-console.log("relatedTrips : ",relatedTrips)
-    const driverIds = [...new Set(relatedTrips.map(trip => trip.DriverId))];
+    console.log("relatedTrips : ", relatedTrips);
+    const driverIds = [...new Set(relatedTrips.map((trip) => trip.DriverId))];
     const driverAdvances = await DBMODELS.TripAdvance.findAll({
-      where: { TripId: { [Op.in]: relatedTrips.map(trip => trip.ID) }, PaidBy: 1 },
+      where: {
+        TripId: { [Op.in]: relatedTrips.map((trip) => trip.ID) },
+        PaidBy: 1,
+      },
       attributes: ["TripId", "Cash", "DieselQty", "PaidBy"],
       raw: true,
     });
-console.log("driverIds : ",driverIds)
-console.log("driverAdvances : ",driverAdvances)
+    console.log("driverIds : ", driverIds);
+    console.log("driverAdvances : ", driverAdvances);
 
-
-
-
-    const driverDetails = driverIds.map(driverId => {
-      const driverInfo = relatedTrips.find(trip => trip.DriverId === driverId);
-      const advances = driverAdvances.filter(adv => relatedTrips.find(trip => trip.ID === adv.TripId && trip.DriverId === driverId));
-      const totalCash = advances.reduce((sum, adv) => sum + (parseFloat(adv.Cash) || 0), 0);
-      const totalDiesel = advances.reduce((sum, adv) => sum + (parseFloat(adv.DieselQty) || 0), 0);
+    const driverDetails = driverIds.map((driverId) => {
+      const driverInfo = relatedTrips.find(
+        (trip) => trip.DriverId === driverId
+      );
+      const advances = driverAdvances.filter((adv) =>
+        relatedTrips.find(
+          (trip) => trip.ID === adv.TripId && trip.DriverId === driverId
+        )
+      );
+      const totalCash = advances.reduce(
+        (sum, adv) => sum + (parseFloat(adv.Cash) || 0),
+        0
+      );
+      const totalDiesel = advances.reduce(
+        (sum, adv) => sum + (parseFloat(adv.DieselQty) || 0),
+        0
+      );
       return {
         DriverId: driverId,
         DriverName: driverInfo?.["Driver.DName"] || "",
         Licence: driverInfo?.["Driver.Licence"] || "",
         TotalAdvanceCash: totalCash,
         TotalAdvanceDiesel: totalDiesel,
+        Vehicle: {
+          VehicleID: driverInfo?.["Vehicle.VehicleID"] || "",
+          VNumer: driverInfo?.["Vehicle.VNumer"] || "",
+          FleetZize: driverInfo?.["Vehicle.FleetZize"] || "",
+          VMaker: driverInfo?.["Vehicle.VMaker"] || "",
+          TyreQ: driverInfo?.["Vehicle.TyreQ"] || "",
+        },
       };
     });
 
