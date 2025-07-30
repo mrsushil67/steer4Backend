@@ -418,7 +418,6 @@ module.exports.getTripSettlement = async (req, res) => {
         {
           model: DBMODELS.RouteMaster,
           as: "route_master",
-          attributes: [],
           include: [
             { model: DBMODELS.city, as: "source_city", attributes: ["CityName"] },
             { model: DBMODELS.city, as: "dest_city", attributes: ["CityName"] },
@@ -441,17 +440,15 @@ module.exports.getTripSettlement = async (req, res) => {
       raw: false,
     });
 
-    // Only merge ID, TripSheet, and RouteString as per requirement
     let mergedTrip = {};
     if (relatedTrips.length > 0) {
       mergedTrip.ID = relatedTrips.map(trip => trip.ID).join(",");
       mergedTrip.TripSheet = relatedTrips.map(trip => trip.TripSheet).join(",");
 
-      // Build RouteString as per TripType from TripPlan
       mergedTrip.RouteString = relatedTrips.map(trip => {
         const source = trip.route_master?.source_city?.CityName || "";
         const dest = trip.route_master?.dest_city?.CityName || "";
-        const tripType = trip.TripType; // Take from TripPlan
+        const tripType = trip.TripType;
         if (parseInt(tripType) === 2) {
           return `${source}-${dest}-${source}`;
         } else {
@@ -460,7 +457,6 @@ module.exports.getTripSettlement = async (req, res) => {
       }).join(" ");
     }
 
-    // Fetch advances for these trips
     const tripIds = relatedTrips.map(trip => trip.ID);
     const tripAdvances = await DBMODELS.TripAdvance.findAll({
       where: { TripId: { [Op.in]: tripIds } },
