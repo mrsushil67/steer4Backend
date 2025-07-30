@@ -495,7 +495,7 @@ module.exports.getDriverDebit = async (req, res) => {
       include: [
         { model: DBMODELS.Driver, as: "Driver", attributes: ["DriverID", "DName", "Licence"] },
       ],
-      attributes: ["ID", "TripSheet", "DriverId"],
+      attributes: ["ID", "TripSheet", "Driver1Id"],
       raw: true,
     });
 
