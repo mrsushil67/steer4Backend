@@ -527,6 +527,7 @@ module.exports.getDriverDebit = async (req, res) => {
 
     const settlementTrip = await DBMODELS.TripSettlement.findOne({
       where: { ID: settlementId },
+      attributes:["TAdvanceCash","TAdvncDiesl","TOnRTCash","TOnRTDiesel","TCash","TDiesel",""],
       raw: true,
     });
 
