@@ -476,6 +476,7 @@ module.exports.getPandingSettlementrips = async (req, res) => {
 module.exports.getDriverDebit = async (req, res) => {
   try {
     const { settlementId } = req.body;
+    console.log(settlementId)
     if (!settlementId) {
       return res.status(400).json({ error: "settlementId is required." });
     }
