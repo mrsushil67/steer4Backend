@@ -422,7 +422,10 @@ module.exports.getPandingSettlementrips = async (req, res) => {
     };
 
     if (tripsheetNo) {
-      tripPlanWhere.TripSheet = { [Op.like]: `%${tripsheetNo}%` };
+      tripPlanWhere[Op.or] = [
+        { TripSheet: { [Op.like]: `%${tripsheetNo}%` } },
+        { "$Vehicle.VNumer$": { [Op.like]: `%${tripsheetNo}%` } },
+      ];
     }
 
     const completedTrips = await DBMODELS.TripOperation.findAll({
