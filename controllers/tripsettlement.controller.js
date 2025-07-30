@@ -697,3 +697,112 @@ module.exports.createDriverDebit = async (req, res) => {
     return res.status(500).json({ error: "Internal server error." });
   }
 };
+
+module.exports.getSettledTrips = async (req, res) => {
+  try {
+    const { tripsheetNo = null } = req.body || {};
+
+    const tripPlanWhere = {};
+
+    if (tripsheetNo) {
+      tripPlanWhere[Op.or] = [
+        { "$TripPlan.TripSheet$": { [Op.like]: `%${tripsheetNo}%` } },
+        { "$TripPlan.Vehicle.VNumer$": { [Op.like]: `%${tripsheetNo}%` } },
+      ];
+    }
+
+    const completedTrips = await DBMODELS.TripOperation.findAll({
+      where: tripPlanWhere,
+      include: [
+        {
+          model: DBMODELS.TripPlan,
+          as: "TripPlan",
+          where: {
+            Is_Completed: 1,
+            Is_Settled: { [Op.ne]: null },
+          },
+          include: [
+            {
+              model: DBMODELS.CustomerMaster,
+              as: "CustomerMasters",
+              attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+            },
+            {
+              model: DBMODELS.MarketCust,
+              as: "MarketCust",
+            },
+            {
+              model: DBMODELS.Vehicle,
+              as: "Vehicle",
+              attributes: ["VehicleID", "VNumer", "FleetZize"],
+            },
+            {
+              model: DBMODELS.Driver,
+              as: "Driver",
+              attributes: ["DriverID", "DName", "Licence"],
+            },
+            {
+              model: DBMODELS.RouteMaster,
+              as: "route_master",
+              attributes: ["RouteId"],
+              include: [
+                {
+                  model: DBMODELS.city,
+                  as: "source_city",
+                  attributes: ["CityName", "latitude", "longitude"],
+                },
+                {
+                  model: DBMODELS.city,
+                  as: "dest_city",
+                  attributes: ["CityName", "latitude", "longitude"],
+                },
+              ],
+            },
+            {
+              model: DBMODELS.CustRateMap,
+              as: "CustRateMaps",
+              on: literal(
+                "`TripPlan`.`RouteId` = `TripPlan->CustRateMaps`.`RouteId` AND `TripPlan`.`CustId` = `TripPlan->CustRateMaps`.`CustId` AND `TripPlan`.`TripType` = `TripPlan->CustRateMaps`.`TripType`"
+              ),
+              include: [
+                {
+                  model: DBMODELS.TripType,
+                  as: "trip_type",
+                  required: true,
+                  attributes: ["Id", "TypeName"],
+                },
+              ],
+              attributes: [
+                "ID",
+                "CustId",
+                "RouteId",
+                "RouteType",
+                "TripType",
+                "RouteString",
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const uniqueTrips = [];
+    const seenTripIds = new Set();
+
+    for (const trip of completedTrips) {
+      if (!seenTripIds.has(trip.TripId)) {
+        seenTripIds.add(trip.TripId);
+        uniqueTrips.push(trip);
+      }
+    }
+
+    return res.status(200).json({
+      status: "200",
+      message: "Record Found",
+      data: uniqueTrips,
+    });
+  } catch (error) {
+    console.error("Error in Create Driver Debit:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
