@@ -307,9 +307,26 @@ module.exports.createTripSettlement = async (req, res) => {
 
     const tripSettlement = await DBMODELS.TripSettlement.create(data);
 
+    const alreadySettledTrips = await DBMODELS.TripPlan.findAll({
+      where: {
+      ID: { [Op.in]: tripIds },
+      Is_Settled: { [Op.not]: null }
+      },
+      attributes: ["ID", "Is_Settled"],
+      raw: true,
+    });
+
+    if (alreadySettledTrips.length > 0) {
+      return res.status(400).json({
+      error: "One or more trips are already settled.",
+      settledTrips: alreadySettledTrips.map(t => t.ID),
+      });
+    }
+
+    // Update Is_Settled for trips that are not settled
     await DBMODELS.TripPlan.update(
       { Is_Settled: tripSettlement.ID },
-      { where: { ID: { [Op.in]: tripIds } } }
+      { where: { ID: { [Op.in]: tripIds }, Is_Settled: { [Op.is]: null } } }
     );
 
     return res.status(201).json({
