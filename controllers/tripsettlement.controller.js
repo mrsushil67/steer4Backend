@@ -441,6 +441,48 @@ module.exports.getTripSettlement = async (req, res) => {
       raw: false,
     });
 
+    // Merge relatedTrips into one object with comma separated values
+    const mergedTrip = {};
+    if (relatedTrips.length > 0) {
+      const fields = [
+        "ID",
+        "TripSheet",
+        "TripType",
+        "Vehicle.VehicleID",
+        "Vehicle.VNumer",
+        "Vehicle.FleetZize",
+        "Vehicle.VMaker",
+        "Vehicle.TyreQ",
+        "Driver.DriverID",
+        "Driver.DName",
+        "Driver.Licence",
+        "CustomerMasters.CustId",
+        "CustomerMasters.CustomerName",
+        "CustomerMasters.CustCode",
+        "CustomerMasters.GSTNo",
+        "route_master.RouteId",
+        "route_master.source_city.CityName",
+        "route_master.dest_city.CityName",
+        "CustRateMaps.ID",
+        "CustRateMaps.CustId",
+        "CustRateMaps.RouteId",
+        "CustRateMaps.RouteType",
+        "CustRateMaps.TripType",
+        "CustRateMaps.RouteString",
+        "MarketCust.ID",
+        "MarketCust.Name",
+        "MarketCust.City"
+      ];
+
+      fields.forEach(field => {
+        const values = relatedTrips.map(trip => {
+          // Support nested fields
+          return field.split('.').reduce((obj, key) => (obj ? obj[key] : ""), trip);
+        });
+        mergedTrip[field.replace(/\./g, "_")] = values.join(",");
+      });
+    }
+
     // Fetch advances for these trips
     const tripIds = relatedTrips.map(trip => trip.ID);
     const tripAdvances = await DBMODELS.TripAdvance.findAll({
@@ -455,7 +497,7 @@ module.exports.getTripSettlement = async (req, res) => {
       status: "200",
       message: "Record Found",
       tripSettlement,
-      relatedTrips,
+      relatedTrips: mergedTrip,
       tripAdvances,
     });
   } catch (error) {
