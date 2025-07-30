@@ -393,18 +393,70 @@ module.exports.getTripSettlement = async (req, res) => {
   try {
     const { id } = req.body;
     if (!id) {
-      return res.status(400).json({ error: "Trip ID is required." });
+      return res.status(400).json({ error: "Trip settlement ID is required." });
     }
+
     const tripSettlement = await DBMODELS.TripSettlement.findOne({
       where: { ID: id },
+      raw: true,
     });
+
     if (!tripSettlement) {
       return res.status(404).json({ error: "Trip settlement not found." });
     }
+
+    const relatedTrips = await DBMODELS.TripPlan.findAll({
+      where: { Is_Settled: id },
+      include: [
+        { model: DBMODELS.Vehicle, as: "Vehicle", attributes: ["VehicleID", "VNumer", "FleetZize", "VMaker", "TyreQ"] },
+        { model: DBMODELS.Driver, as: "Driver", attributes: ["DriverID", "DName", "Licence"] },
+        {
+          model: DBMODELS.CustomerMaster,
+          as: "CustomerMasters",
+          attributes: ["CustId", "CustomerName", "CustCode", "GSTNo"],
+        },
+        {
+          model: DBMODELS.RouteMaster,
+          as: "route_master",
+          attributes: ["RouteId"],
+          include: [
+            { model: DBMODELS.city, as: "source_city", attributes: ["CityName", "latitude", "longitude"] },
+            { model: DBMODELS.city, as: "dest_city", attributes: ["CityName", "latitude", "longitude"] },
+          ],
+        },
+        {
+          model: DBMODELS.CustRateMap,
+          as: "CustRateMaps",
+          include: [
+            { model: DBMODELS.TripType, as: "trip_type", required: true, attributes: ["Id", "TypeName"] },
+          ],
+          attributes: ["ID", "CustId", "RouteId", "RouteType", "TripType", "RouteString"],
+        },
+        {
+          model: DBMODELS.MarketCust,
+          as: "MarketCust",
+          attributes: ["ID", "Name", "City"],
+        },
+      ],
+      raw: false,
+    });
+
+    // Fetch advances for these trips
+    const tripIds = relatedTrips.map(trip => trip.ID);
+    const tripAdvances = await DBMODELS.TripAdvance.findAll({
+      where: { TripId: { [Op.in]: tripIds } },
+      include: [
+        { model: DBMODELS.PumpDetails, as: "PumpDetails", attributes: ["PumpName"] },
+      ],
+      raw: true,
+    });
+
     return res.status(200).json({
       status: "200",
       message: "Record Found",
       tripSettlement,
+      relatedTrips,
+      tripAdvances,
     });
   } catch (error) {
     console.error("Error fetching trip settlement:", error);
