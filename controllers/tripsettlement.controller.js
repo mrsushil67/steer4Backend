@@ -240,7 +240,7 @@ module.exports.createTripSettlement = async (req, res) => {
       return res.status(400).json({ error: "tripIds array is required." });
     }
 
-    if (!StartKms || !CloseKms || !ExcDiesel || !BalanceCash) {
+    if (!StartKms || !CloseKms) {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
