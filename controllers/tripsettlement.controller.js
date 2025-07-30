@@ -621,7 +621,40 @@ module.exports.getDriverDebit = async (req, res) => {
 
 module.exports.createDriverDebit = async ( req, res ) => {
   try {
-    
+    const {
+      driverId,
+      settledId,
+      CashDebit,
+      dieselQtyDB,
+      DieselAmtDB,
+      VehicleId,
+      settledDate,
+      Remark,
+      total,
+      DieselRate
+    } = req.body;
+
+    if(!driverId || !settledId || !VehicleId) { 
+      return res.status(400).json({ error: "driverId, settledId, and VehicleId are required." });
+    }
+
+    const formatedDate = settledDate ? moment(settledDate).format("YYYY-MM-DD HH:mm:ss") : moment().format("YYYY-MM-DD HH:mm:ss");
+
+    const data = {
+      DriverId: driverId,
+      SettleId: settledId,
+      CashDebit: CashDebit,
+      DieselQtyDB: dieselQtyDB,
+      DieselAmtDB: DieselAmtDB,
+      VehcileId: VehicleId,
+      Settledate: formatedDate,
+      Remarks: Remark,
+      Total: total,
+      category: "drivers",
+      DieselRate
+    };
+    await DBMODELS.DriverDebits.create(data);
+    return res.status(201).json({ status: "201", message: "Driver debit created successfully." });
   } catch (error) {
     console.error("Error in Create Driver Debit:", error);
     return res.status(500).json({ error: "Internal server error." });
