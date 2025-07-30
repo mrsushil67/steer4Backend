@@ -250,15 +250,24 @@ module.exports.createTripSettlement = async (req, res) => {
         .json({ error: "missing TCash or TDiesel required." });
     }
 
-    const formattedDate = date
-      ? moment(date, "YYYY-MM-DD").format("YYYY-MM-DD")
-      : new Date();
-    const formattedDeptDate = DeptDate
-      ? moment(DeptDate, "YYYY-MM-DD").format("YYYY-MM-DD")
-      : new Date();
-    const formatedATA =  ATA
-      ? moment(ATA, "YYYY-MM-DD").format("YYYY-MM-DD")
-      : new Date();
+    // Helper to check for invalid date values (with time)
+    const getValidDateTime = (d) => {
+      if (
+        d === undefined ||
+        d === null ||
+        d === "" ||
+        d === 0
+      ) {
+        return moment().format("YYYY-MM-DD HH:mm:ss");
+      }
+      return moment(d).isValid()
+        ? moment(d).format("YYYY-MM-DD HH:mm:ss")
+        : moment().format("YYYY-MM-DD HH:mm:ss");
+    };
+
+    const formattedDate = getValidDateTime(date);
+    const formattedDeptDate = getValidDateTime(DeptDate);
+    const formatedATA = getValidDateTime(ATA);
 
     const data = {
       StartKms,
@@ -293,7 +302,7 @@ module.exports.createTripSettlement = async (req, res) => {
       Challan,
       ChallanRemark,
       Pollution,
-      CreatedDate: new Date(),
+      CreatedDate: moment().format("YYYY-MM-DD HH:mm:ss"),
     };
 
     const tripSettlement = await DBMODELS.TripSettlement.create(data);
