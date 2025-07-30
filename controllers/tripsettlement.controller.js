@@ -416,24 +416,25 @@ module.exports.getPandingSettlementrips = async (req, res) => {
   try {
     const { tripsheetNo = null } = req.body || {};
 
-    const tripPlanWhere = {
-      Is_Completed: 1,
-      Is_Settled: { [Op.eq]: null },
-    };
+    const tripPlanWhere = {};
 
     if (tripsheetNo) {
       tripPlanWhere[Op.or] = [
-        { TripSheet: { [Op.like]: `%${tripsheetNo}%` } },
-        { "$Vehicle.VNumer$": { [Op.like]: `%${tripsheetNo}%` } },
+        { "$TripPlan.TripSheet$": { [Op.like]: `%${tripsheetNo}%` } },
+        { "$TripPlan.Vehicle.VNumer$": { [Op.like]: `%${tripsheetNo}%` } },
       ];
     }
 
     const completedTrips = await DBMODELS.TripOperation.findAll({
+      where: tripPlanWhere,
       include: [
         {
           model: DBMODELS.TripPlan,
           as: "TripPlan",
-          where: tripPlanWhere,
+          where: {
+            Is_Completed: 1,
+            Is_Settled: { [Op.eq]: null },
+          },
           include: [
             {
               model: DBMODELS.CustomerMaster,
@@ -535,7 +536,7 @@ module.exports.getDriverDebit = async (req, res) => {
         "TOnRTCash",
         "TOnRTDiesel",
         "TCash",
-        "TDiesel"
+        "TDiesel",
       ],
       raw: true,
     });
@@ -563,21 +564,22 @@ module.exports.getDriverDebit = async (req, res) => {
     });
 
     const driverIds = [];
-    relatedTrips.forEach(trip => {
+    relatedTrips.forEach((trip) => {
       if (trip.Driver1Id) driverIds.push(trip.Driver1Id);
       if (trip.Driver2Id) driverIds.push(trip.Driver2Id);
     });
     const uniqueDriverIds = [...new Set(driverIds)];
 
-    const vehicleInfo = relatedTrips.length > 0
-      ? {
-          VehicleID: relatedTrips[0]["Vehicle.VehicleID"] || "",
-          VNumer: relatedTrips[0]["Vehicle.VNumer"] || "",
-          FleetZize: relatedTrips[0]["Vehicle.FleetZize"] || "",
-          VMaker: relatedTrips[0]["Vehicle.VMaker"] || "",
-          TyreQ: relatedTrips[0]["Vehicle.TyreQ"] || "",
-        }
-      : {};
+    const vehicleInfo =
+      relatedTrips.length > 0
+        ? {
+            VehicleID: relatedTrips[0]["Vehicle.VehicleID"] || "",
+            VNumer: relatedTrips[0]["Vehicle.VNumer"] || "",
+            FleetZize: relatedTrips[0]["Vehicle.FleetZize"] || "",
+            VMaker: relatedTrips[0]["Vehicle.VMaker"] || "",
+            TyreQ: relatedTrips[0]["Vehicle.TyreQ"] || "",
+          }
+        : {};
 
     const driverAdvances = await DBMODELS.TripAdvance.findAll({
       where: {
@@ -646,14 +648,18 @@ module.exports.createDriverDebit = async (req, res) => {
       settledDate,
       Remark,
       total,
-      DieselRate
+      DieselRate,
     } = req.body;
 
     if (!driverId || !settledId || !VehicleId) {
-      return res.status(400).json({ error: "driverId, settledId, and VehicleId are required." });
+      return res
+        .status(400)
+        .json({ error: "driverId, settledId, and VehicleId are required." });
     }
 
-    const formatedDate = settledDate ? moment(settledDate).format("YYYY-MM-DD HH:mm:ss") : moment().format("YYYY-MM-DD HH:mm:ss");
+    const formatedDate = settledDate
+      ? moment(settledDate).format("YYYY-MM-DD HH:mm:ss")
+      : moment().format("YYYY-MM-DD HH:mm:ss");
 
     const data = {
       DriverId: driverId,
@@ -666,22 +672,28 @@ module.exports.createDriverDebit = async (req, res) => {
       Remarks: Remark,
       Total: total,
       category: "drivers",
-      DieselRate
+      DieselRate,
     };
 
     const existingDebit = await DBMODELS.DriverDebits.findOne({
-      where: { SettleId: settledId }
+      where: { SettleId: settledId },
     });
 
     if (existingDebit) {
-      await DBMODELS.DriverDebits.update(data, { where: { SettleId: settledId } });
-      return res.status(200).json({ status: "200", message: "Driver debit updated successfully." });
+      await DBMODELS.DriverDebits.update(data, {
+        where: { SettleId: settledId },
+      });
+      return res
+        .status(200)
+        .json({ status: "200", message: "Driver debit updated successfully." });
     } else {
       await DBMODELS.DriverDebits.create(data);
-      return res.status(201).json({ status: "201", message: "Driver debit created successfully." });
+      return res
+        .status(201)
+        .json({ status: "201", message: "Driver debit created successfully." });
     }
   } catch (error) {
     console.error("Error in Create Driver Debit:", error);
     return res.status(500).json({ error: "Internal server error." });
   }
-}
+};
