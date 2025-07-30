@@ -447,11 +447,11 @@ module.exports.getTripSettlement = async (req, res) => {
       mergedTrip.ID = relatedTrips.map(trip => trip.ID).join(",");
       mergedTrip.TripSheet = relatedTrips.map(trip => trip.TripSheet).join(",");
 
-      // Build RouteString as per TripType
+      // Build RouteString as per TripType from TripPlan
       mergedTrip.RouteString = relatedTrips.map(trip => {
         const source = trip.route_master?.source_city?.CityName || "";
         const dest = trip.route_master?.dest_city?.CityName || "";
-        const tripType = trip.TripType || trip.route_master?.TripType || trip.CustRateMaps?.TripType;
+        const tripType = trip.TripType; // Take from TripPlan
         if (parseInt(tripType) === 2) {
           return `${source}-${dest}-${source}`;
         } else {
