@@ -606,12 +606,15 @@ module.exports.getDriverDebit = async (req, res) => {
         },
       };
     });
+    const data = {
+      settlement: settlementTrip,
+      drivers: driverDetails,
+    }
 
     return res.status(200).json({
       status: "200",
       message: "Driver debit details found",
-      settlement: settlementTrip,
-      drivers: driverDetails,
+      data,
     });
   } catch (error) {
     console.error("Error in Get Driver Debit:", error);
