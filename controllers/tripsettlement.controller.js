@@ -418,10 +418,10 @@ module.exports.getTripSettlement = async (req, res) => {
         {
           model: DBMODELS.RouteMaster,
           as: "route_master",
-          attributes: ["RouteId"],
+          attributes: ["RouteId", "TripType"],
           include: [
-            { model: DBMODELS.city, as: "source_city", attributes: ["CityName", "latitude", "longitude"] },
-            { model: DBMODELS.city, as: "dest_city", attributes: ["CityName", "latitude", "longitude"] },
+            { model: DBMODELS.city, as: "source_city", attributes: ["CityName"] },
+            { model: DBMODELS.city, as: "dest_city", attributes: ["CityName"] },
           ],
         },
         {
@@ -441,46 +441,23 @@ module.exports.getTripSettlement = async (req, res) => {
       raw: false,
     });
 
-    // Merge relatedTrips into one object with comma separated values
-    const mergedTrip = {};
+    // Only merge ID, TripSheet, and RouteString as per requirement
+    let mergedTrip = {};
     if (relatedTrips.length > 0) {
-      const fields = [
-        "ID",
-        "TripSheet",
-        "TripType",
-        "Vehicle.VehicleID",
-        "Vehicle.VNumer",
-        "Vehicle.FleetZize",
-        "Vehicle.VMaker",
-        "Vehicle.TyreQ",
-        "Driver.DriverID",
-        "Driver.DName",
-        "Driver.Licence",
-        "CustomerMasters.CustId",
-        "CustomerMasters.CustomerName",
-        "CustomerMasters.CustCode",
-        "CustomerMasters.GSTNo",
-        "route_master.RouteId",
-        "route_master.source_city.CityName",
-        "route_master.dest_city.CityName",
-        "CustRateMaps.ID",
-        "CustRateMaps.CustId",
-        "CustRateMaps.RouteId",
-        "CustRateMaps.RouteType",
-        "CustRateMaps.TripType",
-        "CustRateMaps.RouteString",
-        "MarketCust.ID",
-        "MarketCust.Name",
-        "MarketCust.City"
-      ];
+      mergedTrip.ID = relatedTrips.map(trip => trip.ID).join(",");
+      mergedTrip.TripSheet = relatedTrips.map(trip => trip.TripSheet).join(",");
 
-      fields.forEach(field => {
-        const values = relatedTrips.map(trip => {
-          // Support nested fields
-          return field.split('.').reduce((obj, key) => (obj ? obj[key] : ""), trip);
-        });
-        mergedTrip[field.replace(/\./g, "_")] = values.join(",");
-      });
+      // Build RouteString as per TripType
+      mergedTrip.RouteString = relatedTrips.map(trip => {
+        const source = trip.route_master?.source_city?.CityName || "";
+        const dest = trip.route_master?.dest_city?.CityName || "";
+        const tripType = trip.TripType || trip.route_master?.TripType || trip.CustRateMaps?.TripType;
+        if (parseInt(tripType) === 2) {
+          return `${source}-${dest}-${source}`;
+        } else {
+          return `${source}-${dest}`;
+        }
+      }).join(" ");
     }
 
     // Fetch advances for these trips
