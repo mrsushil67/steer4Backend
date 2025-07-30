@@ -610,12 +610,12 @@ module.exports.getDriverDebit = async (req, res) => {
         Licence: tripInfo?.["Driver.Licence"] || "",
         TotalAdvanceCash: totalCash,
         TotalAdvanceDiesel: totalDiesel,
-        Vehicle: vehicleInfo,
+        // Vehicle: vehicleInfo,
       };
     });
 
     const data = {
-      settlement: settlementTrip,
+      // settlement: settlementTrip,
       drivers: driverDetails,
       vehicle: vehicleInfo,
     };
