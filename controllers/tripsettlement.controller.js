@@ -549,7 +549,7 @@ module.exports.getDriverDebit = async (req, res) => {
           attributes: ["VehicleID", "VNumer", "FleetZize", "VMaker", "TyreQ"],
         },
       ],
-      attributes: ["ID", "TripSheet", "DriverId", "VehicleId"],
+      attributes: ["ID", "TripSheet", "Driver1Id", "VehicleId"],
       raw: true,
     });
 
