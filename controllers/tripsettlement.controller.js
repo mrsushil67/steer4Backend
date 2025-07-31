@@ -1030,3 +1030,160 @@ module.exports.getSettledTrips = async (req, res) => {
     return res.status(500).json({ error: "Internal server error." });
   }
 };
+
+module.exports.UpdateTripSettlement = async (req, res) => {
+  try {
+    const {
+      id,
+      tripIds,
+      StartKms,
+      CloseKms,
+      TotalRun,
+      Mileage,
+      ExcDiesel,
+      Maintanance_die,
+      BalanceDiesl,
+      TAdvanceCash,
+      TAdvncDiesl,
+      TOnRTCash,
+      TOnRTDiesel,
+      HandlingChrgs,
+      OtherChargs,
+      BalanceCash,
+      date,
+      FastTagNew,
+      TCash,
+      HChargs,
+      OtherChargsGvnBy,
+      TDiesel,
+      DieselRT,
+      Remark,
+      MechCharge,
+      CustName,
+      DeptDate,
+      ATA,
+      dalaCharge,
+      DalaChargeRemark,
+      TotalAmtPaid,
+      Kanta,
+      Challan,
+      ChallanRemark,
+      Pollution,
+    } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: "TripSettlement ID is required for update." });
+    }
+
+    if (!tripIds || !Array.isArray(tripIds) || tripIds.length === 0) {
+      return res.status(400).json({ error: "tripIds array is required." });
+    }
+
+    if (!StartKms || !CloseKms) {
+      return res.status(400).json({ error: "Missing required fields." });
+    }
+
+    if (!TCash || !TDiesel) {
+      return res.status(400).json({ error: "Missing TCash or TDiesel." });
+    }
+
+    const getValidDateTime = (d) => {
+      if (!d || d === 0) {
+        return moment().format("YYYY-MM-DD HH:mm:ss");
+      }
+      return moment(d).isValid()
+        ? moment(d).format("YYYY-MM-DD HH:mm:ss")
+        : moment().format("YYYY-MM-DD HH:mm:ss");
+    };
+
+    const formattedDate = getValidDateTime(date);
+    const formattedDeptDate = getValidDateTime(DeptDate);
+    const formattedATA = getValidDateTime(ATA);
+
+    const updatedData = {
+      StartKms,
+      CloseKms,
+      TotalRun,
+      Mileage,
+      ExcDiesel,
+      Maintanance_die,
+      BalanceDiesl,
+      TAdvanceCash,
+      TAdvncDiesl,
+      TOnRTCash,
+      TOnRTDiesel,
+      HandlingChrgs,
+      OtherChargs,
+      BalanceCash,
+      Date: formattedDate,
+      FastTagNew,
+      TCash,
+      HChargs,
+      OtherChargsGvnBy,
+      TDiesel,
+      DieselRT,
+      Remark,
+      MechCharge,
+      CustName,
+      DeptDate: formattedDeptDate,
+      ATA: formattedATA,
+      dalaCharge,
+      DalaChargeRemark,
+      TotalAmtPaid,
+      Kanta,
+      Challan,
+      ChallanRemark,
+      Pollution,
+      UpdatedDate: moment().format("YYYY-MM-DD HH:mm:ss"),
+    };
+
+    const existingSettlement = await DBMODELS.TripSettlement.findByPk(id);
+
+    if (!existingSettlement) {
+      return res.status(404).json({ error: "TripSettlement not found." });
+    }
+
+    await DBMODELS.TripSettlement.update(updatedData, {
+      where: { ID: id },
+    });
+
+    // Unsettle previous trips linked to this settlement
+    await DBMODELS.TripPlan.update(
+      { Is_Settled: null },
+      { where: { Is_Settled: id } }
+    );
+
+    // Check for already settled new trips (different from this settlement)
+    const alreadySettledTrips = await DBMODELS.TripPlan.findAll({
+      where: {
+        ID: { [Op.in]: tripIds },
+        Is_Settled: { [Op.and]: [{ [Op.not]: null }, { [Op.not]: id }] },
+      },
+      attributes: ["ID", "Is_Settled"],
+      raw: true,
+    });
+
+    if (alreadySettledTrips.length > 0) {
+      return res.status(400).json({
+        error: "One or more trips are already settled with another settlement.",
+        settledTrips: alreadySettledTrips.map((t) => t.ID),
+      });
+    }
+
+    // Update new trip links to point to this settlement
+    await DBMODELS.TripPlan.update(
+      { Is_Settled: id },
+      { where: { ID: { [Op.in]: tripIds } } }
+    );
+
+    return res.status(200).json({
+      status: "200",
+      message: "Trip settlement updated and associated trips modified successfully",
+      tripSettlementId: id,
+    });
+
+  } catch (error) {
+    console.error("Error in UpdateSettlement:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};

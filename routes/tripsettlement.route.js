@@ -4,11 +4,12 @@ const { authorizedUser } = require("../middlewares/authMiddleware");
 
 SettlemantRouter.post('/getDetailsforTripSettlement', TripSettlementController.getDetailsforTripSettlement);
 SettlemantRouter.post("/createSettlement", authorizedUser, TripSettlementController.createTripSettlement);
-SettlemantRouter.post('/getSettlement', authorizedUser, TripSettlementController.getTripSettlement);
+SettlemantRouter.post('/getSettlement',authorizedUser, TripSettlementController.getTripSettlement);
 SettlemantRouter.post('/getPandingSettlement', TripSettlementController.getPandingSettlementrips);
 SettlemantRouter.post('/getDriverDebit', TripSettlementController.getDriverDebit);
 SettlemantRouter.post('/createDriverDebit', TripSettlementController.createDriverDebit);
 SettlemantRouter.post('/getSettledTrips', TripSettlementController.getSettledTrips);
+SettlemantRouter.post('/updateSettlement',authorizedUser, TripSettlementController.UpdateTripSettlement);
 
 module.exports = SettlemantRouter;
 
