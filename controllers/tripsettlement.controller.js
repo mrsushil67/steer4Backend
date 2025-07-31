@@ -609,6 +609,7 @@ module.exports.getTripSettlement = async (req, res) => {
       lastTripOpB && lastTripOpB.ATA ? formatDate(lastTripOpB.ATA) : null;
 
     const response = {
+      tripSettlement,
       tripPlan: {
         ...mergedTrip,
         TripIds: tripIds.join(","),
