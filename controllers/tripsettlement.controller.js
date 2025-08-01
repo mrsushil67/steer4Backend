@@ -1141,7 +1141,7 @@ module.exports.UpdateTripSettlement = async (req, res) => {
       UpdatedDate: moment().format("YYYY-MM-DD HH:mm:ss"),
     };
 
-    const existingSettlement = await DBMODELS.TripSettlement.findByPk(id);
+    const existingSettlement = await DBMODELS.TripSettlement.findByPk(settlementId);
 
     if (!existingSettlement) {
       return res.status(404).json({ error: "TripSettlement not found." });
@@ -1161,7 +1161,7 @@ module.exports.UpdateTripSettlement = async (req, res) => {
     const alreadySettledTrips = await DBMODELS.TripPlan.findAll({
       where: {
         ID: { [Op.in]: tripIds },
-        Is_Settled: { [Op.and]: [{ [Op.not]: null }, { [Op.not]: id }] },
+        Is_Settled: { [Op.and]: [{ [Op.not]: null }, { [Op.not]: settlementId }] },
       },
       attributes: ["ID", "Is_Settled"],
       raw: true,
