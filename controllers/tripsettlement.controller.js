@@ -1189,3 +1189,67 @@ module.exports.UpdateTripSettlement = async (req, res) => {
     return res.status(500).json({ error: "Internal server error." });
   }
 };
+
+
+module.exports.updateDriverDebit = async (req, res) => {
+  try {
+    const {
+      driverId,
+      settledId,
+      CashDebit,
+      dieselQtyDB,
+      DieselAmtDB,
+      VehicleId,
+      settledDate,
+      Remark,
+      total,
+      DieselRate,
+    } = req.body;
+
+    if (!driverId || !settledId || !VehicleId) {
+      return res
+        .status(400)
+        .json({ error: "driverId, settledId, and VehicleId are required." });
+    }
+
+    const formatedDate = settledDate
+      ? moment(settledDate).format("YYYY-MM-DD HH:mm:ss")
+      : moment().format("YYYY-MM-DD HH:mm:ss");
+
+    const data = {
+      DriverId: driverId,
+      SettleId: settledId,
+      CashDebit: CashDebit,
+      DieselQtyDB: dieselQtyDB,
+      DieselAmtDB: DieselAmtDB,
+      VehcileId: VehicleId,
+      Settledate: formatedDate,
+      Remarks: Remark,
+      Total: total,
+      category: "drivers",
+      DieselRate,
+    };
+
+    const existingDebit = await DBMODELS.DriverDebits.findOne({
+      where: { SettleId: settledId },
+    });
+
+    if (existingDebit) {
+      await DBMODELS.DriverDebits.update(data, {
+        where: { SettleId: settledId },
+      });
+      return res
+        .status(200)
+        .json({ status: "200", message: "Driver debit updated successfully." });
+    } 
+    else {
+      await DBMODELS.DriverDebits.create(data);
+      return res
+        .status(201)
+        .json({ status: "201", message: "Driver debit created successfully." });
+    }
+  } catch (error) {
+    console.error("Error in Update Driver Debit:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};

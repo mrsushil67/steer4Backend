@@ -10,6 +10,7 @@ SettlemantRouter.post('/getDriverDebit', TripSettlementController.getDriverDebit
 SettlemantRouter.post('/createDriverDebit', TripSettlementController.createDriverDebit);
 SettlemantRouter.post('/getSettledTrips', TripSettlementController.getSettledTrips);
 SettlemantRouter.post('/updateSettlement',authorizedUser, TripSettlementController.UpdateTripSettlement);
+SettlemantRouter.post('/updateDriverDebit', TripSettlementController.updateDriverDebit);
 
 module.exports = SettlemantRouter;
 
