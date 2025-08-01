@@ -266,7 +266,7 @@ module.exports.createTripSettlement = async (req, res) => {
       TOnRTDiesel,
       HandlingChrgs,
       OtherChargs,
-      BalanceCash,
+      DebitCredit,
       date,
       FastTagNew,
       TCash,
@@ -298,10 +298,10 @@ module.exports.createTripSettlement = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    if (!TCash || !TDiesel) {
+    if (!TCash || !TDiesel ||!DebitCredit) {
       return res
         .status(400)
-        .json({ error: "missing TCash or TDiesel required." });
+        .json({ error: "missing TCash or TDiesel or DebitCredit required." });
     }
 
     // Helper to check for invalid date values (with time)
@@ -332,7 +332,7 @@ module.exports.createTripSettlement = async (req, res) => {
       TOnRTDiesel,
       HandlingChrgs,
       OtherChargs,
-      BalanceCash,
+      BalanceCash:DebitCredit,
       Date: formattedDate,
       FastTagNew,
       TCash,
