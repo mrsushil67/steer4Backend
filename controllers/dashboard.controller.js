@@ -101,3 +101,53 @@ module.exports.CustomerStatus = async (req, res) => {
     });
   }
 };
+
+
+module.exports.DriverActivity = async (req, res) => {
+  try {
+    const allDrivers = await DBMODELS.Driver.findAll();
+    const unblockedDrivers = allDrivers.filter(driver => driver.BlockStataus ===  1);
+
+    const tripPlans = await DBMODELS.TripPlan.findAll();
+
+    const driverUsage = {};
+
+    for (const trip of tripPlans) {
+      if (trip.Driver1Id) {
+        driverUsage[trip.Driver1Id] = (driverUsage[trip.Driver1Id] || 0) + 1;
+      }
+      if (trip.Driver2Id) {
+        driverUsage[trip.Driver2Id] = (driverUsage[trip.Driver2Id] || 0) + 1;
+      }
+    }
+
+    const driverUsageDetails = allDrivers.map(driver => ({
+      driverId: driver.DriverID,
+      name: driver.DName,
+      usedTimes: driverUsage[driver.DriverID] || 0,
+      isBlocked: driver.BlockStataus === 2
+    }));
+
+    const data = {
+       totalDrivers: allDrivers.length,
+      totalUnblockedDrivers: unblockedDrivers.length,
+      driverUsage: driverUsageDetails
+    }
+
+    return res.status(200).json({
+     status: "200",
+     message: "Driver Activity Reports"
+    });
+  } catch (error) {
+    console.error("Error in Driver Activity:", {
+      message: error.message,
+      stack: error.stack,
+    });
+
+    return res.status(500).json({
+      status: "500",
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
