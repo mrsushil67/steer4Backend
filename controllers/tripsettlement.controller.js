@@ -1036,7 +1036,7 @@ module.exports.getSettledTrips = async (req, res) => {
 module.exports.UpdateTripSettlement = async (req, res) => {
   try {
     const {
-      id,
+      settlementId,
       tripIds,
       StartKms,
       CloseKms,
@@ -1073,8 +1073,8 @@ module.exports.UpdateTripSettlement = async (req, res) => {
       Pollution,
     } = req.body;
 
-    if (!id) {
-      return res.status(400).json({ error: "TripSettlement ID is required for update." });
+    if (!settlementId) {
+      return res.status(400).json({ error: "TripSettlement settlementId is required for update." });
     }
 
     if (!tripIds || !Array.isArray(tripIds) || tripIds.length === 0) {
@@ -1146,13 +1146,13 @@ module.exports.UpdateTripSettlement = async (req, res) => {
     }
 
     await DBMODELS.TripSettlement.update(updatedData, {
-      where: { ID: id },
+      where: { ID: settlementId },
     });
 
     // Unsettle previous trips linked to this settlement
     await DBMODELS.TripPlan.update(
       { Is_Settled: null },
-      { where: { Is_Settled: id } }
+      { where: { Is_Settled: settlementId } }
     );
 
     // Check for already settled new trips (different from this settlement)
@@ -1174,14 +1174,14 @@ module.exports.UpdateTripSettlement = async (req, res) => {
 
     // Update new trip links to point to this settlement
     await DBMODELS.TripPlan.update(
-      { Is_Settled: id },
+      { Is_Settled: settlementId },
       { where: { ID: { [Op.in]: tripIds } } }
     );
 
     return res.status(200).json({
       status: "200",
       message: "Trip settlement updated and associated trips modified successfully",
-      tripSettlementId: id,
+      tripSettlementId: settlementId,
     });
 
   } catch (error) {
