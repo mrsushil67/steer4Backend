@@ -1249,7 +1249,7 @@ module.exports.updateDriverDebit = async (req, res) => {
       await DBMODELS.DriverDebits.create(data);
       return res
         .status(201)
-        .json({ status: "201", message: "Driver debit created successfully." });
+        .json({ status: "200", message: "Driver debit created successfully." });
     }
   } catch (error) {
     console.error("Error in Update Driver Debit:", error);
