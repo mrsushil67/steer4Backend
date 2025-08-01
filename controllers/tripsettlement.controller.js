@@ -1155,13 +1155,11 @@ module.exports.UpdateTripSettlement = async (req, res) => {
       where: { ID: settlementId },
     });
 
-    // Unsettle previous trips linked to this settlement
     await DBMODELS.TripPlan.update(
       { Is_Settled: null },
       { where: { Is_Settled: settlementId } }
     );
 
-    // Check for already settled new trips (different from this settlement)
     const alreadySettledTrips = await DBMODELS.TripPlan.findAll({
       where: {
         ID: { [Op.in]: tripIds },
@@ -1178,7 +1176,6 @@ module.exports.UpdateTripSettlement = async (req, res) => {
       });
     }
 
-    // Update new trip links to point to this settlement
     await DBMODELS.TripPlan.update(
       { Is_Settled: settlementId },
       { where: { ID: { [Op.in]: tripIds } } }
@@ -1259,3 +1256,4 @@ module.exports.updateDriverDebit = async (req, res) => {
     return res.status(500).json({ error: "Internal server error." });
   }
 };
+
