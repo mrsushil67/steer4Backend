@@ -1071,6 +1071,8 @@ module.exports.UpdateTripSettlement = async (req, res) => {
       Challan,
       ChallanRemark,
       Pollution,
+      CashReturn,
+      DebitCredit,
     } = req.body;
 
     console.log("Update body : ",req.body);
@@ -1138,6 +1140,8 @@ module.exports.UpdateTripSettlement = async (req, res) => {
       Challan,
       ChallanRemark,
       Pollution,
+      CashReturn,
+      BalanceCash:DebitCredit,
       UpdatedDate: moment().format("YYYY-MM-DD HH:mm:ss"),
     };
 
