@@ -42,7 +42,7 @@ module.exports.CustomerStatus = async (req, res) => {
       !tripPlans ||
       !tripOperations ||
       !vehicleAvailables ||
-      !invoices||
+      !invoices ||
       !settledTrips
     ) {
       throw new Error("Failed to retrieve necessary data");
@@ -102,11 +102,12 @@ module.exports.CustomerStatus = async (req, res) => {
   }
 };
 
-
 module.exports.DriverActivity = async (req, res) => {
   try {
     const allDrivers = await DBMODELS.Driver.findAll();
-    const unblockedDrivers = allDrivers.filter(driver => driver.BlockStataus ===  1);
+    const unblockedDrivers = allDrivers.filter(
+      (driver) => driver.BlockStataus === 1
+    );
 
     const tripPlans = await DBMODELS.TripPlan.findAll();
 
@@ -121,22 +122,23 @@ module.exports.DriverActivity = async (req, res) => {
       }
     }
 
-    const driverUsageDetails = allDrivers.map(driver => ({
+    const driverUsageDetails = allDrivers.map((driver) => ({
       driverId: driver.DriverID,
       name: driver.DName,
       usedTimes: driverUsage[driver.DriverID] || 0,
-      isBlocked: driver.BlockStataus === 2
+      isBlocked: driver.BlockStataus === 2,
     }));
 
     const data = {
-       totalDrivers: allDrivers.length,
+      totalDrivers: allDrivers.length,
       totalUnblockedDrivers: unblockedDrivers.length,
-      driverUsage: driverUsageDetails
-    }
+      driverUsage: driverUsageDetails,
+    };
 
     return res.status(200).json({
-     status: "200",
-     message: "Driver Activity Reports"
+      status: "200",
+      message: "Driver Activity Reports",
+      data,
     });
   } catch (error) {
     console.error("Error in Driver Activity:", {
