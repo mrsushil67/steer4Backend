@@ -3,7 +3,15 @@ const { DBMODELS } = require("../models/init-models");
 
 module.exports.CustomerStatus = async (req, res) => {
   try {
-    const [customers, drivers, tripPlans, tripOperations, vehicleAvailables, invoices] = await Promise.all([
+    const [
+      customers,
+      drivers,
+      tripPlans,
+      tripOperations,
+      vehicleAvailables,
+      invoices,
+      settledTrips,
+    ] = await Promise.all([
       DBMODELS.CustomerMaster.findAll(),
       DBMODELS.Driver.findAll(),
       DBMODELS.TripPlan.findAll(),
@@ -21,19 +29,27 @@ module.exports.CustomerStatus = async (req, res) => {
       }),
       DBMODELS.VehicleAvailable.findAll(),
       DBMODELS.InvoiceMaster.findAll(),
+      DBMODELS.TripPlan.findAll({
+        where: {
+          [Op.and]: [{ Is_Completed: 1 }, { Is_Settled: { [Op.ne]: null } }],
+        },
+      }),
     ]);
 
-    if (!customers || !drivers || !tripPlans || !tripOperations || !vehicleAvailables || !invoices) {
+    if (
+      !customers ||
+      !drivers ||
+      !tripPlans ||
+      !tripOperations ||
+      !vehicleAvailables ||
+      !invoices||
+      !settledTrips
+    ) {
       throw new Error("Failed to retrieve necessary data");
     }
 
-    let settlement_trip = 0;
-    let pending_settlement = 0;
-
-    for (const trip of tripPlans) {
-      if (trip.Is_Settled === 1) settlement_trip++;
-      else if (trip.Is_Settled === null) pending_settlement++;
-    }
+    let settlement_trip = settledTrips.length;
+    let pending_settlement = tripPlans.length - settledTrips.length;
 
     let ongoing_travel = 0;
     for (const trip of tripPlans) {
@@ -50,7 +66,7 @@ module.exports.CustomerStatus = async (req, res) => {
       if (op.VStatus === 2) available_vehicles++;
     }
 
-    const Total_invoices = invoices.length
+    const Total_invoices = invoices.length;
 
     const data = {
       totalCustomer: customers.length,
