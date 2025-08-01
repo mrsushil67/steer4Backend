@@ -1073,6 +1073,8 @@ module.exports.UpdateTripSettlement = async (req, res) => {
       Pollution,
     } = req.body;
 
+    console.log("Update body : ",req.body);
+
     if (!settlementId) {
       return res.status(400).json({ error: "TripSettlement settlementId is required for update." });
     }
