@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op, where, col } = require("sequelize");
 const { DBMODELS } = require("../models/init-models");
 
 module.exports.CustomerStatus = async (req, res) => {
@@ -149,6 +149,110 @@ module.exports.DriverActivity = async (req, res) => {
     return res.status(500).json({
       status: "500",
       message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports.getTotalExpence = async (req, res) => {
+  try {
+    const tripPlans = await DBMODELS.TripPlan.findAll({
+      where: { Status: { [Op.ne]: 6 } },
+      include: [
+        {
+          model: DBMODELS.TripAdvance,
+          as: "TripAdvances",
+          attributes: ["Cash", "TotalAmt"],
+        },
+      ],
+    });
+
+    let totalCash = 0;
+    let totalAmt = 0;
+
+    tripPlans.forEach((trip) => {
+      trip.TripAdvances.forEach((advance) => {
+        totalCash += Number(advance.Cash || 0);
+        totalAmt += Number(advance.TotalAmt || 0);
+      });
+    });
+
+    const totalExpense = totalCash + totalAmt;
+
+    return res.status(200).json({
+      status: "200",
+      message: "Total expense calculated successfully",
+      totalCash,
+      totalAmt,
+      totalExpense,
+    });
+  } catch (error) {
+    console.error("Error in Total Expence:", {
+      message: error.message,
+      stack: error.stack,
+    });
+
+    return res.status(500).json({
+      status: "500",
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports.TotalSales = async (req, res) => {
+  try {
+    const tripPlans = await DBMODELS.TripPlan.findAll({
+      where: { Status: { [Op.ne]: 6 } },
+      include: [
+        {
+          model: DBMODELS.CustRateMap,
+          as: "CustRateMaps",
+          required: false,
+          on: {
+            CustId: where(
+              col("TripPlan.CustId"),
+              "=",
+              col("CustRateMaps.CustId")
+            ),
+            RouteId: where(
+              col("TripPlan.RouteId"),
+              "=",
+              col("CustRateMaps.RouteId")
+            ),
+          },
+          attributes: ["Rate"],
+        },
+      ],
+    });
+
+    let totalRate = 0;
+
+    tripPlans.forEach((trip) => {
+      const rateMap = trip.CustRateMaps;
+
+      if (rateMap && typeof rateMap === "object" && rateMap.Rate != null) {
+        totalRate += Number(rateMap.Rate);
+      } else if (Array.isArray(rateMap)) {
+        rateMap.forEach((r) => {
+          if (r && r.Rate != null) {
+            totalRate += Number(r.Rate);
+          }
+        });
+      }
+    });
+
+    return res.status(200).json({
+      status: "200",
+      message: "Total sales calculated successfully",
+      totalRate,
+      data: tripPlans,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "500",
+      message: "Internal Server Error",
       error: error.message,
     });
   }
