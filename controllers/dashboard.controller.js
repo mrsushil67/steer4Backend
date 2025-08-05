@@ -246,7 +246,7 @@ module.exports.TotalSales = async (req, res) => {
       status: "200",
       message: "Total sales calculated successfully",
       totalRate,
-      data: tripPlans,
+      // data: tripPlans,
     });
   } catch (error) {
     console.error(error);
